@@ -667,9 +667,6 @@
     <ClInclude Include="Sachen74LS374N.h">
       <Filter>Nes\Mappers\Sachen</Filter>
     </ClInclude>
-    <ClInclude Include="Sachen74LS374NB.h">
-      <Filter>Nes\Mappers\Sachen</Filter>
-    </ClInclude>
     <ClInclude Include="Mapper227.h">
       <Filter>Nes\Mappers\Unnamed</Filter>
     </ClInclude>
@@ -1090,9 +1087,6 @@
     <ClInclude Include="BisqwitNtscFilter.h">
       <Filter>VideoDecoder</Filter>
     </ClInclude>
-    <ClInclude Include="AviRecorder.h">
-      <Filter>Misc</Filter>
-    </ClInclude>
     <ClInclude Include="MagicKidGooGoo.h">
       <Filter>Nes\Mappers</Filter>
     </ClInclude>
@@ -1487,6 +1481,27 @@
     <ClInclude Include="BaseEeprom24C0X.h">
       <Filter>Nes\Mappers\Bandai</Filter>
     </ClInclude>
+    <ClInclude Include="EventManager.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="TxcChip.h">
+      <Filter>Nes\Mappers\Txc</Filter>
+    </ClInclude>
+    <ClInclude Include="McAcc.h">
+      <Filter>Nes\Mappers\MMC</Filter>
+    </ClInclude>
+    <ClInclude Include="StudyBoxLoader.h">
+      <Filter>Nes\RomLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="MMC5MemoryHandler.h">
+      <Filter>Nes\Mappers\MMC</Filter>
+    </ClInclude>
+    <ClInclude Include="FlashSST39SF040.h">
+      <Filter>Nes\Mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="VbController.h">
+      <Filter>Nes\Input\Controllers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1648,9 +1663,6 @@
     <ClCompile Include="BisqwitNtscFilter.cpp">
       <Filter>VideoDecoder</Filter>
     </ClCompile>
-    <ClCompile Include="AviRecorder.cpp">
-      <Filter>Misc</Filter>
-    </ClCompile>
     <ClCompile Include="Assembler.cpp">
       <Filter>Debugger</Filter>
     </ClCompile>
@@ -1785,6 +1797,12 @@
     </ClCompile>
     <ClCompile Include="PerformanceTracker.cpp">
       <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="EventManager.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="StudyBoxLoader.cpp">
+      <Filter>Misc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

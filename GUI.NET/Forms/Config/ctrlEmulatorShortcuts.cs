@@ -40,6 +40,7 @@ namespace Mesen.GUI.Forms.Config
 				EmulatorShortcut.Pause,
 				EmulatorShortcut.Reset,
 				EmulatorShortcut.PowerCycle,
+				EmulatorShortcut.ReloadRom,
 				EmulatorShortcut.PowerOff,
 				EmulatorShortcut.Exit,
 
@@ -55,6 +56,10 @@ namespace Mesen.GUI.Forms.Config
 				EmulatorShortcut.VsServiceButton2,
 
 				EmulatorShortcut.InputBarcode,
+
+				EmulatorShortcut.ToggleRecordVideo,
+				EmulatorShortcut.ToggleRecordAudio,
+				EmulatorShortcut.ToggleRecordMovie,
 
 				EmulatorShortcut.TakeScreenshot,
 				EmulatorShortcut.LoadRandomGame,
@@ -78,8 +83,11 @@ namespace Mesen.GUI.Forms.Config
 				EmulatorShortcut.ToggleBackground,
 				EmulatorShortcut.ToggleSprites,
 				EmulatorShortcut.ToggleCheats,
-				EmulatorShortcut.ToggleAudio,
 				EmulatorShortcut.ToggleKeyboardMode,
+				
+				EmulatorShortcut.ToggleAudio,
+				EmulatorShortcut.IncreaseVolume,
+				EmulatorShortcut.DecreaseVolume,
 
 				EmulatorShortcut.MaxSpeed,
 				EmulatorShortcut.IncreaseSpeed,
@@ -103,6 +111,7 @@ namespace Mesen.GUI.Forms.Config
 				EmulatorShortcut.SaveStateSlot9,
 				EmulatorShortcut.SaveStateSlot10,
 				EmulatorShortcut.SaveStateToFile,
+				EmulatorShortcut.SaveStateDialog,
 
 				EmulatorShortcut.LoadStateSlot1,
 				EmulatorShortcut.LoadStateSlot2,
@@ -116,6 +125,19 @@ namespace Mesen.GUI.Forms.Config
 				EmulatorShortcut.LoadStateSlot10,
 				EmulatorShortcut.LoadStateSlotAuto,
 				EmulatorShortcut.LoadStateFromFile,
+				EmulatorShortcut.LoadStateDialog,
+
+				EmulatorShortcut.SelectSaveSlot1,
+				EmulatorShortcut.SelectSaveSlot2,
+				EmulatorShortcut.SelectSaveSlot3,
+				EmulatorShortcut.SelectSaveSlot4,
+				EmulatorShortcut.SelectSaveSlot5,
+				EmulatorShortcut.SelectSaveSlot6,
+				EmulatorShortcut.SelectSaveSlot7,
+				EmulatorShortcut.SelectSaveSlot8,
+				EmulatorShortcut.SelectSaveSlot9,
+				EmulatorShortcut.SelectSaveSlot10,
+
 				EmulatorShortcut.LoadLastSession,
 			};
 
@@ -204,7 +226,7 @@ namespace Mesen.GUI.Forms.Config
 						CheckConflicts();
 					} else if(e.Button == MouseButtons.Left) {
 						using(frmGetKey frm = new frmGetKey(false)) {
-							frm.ShowDialog();
+							((Form)frm).ShowDialog(this);
 							button.Value = frm.ShortcutKey.ToString();
 							button.Tag = frm.ShortcutKey;
 

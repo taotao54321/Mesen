@@ -20,15 +20,15 @@ namespace Mesen.GUI.Forms
 				this.BeginInvoke((MethodInvoker)(() => this.UpdateStateMenu(menu, forSave)));
 			} else {
 				for(uint i = 1; i <= frmMain.NumberOfSaveSlots + (forSave ? 0 : 1); i++) {
-					Int64 fileTime = InteropEmu.GetStateInfo(i);
+					string statePath = Path.Combine(ConfigManager.SaveStateFolder, InteropEmu.GetRomInfo().GetRomName() + "_" + i + ".mst");
 					string label;
 					bool isAutoSaveSlot = i == NumberOfSaveSlots + 1;
 					string slotName = isAutoSaveSlot ? "Auto" : i.ToString();
 
-					if(fileTime == 0) {
+					if(!File.Exists(statePath)) {
 						label = slotName + ". " + ResourceHelper.GetMessage("EmptyState");
 					} else {
-						DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(fileTime).ToLocalTime();
+						DateTime dateTime = new FileInfo(statePath).LastWriteTime;
 						label = slotName + ". " + dateTime.ToShortDateString() + " " + dateTime.ToShortTimeString();
 					}
 
@@ -63,14 +63,23 @@ namespace Mesen.GUI.Forms
 				menu.DropDownItems.Add("-");
 				addSaveStateInfo(NumberOfSaveSlots+1);
 				menu.DropDownItems.Add("-");
+
+				ToolStripMenuItem loadDialog = new ToolStripMenuItem(ResourceHelper.GetMessage("LoadStateDialog"), Resources.SplitView);
+				menu.DropDownItems.Add(loadDialog);
+				BindShortcut(loadDialog, EmulatorShortcut.LoadStateDialog, () => _emuThread != null && !InteropEmu.IsConnected() && !InteropEmu.IsNsf());
+
 				ToolStripMenuItem loadFromFile = new ToolStripMenuItem(ResourceHelper.GetMessage("LoadFromFile"), Resources.FolderOpen);
 				menu.DropDownItems.Add(loadFromFile);
 				BindShortcut(loadFromFile, EmulatorShortcut.LoadStateFromFile);					
 			} else {
 				menu.DropDownItems.Add("-");
+				ToolStripMenuItem saveDialog = new ToolStripMenuItem(ResourceHelper.GetMessage("SaveStateDialog"), Resources.SplitView);
+				menu.DropDownItems.Add(saveDialog);
+				BindShortcut(saveDialog, EmulatorShortcut.SaveStateDialog, () => _emuThread != null && !InteropEmu.IsConnected() && !InteropEmu.IsNsf());
+
 				ToolStripMenuItem saveToFile = new ToolStripMenuItem(ResourceHelper.GetMessage("SaveToFile"), Resources.Floppy);
 				menu.DropDownItems.Add(saveToFile);
-				BindShortcut(saveToFile, EmulatorShortcut.SaveStateToFile);					
+				BindShortcut(saveToFile, EmulatorShortcut.SaveStateToFile);
 			}
 		}
 
@@ -217,6 +226,25 @@ namespace Mesen.GUI.Forms
 			}
 		}
 
+		private ResourcePath? GetIpsFile(ResourcePath romFile)
+		{
+			string[] extensions = new string[3] { ".ips", ".ups", ".bps" };
+			foreach(string ext in extensions) {
+				//Check if [romname].ips exists
+				string file = Path.Combine(romFile.Folder, Path.GetFileNameWithoutExtension(romFile.FileName)) + ext;
+				if(File.Exists(file)) {
+					return file;
+				} else {
+					//Check if [romname].[romext].ips exists
+					file = Path.Combine(romFile.Folder, Path.GetFileName(romFile.FileName)) + ext;
+					if(File.Exists(file)) {
+						return file;
+					}
+				}
+			}
+			return null;
+		}
+
 		private void LoadROM(ResourcePath romFile, bool autoLoadPatches = false, ResourcePath? patchFileToApply = null)
 		{
 			if(romFile.Exists) {
@@ -231,14 +259,7 @@ namespace Mesen.GUI.Forms
 
 					ResourcePath? patchFile = patchFileToApply;
 					if(patchFile == null && autoLoadPatches) {
-						string[] extensions = new string[3] { ".ips", ".ups", ".bps" };
-						foreach(string ext in extensions) {
-							string file = Path.Combine(romFile.Folder, Path.GetFileNameWithoutExtension(romFile.FileName)) + ext;
-							if(File.Exists(file)) {
-								patchFile = file;
-								break;
-							}
-						}
+						patchFile = GetIpsFile(romFile);
 					}
 
 					Task loadRomTask = new Task(() => {

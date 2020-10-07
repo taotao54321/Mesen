@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <iostream>
+#include <cstring>
 #include <memory>
 #include <vector>
 #include <atomic>
@@ -11,6 +12,7 @@
 #include "UTF8Util.h"
 
 using std::shared_ptr;
+using std::unique_ptr;
 using utf8::ifstream;
 using utf8::ofstream;
 using std::string;

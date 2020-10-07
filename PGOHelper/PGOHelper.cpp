@@ -2,9 +2,14 @@
 #include <string>
 #include <algorithm>
 #include <unordered_set>
-#include <experimental/filesystem>
+#if __has_include(<filesystem>)
+	#include <filesystem>
+	namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+	#include <experimental/filesystem>
+	namespace fs = std::experimental::filesystem;
+#endif
 #include "../Core/PgoUtilities.h"
-namespace fs = std::experimental::filesystem;
 using std::string;
 using std::vector;
 

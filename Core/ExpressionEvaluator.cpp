@@ -11,9 +11,9 @@
 
 const vector<string> ExpressionEvaluator::_binaryOperators = { { "*", "/", "%", "+", "-", "<<", ">>", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|", "&&", "||" } };
 const vector<int> ExpressionEvaluator::_binaryPrecedence = { { 10,  10,  10,   9,   9,    8,    8,   7,   7,    7,    7,    6,    6,   5,   4,   3,    2,    1 } };
-const vector<string> ExpressionEvaluator::_unaryOperators = { { "+", "-", "~", "!" } };
-const vector<int> ExpressionEvaluator::_unaryPrecedence = { { 11,  11,  11,  11 } };
-const std::unordered_set<string> ExpressionEvaluator::_operators = { { "*", "/", "%", "+", "-", "<<", ">>", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|", "&&", "||", "~", "!", "(", ")", "{", "}", "[", "]" } };
+const vector<string> ExpressionEvaluator::_unaryOperators = { { "+", "-", "~", "!", ":" } };
+const vector<int> ExpressionEvaluator::_unaryPrecedence = { { 11,  11,  11,  11, 11 } };
+const std::unordered_set<string> ExpressionEvaluator::_operators = { { "*", "/", "%", "+", "-", "<<", ">>", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|", "&&", "||", "~", "!", "(", ")", "{", "}", "[", "]", ":" } };
 
 bool ExpressionEvaluator::IsOperator(string token, int &precedence, bool unaryOperator)
 {
@@ -77,6 +77,18 @@ bool ExpressionEvaluator::CheckSpecialTokens(string expression, size_t &pos, str
 		output += std::to_string((int64_t)EvalValues::RegY);
 	} else if(token == "ps") {
 		output += std::to_string((int64_t)EvalValues::RegPS);
+	} else if(token == "pscarry") {
+		output += std::to_string((int64_t)EvalValues::RegPS_Carry);
+	} else if(token == "pszero") {
+		output += std::to_string((int64_t)EvalValues::RegPS_Zero);
+	} else if(token == "psinterrupt") {
+		output += std::to_string((int64_t)EvalValues::RegPS_Interrupt);
+	} else if(token == "psdecimal") {
+		output += std::to_string((int64_t)EvalValues::RegPS_Decimal);
+	} else if(token == "psoverflow") {
+		output += std::to_string((int64_t)EvalValues::RegPS_Overflow);
+	} else if(token == "psnegative") {
+		output += std::to_string((int64_t)EvalValues::RegPS_Negative);
 	} else if(token == "sp") {
 		output += std::to_string((int64_t)EvalValues::RegSP);
 	} else if(token == "pc") {
@@ -105,8 +117,6 @@ bool ExpressionEvaluator::CheckSpecialTokens(string expression, size_t &pos, str
 		output += std::to_string((int64_t)EvalValues::Value);
 	} else if(token == "address") {
 		output += std::to_string((int64_t)EvalValues::Address);
-	} else if(token == "romaddress") {
-		output += std::to_string((int64_t)EvalValues::AbsoluteAddress);
 	} else if(token == "iswrite") {
 		output += std::to_string((int64_t)EvalValues::IsWrite);
 	} else if(token == "isread") {
@@ -133,7 +143,7 @@ bool ExpressionEvaluator::CheckSpecialTokens(string expression, size_t &pos, str
 	return true;
 }
 
-string ExpressionEvaluator::GetNextToken(string expression, size_t &pos, ExpressionData &data, bool &success)
+string ExpressionEvaluator::GetNextToken(string expression, size_t& pos, ExpressionData& data, bool& success, bool previousTokenIsOp)
 {
 	string output;
 	success = true;
@@ -155,12 +165,12 @@ string ExpressionEvaluator::GetNextToken(string expression, size_t &pos, Express
 			success = false;
 		}
 		output = std::to_string((uint32_t)HexUtilities::FromHex(output));
-	} else if(c == '%') {
+	} else if(c == '%' && previousTokenIsOp) {
 		//Binary numbers
 		pos++;
 		for(size_t len = expression.size(); pos < len; pos++) {
 			c = std::tolower(expression[pos]);
-			if(c == '0' || c <= '1') {
+			if(c == '0' || c == '1') {
 				output += c;
 			} else {
 				break;
@@ -247,7 +257,7 @@ bool ExpressionEvaluator::ToRpn(string expression, ExpressionData &data)
 	bool operatorOrEndTokenExpected = false;
 	while(true) {
 		bool success = true;
-		string token = GetNextToken(expression, position, data, success);
+		string token = GetNextToken(expression, position, data, success, previousTokenIsOp);
 		if(!success) {
 			return false;
 		}
@@ -294,7 +304,7 @@ bool ExpressionEvaluator::ToRpn(string expression, ExpressionData &data)
 			if(!ProcessSpecialOperator(EvalOperators::Parenthesis, opStack, precedenceStack, data.RpnQueue)) {
 				return false;
 			}
-			operatorExpected = true;
+			operatorOrEndTokenExpected = true;
 		} else if(token[0] == '[') {
 			bracketCount++;
 			opStack.push(EvalOperators::Bracket);
@@ -304,7 +314,7 @@ bool ExpressionEvaluator::ToRpn(string expression, ExpressionData &data)
 			if(!ProcessSpecialOperator(EvalOperators::Bracket, opStack, precedenceStack, data.RpnQueue)) {
 				return false;
 			}
-			operatorExpected = true;
+			operatorOrEndTokenExpected = true;
 		} else if(token[0] == '{') {
 			braceCount++;
 			opStack.push(EvalOperators::Braces);
@@ -314,7 +324,7 @@ bool ExpressionEvaluator::ToRpn(string expression, ExpressionData &data)
 			if(!ProcessSpecialOperator(EvalOperators::Braces, opStack, precedenceStack, data.RpnQueue)){
 				return false;
 			}
-			operatorExpected = true;
+			operatorOrEndTokenExpected = true;
 		} else {
 			if(token[0] < '0' || token[0] > '9') {
 				return false;
@@ -388,7 +398,6 @@ int32_t ExpressionEvaluator::Evaluate(ExpressionData &data, DebugState &state, E
 					case EvalValues::Irq: token = state.CPU.IRQFlag; resultType = EvalResultType::Boolean; break;
 					case EvalValues::Value: token = operationInfo.Value; break;
 					case EvalValues::Address: token = operationInfo.Address; break;
-					case EvalValues::AbsoluteAddress: token = _debugger->GetAbsoluteAddress(operationInfo.Address); break;
 					case EvalValues::IsWrite: token = operationInfo.OperationType == MemoryOperationType::Write || operationInfo.OperationType == MemoryOperationType::DummyWrite; break;
 					case EvalValues::IsRead: token = operationInfo.OperationType == MemoryOperationType::Read || operationInfo.OperationType == MemoryOperationType::DummyRead; break;
 					case EvalValues::PreviousOpPC: token = state.CPU.PreviousDebugPC; break;
@@ -396,6 +405,12 @@ int32_t ExpressionEvaluator::Evaluate(ExpressionData &data, DebugState &state, E
 					case EvalValues::SpriteOverflow: token = state.PPU.StatusFlags.SpriteOverflow; resultType = EvalResultType::Boolean; break;
 					case EvalValues::VerticalBlank: token = state.PPU.StatusFlags.VerticalBlank; resultType = EvalResultType::Boolean; break;
 					case EvalValues::Branched: token = Disassembler::IsJump(_debugger->GetMemoryDumper()->GetMemoryValue(DebugMemoryType::CpuMemory, state.CPU.PreviousDebugPC, true)); resultType = EvalResultType::Boolean; break;
+					case EvalValues::RegPS_Carry: token = (state.CPU.PS & PSFlags::Carry) != 0; resultType = EvalResultType::Boolean; break;
+					case EvalValues::RegPS_Zero: token = (state.CPU.PS & PSFlags::Zero) != 0; resultType = EvalResultType::Boolean; break;
+					case EvalValues::RegPS_Interrupt: token = (state.CPU.PS & PSFlags::Interrupt) != 0; resultType = EvalResultType::Boolean; break;
+					case EvalValues::RegPS_Decimal: token = (state.CPU.PS & PSFlags::Decimal) != 0; resultType = EvalResultType::Boolean; break;
+					case EvalValues::RegPS_Overflow: token = (state.CPU.PS & PSFlags::Overflow) != 0; resultType = EvalResultType::Boolean; break;
+					case EvalValues::RegPS_Negative: token = (state.CPU.PS & PSFlags::Negative) != 0; resultType = EvalResultType::Boolean; break;
 				}
 			}
 		} else if(token >= EvalOperators::Multiplication) {
@@ -442,6 +457,16 @@ int32_t ExpressionEvaluator::Evaluate(ExpressionData &data, DebugState &state, E
 				case EvalOperators::Minus: token = -right; break;
 				case EvalOperators::BinaryNot: token = ~right; break;
 				case EvalOperators::LogicalNot: token = !right; break;
+				case EvalOperators::AbsoluteAddress: {
+					if(right >= 0) {
+						AddressTypeInfo addressInfo;
+						_debugger->GetAbsoluteAddressAndType((uint32_t)right, &addressInfo);
+						token = addressInfo.Address;
+					} else {
+						token = -1;
+					}
+					break;
+				}
 				case EvalOperators::Bracket: token = _debugger->GetMemoryDumper()->GetMemoryValue(DebugMemoryType::CpuMemory, (uint32_t)right); break;
 				case EvalOperators::Braces: token = _debugger->GetMemoryDumper()->GetMemoryValueWord(DebugMemoryType::CpuMemory, (uint32_t)right); break;
 				default: throw std::runtime_error("Invalid operator");
@@ -517,7 +542,7 @@ int32_t ExpressionEvaluator::Evaluate(string expression, DebugState &state, Eval
 		if(success) {
 			return result;
 		}
-	} catch(std::exception e) {
+	} catch(std::exception&) {
 	}
 	resultType = EvalResultType::Invalid;
 	return 0;
@@ -532,7 +557,7 @@ bool ExpressionEvaluator::Validate(string expression)
 		bool success;
 		PrivateEvaluate(expression, state, type, operationInfo, success);
 		return success;
-	} catch(std::exception e) {
+	} catch(std::exception&) {
 		return false;
 	}
 }
@@ -580,8 +605,8 @@ void ExpressionEvaluator::RunTests()
 	test("(1+3*3+10)/(3+4)", EvalResultType::Numeric, 2);
 	test("(1+3*3+10)/3+4", EvalResultType::Numeric, 10);
 
-	test("{$4500}", EvalResultType::Numeric, 0x4545);
-	test("[$4500]", EvalResultType::Numeric, 0x45);
+	test("{$4100}", EvalResultType::Numeric, 0x4141);
+	test("[$4100]", EvalResultType::Numeric, 0x41);
 	
 	test("[$45]3", EvalResultType::Invalid, 0);
 	test("($45)3", EvalResultType::Invalid, 0);
@@ -591,5 +616,23 @@ void ExpressionEvaluator::RunTests()
 	test("%011", EvalResultType::Numeric, 3);
 	test("%1011", EvalResultType::Numeric, 11);
 	test("%12", EvalResultType::Invalid, 0);
+
+	test("10 % 5", EvalResultType::Numeric, 0);
+	test("%100 % 5", EvalResultType::Numeric, 4);
+	test("%100%5", EvalResultType::Numeric, 4);
+	test("%10(10)", EvalResultType::Invalid, 0);
+	test("10%4*10", EvalResultType::Numeric, 20);
+	test("(5+5)%3", EvalResultType::Numeric, 1);
+	test("11%%10", EvalResultType::Numeric, 1); //11 modulo of 2 in binary (%10)
+
+	test(":$00", EvalResultType::Numeric, 0);
+	test(":50", EvalResultType::Numeric, 50);
+	test(":$50", EvalResultType::Numeric, 0x50);
+	test(":($1FFF+1)", EvalResultType::Numeric, -1);
+	test(":$1FFF+1", EvalResultType::Numeric, 0x800);
+	test("1+:$100", EvalResultType::Numeric, 0x101);
+
+	test("[$4100+[$4100]]", EvalResultType::Numeric, 0x41);
+	test("-($10+[$4100])", EvalResultType::Numeric, -0x51);
 }
 #endif

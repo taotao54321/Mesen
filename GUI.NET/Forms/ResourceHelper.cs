@@ -26,6 +26,7 @@ namespace Mesen.GUI.Forms
 		Portuguese = 7,
 		Catalan = 8,
 		Chinese = 9,
+		Italian = 10,
 	}
 
 	class ResourceHelper
@@ -36,6 +37,10 @@ namespace Mesen.GUI.Forms
 
 		public static Language GetCurrentLanguage()
 		{
+			if (_language == Language.SystemDefault)
+			{
+				_language = DetectLanguage();
+			}
 			return _language;
 		}
 
@@ -51,6 +56,7 @@ namespace Mesen.GUI.Forms
 				case Language.Portuguese: return "pt";
 				case Language.Catalan: return "ca";
 				case Language.Chinese: return "zh";
+				case Language.Italian: return "it";
 			}
 
 			return "";
@@ -64,17 +70,7 @@ namespace Mesen.GUI.Forms
 		public static void LoadResources(Language language)
 		{
 			if(language == Language.SystemDefault) {
-				switch(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName) {
-					default:
-					case "en": language = Language.English; break;
-					case "fr": language = Language.French; break;
-					case "ja": language = Language.Japanese; break;
-					case "ru": language = Language.Russian; break;
-					case "es": language = Language.Spanish; break;
-					case "uk": language = Language.Ukrainian; break;
-					case "pt": language = Language.Portuguese; break;
-					case "zh": language = Language.Chinese; break;
-				}
+				language = DetectLanguage();
 			}
 
 			string filename;
@@ -90,6 +86,7 @@ namespace Mesen.GUI.Forms
 				case Language.Portuguese: filename = "resources.pt.xml"; break;
 				case Language.Catalan: filename = "resources.ca.xml"; break;
 				case Language.Chinese: filename = "resources.zh.xml"; break;
+				case Language.Italian: filename = "resources.it.xml"; break;
 			}
 
 			_language = language;
@@ -101,6 +98,25 @@ namespace Mesen.GUI.Forms
 			using(Stream stream = ResourceManager.GetZippedResource(enFilename)) {
 				_enResources.Load(stream);
 			}
+		}
+
+		private static Language DetectLanguage()
+		{
+			Language language = Language.SystemDefault;
+			switch (System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)
+			{
+				default:
+				case "en": language = Language.English; break;
+				case "fr": language = Language.French; break;
+				case "ja": language = Language.Japanese; break;
+				case "ru": language = Language.Russian; break;
+				case "es": language = Language.Spanish; break;
+				case "uk": language = Language.Ukrainian; break;
+				case "pt": language = Language.Portuguese; break;
+				case "zh": language = Language.Chinese; break;
+				case "it": language = Language.Italian; break;
+			}
+			return language;
 		}
 
 		public static string GetMessage(string id, params object[] args)

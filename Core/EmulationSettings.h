@@ -23,7 +23,7 @@ enum EmulationFlags : uint64_t
 
 	PauseOnMovieEnd = 0x0100,
 
-	DeveloperMode = 0x0200,
+	EnablePpuOamRowCorruption = 0x0200,
 
 	AllowBackgroundInput = 0x0400,
 	ReduceSoundInBackground = 0x0800,
@@ -34,6 +34,8 @@ enum EmulationFlags : uint64_t
 	Mmc3IrqAltBehavior = 0x8000,
 	
 	SwapDutyCycles = 0x10000,
+
+	DisableGameSelectionScreen = 0x20000,
 
 	AutoConfigureInput = 0x40000,
 
@@ -71,7 +73,8 @@ enum EmulationFlags : uint64_t
 
 	AdaptiveSpriteLimit = 0x80000000000,
 
-	DisableGameSelectionScreen = 0x200000000000,
+	EnablePpu2006ScrollGlitch = 0x100000000000,
+	EnablePpu2000ScrollGlitch = 0x200000000000,
 
 	ConfirmExitResetPower = 0x400000000000,
 
@@ -94,6 +97,8 @@ enum EmulationFlags : uint64_t
 
 	VsDualMuteMaster = 0x200000000000000,
 	VsDualMuteSlave = 0x400000000000000,
+	
+	RandomizeCpuPpuAlignment = 0x800000000000000,
 	
 	ForceMaxSpeed = 0x4000000000000000,	
 	ConsoleMode = 0x8000000000000000,
@@ -264,7 +269,8 @@ enum class ControllerType
 	PowerPad = 5,
 	SnesMouse = 6,
 	SuborMouse = 7,
-	VsZapper = 8
+	VsZapper = 8,
+	VbController = 9,
 };
 
 extern const vector<string> ExpansionPortDeviceNames;
@@ -323,6 +329,7 @@ struct KeyMapping
 	uint32_t JissenMahjongButtons[21] = {};
 	uint32_t SuborKeyboardButtons[99] = {};
 	uint32_t BandaiMicrophoneButtons[3] = {};
+	uint32_t VirtualBoyButtons[14] = {};
 
 	bool HasKeySet()
 	{
@@ -339,6 +346,7 @@ struct KeyMapping
 		hasKeyBinding |= HasKeyBinding(JissenMahjongButtons, sizeof(JissenMahjongButtons) / sizeof(JissenMahjongButtons[0]));
 		hasKeyBinding |= HasKeyBinding(SuborKeyboardButtons, sizeof(SuborKeyboardButtons) / sizeof(SuborKeyboardButtons[0]));
 		hasKeyBinding |= HasKeyBinding(BandaiMicrophoneButtons, sizeof(BandaiMicrophoneButtons) / sizeof(BandaiMicrophoneButtons[0]));
+		hasKeyBinding |= HasKeyBinding(VirtualBoyButtons, sizeof(VirtualBoyButtons) / sizeof(VirtualBoyButtons[0]));
 		return hasKeyBinding;
 	}
 
@@ -389,6 +397,16 @@ enum class EmulatorShortcut
 	RewindTenSecs,
 	RewindOneMin,
 
+	SelectSaveSlot1,
+	SelectSaveSlot2,
+	SelectSaveSlot3,
+	SelectSaveSlot4,
+	SelectSaveSlot5,
+	SelectSaveSlot6,
+	SelectSaveSlot7,
+	SelectSaveSlot8,
+	SelectSaveSlot9,
+	SelectSaveSlot10,
 	MoveToNextStateSlot,
 	MoveToPreviousStateSlot,
 	SaveState,
@@ -399,7 +417,6 @@ enum class EmulatorShortcut
 	VsServiceButton2,
 
 	ToggleCheats,
-	ToggleAudio,
 	ToggleFastForward,
 	ToggleRewind,
 	ToggleKeyboardMode,
@@ -419,6 +436,10 @@ enum class EmulatorShortcut
 
 	TakeScreenshot,
 
+	ToggleRecordVideo,
+	ToggleRecordAudio,
+	ToggleRecordMovie,
+
 	IncreaseSpeed,
 	DecreaseSpeed,
 	MaxSpeed,
@@ -426,6 +447,7 @@ enum class EmulatorShortcut
 	Pause,
 	Reset,
 	PowerCycle,
+	ReloadRom,
 	PowerOff,
 	Exit,
 
@@ -445,6 +467,9 @@ enum class EmulatorShortcut
 	ToggleSprites,
 	ToggleBackground,
 	ToggleDebugInfo,
+	ToggleAudio,
+	IncreaseVolume,
+	DecreaseVolume,
 
 	LoadRandomGame,
 	SaveStateSlot1,
@@ -458,6 +483,7 @@ enum class EmulatorShortcut
 	SaveStateSlot9,
 	SaveStateSlot10,
 	SaveStateToFile,
+	SaveStateDialog,
 
 	LoadStateSlot1,
 	LoadStateSlot2,
@@ -471,6 +497,7 @@ enum class EmulatorShortcut
 	LoadStateSlot10,
 	LoadStateSlotAuto,
 	LoadStateFromFile,
+	LoadStateDialog,
 
 	LoadLastSession,
 
@@ -529,6 +556,7 @@ enum class Language
 	Portuguese = 7,
 	Catalan = 8,
 	Chinese = 9,
+	Italian = 10,
 };
 
 enum class MouseDevice
@@ -637,7 +665,10 @@ private:
 	double _volumeReduction = 0.75;
 	uint32_t _sampleRate = 48000;
 	AudioFilterSettings _audioFilterSettings;
-		
+
+	uint32_t _runAheadFrames = 0;
+	bool _isRunAheadFrame = false;
+
 	NesModel _model = NesModel::Auto;
 	PpuModel _ppuModel = PpuModel::Ppu2C02;
 
@@ -647,13 +678,9 @@ private:
 
 	uint32_t _rewindBufferSize = 300;
 
-	bool _hasOverclock = false;
-	uint32_t _overclockRate = 100;
-	bool _overclockAdjustApu = true;
 	bool _disableOverclocking = false;
 	uint32_t _extraScanlinesBeforeNmi = 0;
 	uint32_t _extraScanlinesAfterNmi = 0;
-	double _effectiveOverclockRate = 100;
 
 	OverscanDimensions _overscan;
 	VideoFilterType _videoFilterType = VideoFilterType::None;
@@ -978,7 +1005,27 @@ public:
 		}
 		return value;
 	}
-	
+
+	void SetRunAheadFrames(uint32_t frameCount)
+	{
+		_runAheadFrames = frameCount;
+	}
+
+	uint32_t GetRunAheadFrames()
+	{
+		return _runAheadFrames;
+	}
+
+	void SetRunAheadFrameFlag(bool disabled)
+	{
+		_isRunAheadFrame = disabled;
+	}
+
+	bool IsRunAheadFrame()
+	{
+		return _isRunAheadFrame;
+	}
+
 	//0: No limit, Number: % of default speed (50/60fps)
 	void SetEmulationSpeed(uint32_t emulationSpeed, bool displaySpeed = false)
 	{
@@ -1040,55 +1087,11 @@ public:
 	}
 
 	uint32_t GetEmulationSpeed(bool ignoreTurbo = false);
-
-	void UpdateEffectiveOverclockRate()
-	{
-		if(_disableOverclocking) {
-			_effectiveOverclockRate = 100;
-		} else {
-			_effectiveOverclockRate = _overclockRate;
-		}
-		_hasOverclock = _effectiveOverclockRate != 100;
-		_audioSettingsChanged = true;
-	}
-
+	
 	void DisableOverclocking(bool disabled)
 	{
 		if(_disableOverclocking != disabled) {
 			_disableOverclocking = disabled;
-			UpdateEffectiveOverclockRate();
-		}
-	}
-
-	uint32_t GetOverclockRateSetting()
-	{
-		return _overclockRate;
-	}
-
-	bool HasOverclock()
-	{
-		return _hasOverclock;
-	}
-
-	double GetOverclockRate()
-	{
-		return _effectiveOverclockRate;
-	}
-
-	bool GetOverclockAdjustApu()
-	{
-		return _overclockAdjustApu;
-	}
-
-	void SetOverclockRate(uint32_t overclockRate, bool adjustApu)
-	{
-		if(_overclockRate != overclockRate || _overclockAdjustApu != adjustApu) {
-			_overclockRate = overclockRate;
-			_overclockAdjustApu = adjustApu;
-
-			UpdateEffectiveOverclockRate();
-
-			MessageManager::DisplayMessage("ClockRate", std::to_string((uint32_t)GetOverclockRate()) + "%");
 		}
 	}
 
@@ -1111,8 +1114,6 @@ public:
 
 			_extraScanlinesBeforeNmi = extraScanlinesBeforeNmi;
 			_extraScanlinesAfterNmi = extraScanlinesAfterNmi;
-
-			UpdateEffectiveOverclockRate();
 		}
 	}
 

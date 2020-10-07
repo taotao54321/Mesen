@@ -5,6 +5,7 @@
 #include "UnifBoards.h"
 #include "BaseMapper.h"
 #include "RomData.h"
+#include "VirtualFile.h"
 
 #include "A65AS.h"
 #include "Ac08.h"
@@ -145,6 +146,7 @@
 #include "Mapper244.h"
 #include "Mapper246.h"
 #include "Mapper253.h"
+#include "McAcc.h"
 #include "MMC1.h"
 #include "MMC1_105.h"
 #include "MMC1_155.h"
@@ -220,7 +222,6 @@
 #include "Sachen_148.h"
 #include "Sachen_149.h"
 #include "Sachen74LS374N.h"
-#include "Sachen74LS374NB.h"
 #include "Sachen8259.h"
 #include "Sachen9602.h"
 #include "SealieComputing.h"
@@ -307,7 +308,13 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 1: return new MMC1();
 		case 2: return new UNROM();
 		case 3: return new CNROM(false);
-		case 4: return new MMC3();
+		case 4: 
+			if(romData.Info.SubMapperID == 3) {
+				return new McAcc();
+			} else {
+				return new MMC3();
+			}
+
 		case 5: return new MMC5();
 		case 6: return new FrontFareast();
 		case 7: return new AXROM();
@@ -441,7 +448,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 147: return new Sachen_147();
 		case 148: return new Sachen_148();
 		case 149: return new Sachen_149();
-		case 150: return new Sachen74LS374NB();
+		case 150: return new Sachen74LS374N();
 		case 151: return new VRC1();
 		case 152: return new Bandai74161_7432(true);
 		case 153: return new BandaiFcg();
@@ -473,7 +480,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 183: return new Mapper183();
 		case 184: return new Sunsoft184();
 		case 185: return new CNROM(true);
-		case 186: return new StudyBox();
+		case 186: break; //The study box is handled as a bios file, not a iNES rom
 		case 187: return new MMC3_187();
 		case 188: return new BandaiKaraoke();
 		case 189: return new MMC3_189();
@@ -619,6 +626,8 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 349: return new BmcG146();
 		case 350: break; //891227
 
+		case 366: return new BmcGn45();
+
 		case 513: return new Sachen9602();
 		//514-517
 		case 518: return new Dance2000();
@@ -636,7 +645,6 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 530: return new Ax5705();
 
 		case UnifBoards::Ac08: return new Ac08(); //mapper 42?
-		case UnifBoards::BmcGn45: return new BmcGn45();
 		case UnifBoards::Cc21: return new Cc21();
 		case UnifBoards::Ghostbusters63in1: return new Ghostbusters63in1(); //mapper 226?
 		case UnifBoards::Gs2013: return new Gs2013();
@@ -646,6 +654,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case UnifBoards::Unl8237A: return new Unl8237A(); //mapper 215.1
 		case UnifBoards::UnlPuzzle: return new UnlPuzzle();
 
+		case MapperFactory::StudyBoxMapperID: return new StudyBox();
 		case MapperFactory::NsfMapperID: return new NsfMapper();
 		case MapperFactory::FdsMapperID: return new FDS();
 	}
@@ -656,12 +665,12 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 	return nullptr;
 }
 
-shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(shared_ptr<Console> console, string romFilename, vector<uint8_t> &fileData, RomData &outRomData)
+shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(shared_ptr<Console> console, VirtualFile &romFile, RomData &romData)
 {
 	RomLoader loader;
 
-	if(loader.LoadFile(romFilename, fileData)) {
-		RomData romData = loader.GetRomData();
+	if(loader.LoadFile(romFile)) {
+		romData = loader.GetRomData();
 
 		if((romData.Info.IsInDatabase || romData.Info.IsNes20Header) && romData.Info.InputType != GameInputType::Unspecified) {
 			//If in DB or a NES 2.0 file, auto-configure the inputs
@@ -671,13 +680,11 @@ shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(shared_ptr<Console> con
 		}
 
 		shared_ptr<BaseMapper> mapper(GetMapperFromID(romData));
-
 		if(mapper) {
-			outRomData = romData;
 			return mapper;
 		}
 	} else if(loader.GetRomData().BiosMissing) {
-		console->GetNotificationManager()->SendNotification(ConsoleNotificationType::FdsBiosNotFound);
+		console->GetNotificationManager()->SendNotification(ConsoleNotificationType::BiosNotFound, (void*)loader.GetRomData().Info.Format);
 	}
 	return nullptr;
 }

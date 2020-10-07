@@ -63,6 +63,13 @@ void MemoryManager::RegisterIODevice(IMemoryHandler *handler)
 	InitializeMemoryHandlers(_ramWriteHandlers, handler, ranges.GetRAMWriteAddresses(), ranges.GetAllowOverride());
 }
 
+void MemoryManager::RegisterWriteHandler(IMemoryHandler* handler, uint32_t start, uint32_t end)
+{
+	for(uint32_t i = start; i < end; i++) {
+		_ramWriteHandlers[i] = handler;
+	}
+}
+
 void MemoryManager::UnregisterIODevice(IMemoryHandler *handler)
 {
 	MemoryRanges ranges;
@@ -101,7 +108,7 @@ uint8_t MemoryManager::DebugRead(uint16_t addr, bool disableSideEffects)
 		}
 	}
 
-	_console->GetCheatManager()->ApplyRamCodes(addr, value);
+	_console->GetCheatManager()->ApplyCodes(addr, value);
 
 	return value;
 }
@@ -114,7 +121,7 @@ uint16_t MemoryManager::DebugReadWord(uint16_t addr)
 uint8_t MemoryManager::Read(uint16_t addr, MemoryOperationType operationType)
 {
 	uint8_t value = _ramReadHandlers[addr]->ReadRAM(addr);
-	_console->GetCheatManager()->ApplyRamCodes(addr, value);
+	_console->GetCheatManager()->ApplyCodes(addr, value);
 	_console->DebugProcessRamOperation(operationType, addr, value);
 
 	_openBusHandler.SetOpenBus(value);

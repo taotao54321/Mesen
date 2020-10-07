@@ -23,24 +23,27 @@ public:
 		Stream(_lastCycle, _cyclesDown);
 	}
 
+	template<uint8_t minDelay = 10>
 	A12StateChange UpdateVramAddress(uint16_t addr, uint32_t frameCycle)
 	{
 		A12StateChange result = A12StateChange::None;
 
+		if(_cyclesDown > 0) {
+			if(_lastCycle > frameCycle) {
+				//We changed frames
+				_cyclesDown += (89342 - _lastCycle) + frameCycle;
+			} else {
+				_cyclesDown += (frameCycle - _lastCycle);
+			}
+		}
+
 		if((addr & 0x1000) == 0) {
 			if(_cyclesDown == 0) {
 				_cyclesDown = 1;
-			} else {
-				if(_lastCycle > frameCycle) {
-					//We changed frames
-					_cyclesDown += (89342 - _lastCycle) + frameCycle;
-				} else {
-					_cyclesDown += (frameCycle - _lastCycle);
-				}
+				result = A12StateChange::Fall;
 			}
-			result = A12StateChange::Fall;
 		} else if(addr & 0x1000) {
-			if(_cyclesDown > 8) {
+			if(_cyclesDown > minDelay) {
 				result = A12StateChange::Rise;
 			}
 			_cyclesDown = 0;

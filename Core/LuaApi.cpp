@@ -36,6 +36,7 @@
 #define errorCond(cond, text) if(cond) { luaL_error(lua, text); return 0; }
 #define checkparams() if(!l.CheckParamCount()) { return 0; }
 #define checkminparams(x) if(!l.CheckParamCount(x)) { return 0; }
+#define checkinitdone() if(!_context->CheckInitDone()) { error("This function cannot be called outside a callback"); return 0; }
 #define checksavestateconditions() if(!_context->CheckInStartFrameEvent() && !_context->CheckInExecOpEvent()) { error("This function must be called inside a StartFrame event callback or a CpuExec memory operation callback"); return 0; }
 
 enum class ExecuteCountType
@@ -532,6 +533,7 @@ int LuaApi::Reset(lua_State *lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
+	checkinitdone();
 	_console->Reset(true);
 	return l.ReturnCount();
 }
@@ -541,6 +543,7 @@ int LuaApi::Stop(lua_State *lua)
 	LuaCallHelper l(lua);
 	int32_t stopCode = l.ReadInteger(0);
 	checkminparams(0);
+	checkinitdone();
 	_console->Stop(stopCode);
 	return l.ReturnCount();
 }
@@ -549,6 +552,7 @@ int LuaApi::Break(lua_State *lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
+	checkinitdone();
 	_debugger->Step(1);
 	return l.ReturnCount();
 }
@@ -557,6 +561,7 @@ int LuaApi::Resume(lua_State *lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
+	checkinitdone();
 	_debugger->Run();
 	return l.ReturnCount();
 }
@@ -567,6 +572,7 @@ int LuaApi::Execute(lua_State *lua)
 	ExecuteCountType type = (ExecuteCountType)l.ReadInteger();
 	int count = l.ReadInteger();
 	checkparams();
+	checkinitdone();
 	errorCond(count <= 0, "count must be >= 1");
 	errorCond(type < ExecuteCountType::CpuCycles || type > ExecuteCountType::CpuInstructions, "type is invalid");
 
@@ -775,7 +781,7 @@ int LuaApi::GetAccessCounters(lua_State *lua)
 
 		case AddressType::InternalRam:
 			debugMemoryType = DebugMemoryType::InternalRam;
-			size = 0x2000;
+			size = 0x800;
 			break;
 
 		case AddressType::PrgRom:
@@ -794,14 +800,32 @@ int LuaApi::GetAccessCounters(lua_State *lua)
 			break;
 	}
 
-	vector<int32_t> counts;
-	counts.resize(size, 0);
-	_debugger->GetMemoryAccessCounter()->GetAccessCounts(0, size, debugMemoryType, operationType, counts.data());
+	vector<AddressCounters> counts;
+	counts.resize(size, {});
+	_debugger->GetMemoryAccessCounter()->GetAccessCounts(0, size, debugMemoryType, counts.data());
 
 	lua_newtable(lua);
-	for(uint32_t i = 0; i < size; i++) {
-		lua_pushinteger(lua, counts[i]);
-		lua_rawseti(lua, -2, i);
+	switch(operationType) {
+		case MemoryOperationType::Read:
+			for(uint32_t i = 0; i < size; i++) {
+				lua_pushinteger(lua, counts[i].ReadCount);
+				lua_rawseti(lua, -2, i);
+			}
+			break;
+
+		case MemoryOperationType::Write:
+			for(uint32_t i = 0; i < size; i++) {
+				lua_pushinteger(lua, counts[i].WriteCount);
+				lua_rawseti(lua, -2, i);
+			}
+			break;
+
+		case MemoryOperationType::ExecOpCode:
+			for(uint32_t i = 0; i < size; i++) {
+				lua_pushinteger(lua, counts[i].ExecCount);
+				lua_rawseti(lua, -2, i);
+			}
+			break;
 	}
 
 	return 1;

@@ -21,12 +21,7 @@ namespace Mesen.GUI.Debugger
 			InitializeComponent();
 
 			if(!DesignMode) {
-				if(!ConfigManager.Config.DebugInfo.WatchWindowSize.IsEmpty) {
-					this.StartPosition = FormStartPosition.Manual;
-					this.Size = ConfigManager.Config.DebugInfo.WatchWindowSize;
-					this.Location = ConfigManager.Config.DebugInfo.WatchWindowLocation;
-				}
-
+				RestoreLocation(ConfigManager.Config.DebugInfo.WatchWindowLocation, ConfigManager.Config.DebugInfo.WatchWindowSize);
 				this.toolTip.SetToolTip(picWatchHelp, ctrlWatch.GetTooltipText());
 			}
 		}
@@ -36,8 +31,6 @@ namespace Mesen.GUI.Debugger
 			base.OnLoad(e);
 
 			if(!DesignMode) {
-				DebugWorkspaceManager.GetWorkspace();
-				DebugWorkspaceManager.AutoLoadDbgFiles(true);
 				_notifListener = new InteropEmu.NotificationListener(ConfigManager.Config.DebugInfo.DebugConsoleId);
 				_notifListener.OnNotification += _notifListener_OnNotification;
 				ctrlWatch.UpdateWatch(true);
@@ -67,11 +60,9 @@ namespace Mesen.GUI.Debugger
 		{
 			switch(e.NotificationType) {
 				case InteropEmu.ConsoleNotificationType.PpuFrameDone:
-					if(ConfigManager.Config.DebugInfo.RefreshWhileRunning) {
-						this.BeginInvoke((MethodInvoker)(() => {
-							ctrlWatch.UpdateWatch(false);
-						}));
-					}
+					this.BeginInvoke((MethodInvoker)(() => {
+						ctrlWatch.UpdateWatch(false);
+					}));
 					break;
 
 				case InteropEmu.ConsoleNotificationType.CodeBreak:

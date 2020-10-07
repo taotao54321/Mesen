@@ -10,9 +10,12 @@
 #include "../Core/Console.h"
 #include "../Core/VideoDecoder.h"
 #include "../Core/VideoRenderer.h"
+#include "../Core/MemoryManager.h"
+#include "../Core/BaseMapper.h"
 #include "../Core/EmulationSettings.h"
 #include "../Core/CheatManager.h"
 #include "../Core/HdData.h"
+#include "../Core/SaveStateManager.h"
 #include "../Core/DebuggerTypes.h"
 #include "../Core/GameDatabase.h"
 #include "../Utilities/FolderUtilities.h"
@@ -27,6 +30,7 @@
 #define DEVICE_EXCITINGBOXING     RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 5)
 #define DEVICE_KONAMIHYPERSHOT    RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 6)
 #define DEVICE_SNESGAMEPAD        RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 7)
+#define DEVICE_VBGAMEPAD          RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 8)
 #define DEVICE_ZAPPER             RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_POINTER, 0)
 #define DEVICE_OEKAKIDS           RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_POINTER, 1)
 #define DEVICE_BANDAIHYPERSHOT    RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_POINTER, 2)
@@ -43,8 +47,8 @@ static unsigned _inputDevices[5] = { DEVICE_AUTO, DEVICE_AUTO, DEVICE_AUTO, DEVI
 static bool _hdPacksEnabled = false;
 static string _mesenVersion = "";
 static int32_t _saveStateSize = -1;
-static struct retro_memory_descriptor _descriptors[3];
-static struct retro_memory_map _memoryMap;
+static bool _shiftButtonsClockwise = false;
+static int32_t _audioSampleRate = 44100;
 
 //Include game database as a byte array (representing the MesenDB.txt file)
 #include "MesenDB.inc"
@@ -55,26 +59,30 @@ static std::unique_ptr<LibretroSoundManager> _soundManager;
 static std::unique_ptr<LibretroKeyManager> _keyManager;
 static std::unique_ptr<LibretroMessageManager> _messageManager;
 
-static constexpr char* MesenNtscFilter = "mesen_ntsc_filter";
-static constexpr char* MesenPalette = "mesen_palette";
-static constexpr char* MesenNoSpriteLimit = "mesen_nospritelimit";
-static constexpr char* MesenOverclock = "mesen_overclock";
-static constexpr char* MesenOverclockType = "mesen_overclock_type";
-static constexpr char* MesenOverscanVertical = "mesen_overscan_vertical";
-static constexpr char* MesenOverscanHorizontal = "mesen_overscan_horizontal";
-static constexpr char* MesenAspectRatio = "mesen_aspect_ratio";
-static constexpr char* MesenRegion = "mesen_region";
-static constexpr char* MesenRamState = "mesen_ramstate";
-static constexpr char* MesenControllerTurboSpeed = "mesen_controllerturbospeed";
-static constexpr char* MesenFdsAutoSelectDisk = "mesen_fdsautoinsertdisk";
-static constexpr char* MesenFdsFastForwardLoad = "mesen_fdsfastforwardload";
-static constexpr char* MesenHdPacks = "mesen_hdpacks";
-static constexpr char* MesenScreenRotation = "mesen_screenrotation";
-static constexpr char* MesenFakeStereo = "mesen_fake_stereo";
-static constexpr char* MesenMuteTriangleUltrasonic = "mesen_mute_triangle_ultrasonic";
-static constexpr char* MesenReduceDmcPopping = "mesen_reduce_dmc_popping";
-static constexpr char* MesenSwapDutyCycle = "mesen_swap_duty_cycle";
-static constexpr char* MesenDisableNoiseModeFlag = "mesen_disable_noise_mode_flag";
+static constexpr const char* MesenNtscFilter = "mesen_ntsc_filter";
+static constexpr const char* MesenPalette = "mesen_palette";
+static constexpr const char* MesenNoSpriteLimit = "mesen_nospritelimit";
+static constexpr const char* MesenOverclock = "mesen_overclock";
+static constexpr const char* MesenOverclockType = "mesen_overclock_type";
+static constexpr const char* MesenOverscanLeft = "mesen_overscan_left";
+static constexpr const char* MesenOverscanRight = "mesen_overscan_right";
+static constexpr const char* MesenOverscanTop = "mesen_overscan_up";
+static constexpr const char* MesenOverscanBottom = "mesen_overscan_down";
+static constexpr const char* MesenAspectRatio = "mesen_aspect_ratio";
+static constexpr const char* MesenRegion = "mesen_region";
+static constexpr const char* MesenRamState = "mesen_ramstate";
+static constexpr const char* MesenControllerTurboSpeed = "mesen_controllerturbospeed";
+static constexpr const char* MesenFdsAutoSelectDisk = "mesen_fdsautoinsertdisk";
+static constexpr const char* MesenFdsFastForwardLoad = "mesen_fdsfastforwardload";
+static constexpr const char* MesenHdPacks = "mesen_hdpacks";
+static constexpr const char* MesenScreenRotation = "mesen_screenrotation";
+static constexpr const char* MesenFakeStereo = "mesen_fake_stereo";
+static constexpr const char* MesenMuteTriangleUltrasonic = "mesen_mute_triangle_ultrasonic";
+static constexpr const char* MesenReduceDmcPopping = "mesen_reduce_dmc_popping";
+static constexpr const char* MesenSwapDutyCycle = "mesen_swap_duty_cycle";
+static constexpr const char* MesenDisableNoiseModeFlag = "mesen_disable_noise_mode_flag";
+static constexpr const char* MesenShiftButtonsClockwise = "mesen_shift_buttons_clockwise";
+static constexpr const char* MesenAudioSampleRate = "mesen_audio_sample_rate";
 
 uint32_t defaultPalette[0x40] { 0xFF666666, 0xFF002A88, 0xFF1412A7, 0xFF3B00A4, 0xFF5C007E, 0xFF6E0040, 0xFF6C0600, 0xFF561D00, 0xFF333500, 0xFF0B4800, 0xFF005200, 0xFF004F08, 0xFF00404D, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFADADAD, 0xFF155FD9, 0xFF4240FF, 0xFF7527FE, 0xFFA01ACC, 0xFFB71E7B, 0xFFB53120, 0xFF994E00, 0xFF6B6D00, 0xFF388700, 0xFF0C9300, 0xFF008F32, 0xFF007C8D, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFFFFEFF, 0xFF64B0FF, 0xFF9290FF, 0xFFC676FF, 0xFFF36AFF, 0xFFFE6ECC, 0xFFFE8170, 0xFFEA9E22, 0xFFBCBE00, 0xFF88D800, 0xFF5CE430, 0xFF45E082, 0xFF48CDDE, 0xFF4F4F4F, 0xFF000000, 0xFF000000, 0xFFFFFEFF, 0xFFC0DFFF, 0xFFD3D2FF, 0xFFE8C8FF, 0xFFFBC2FF, 0xFFFEC4EA, 0xFFFECCC5, 0xFFF7D8A5, 0xFFE4E594, 0xFFCFEF96, 0xFFBDF4AB, 0xFFB3F3CC, 0xFFB5EBF2, 0xFFB8B8B8, 0xFF000000, 0xFF000000 };
 uint32_t unsaturatedPalette[0x40] { 0xFF6B6B6B, 0xFF001E87, 0xFF1F0B96, 0xFF3B0C87, 0xFF590D61, 0xFF5E0528, 0xFF551100, 0xFF461B00, 0xFF303200, 0xFF0A4800, 0xFF004E00, 0xFF004619, 0xFF003A58, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFB2B2B2, 0xFF1A53D1, 0xFF4835EE, 0xFF7123EC, 0xFF9A1EB7, 0xFFA51E62, 0xFFA52D19, 0xFF874B00, 0xFF676900, 0xFF298400, 0xFF038B00, 0xFF008240, 0xFF007891, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFFFFFFF, 0xFF63ADFD, 0xFF908AFE, 0xFFB977FC, 0xFFE771FE, 0xFFF76FC9, 0xFFF5836A, 0xFFDD9C29, 0xFFBDB807, 0xFF84D107, 0xFF5BDC3B, 0xFF48D77D, 0xFF48CCCE, 0xFF555555, 0xFF000000, 0xFF000000, 0xFFFFFFFF, 0xFFC4E3FE, 0xFFD7D5FE, 0xFFE6CDFE, 0xFFF9CAFE, 0xFFFEC9F0, 0xFFFED1C7, 0xFFF7DCAC, 0xFFE8E89C, 0xFFD1F29D, 0xFFBFF4B1, 0xFFB7F5CD, 0xFFB7F0EE, 0xFFBEBEBE, 0xFF000000, 0xFF000000 };
@@ -123,7 +131,7 @@ extern "C" {
 
 		_console->GetSettings()->SetFlags(EmulationFlags::FdsAutoLoadDisk);
 		_console->GetSettings()->SetFlags(EmulationFlags::AutoConfigureInput);
-		_console->GetSettings()->SetSampleRate(96000);
+		_console->GetSettings()->SetSampleRate(_audioSampleRate);
 		_console->GetSettings()->SetAutoSaveOptions(0, false);
 		_console->GetSettings()->SetRewindBufferSize(0);
 	}
@@ -150,12 +158,15 @@ extern "C" {
 			{ MesenOverclock, "Overclock; None|Low|Medium|High|Very High" },
 			{ MesenOverclockType, "Overclock Type; Before NMI (Recommended)|After NMI" },
 			{ MesenRegion, "Region; Auto|NTSC|PAL|Dendy" },
-			{ MesenOverscanVertical, "Vertical Overscan; None|8px|16px" },
-			{ MesenOverscanHorizontal, "Horizontal Overscan; None|8px|16px" },
+			{ MesenOverscanLeft, "Left Overscan; None|4px|8px|12px|16px" },
+			{ MesenOverscanRight, "Right Overscan; None|4px|8px|12px|16px" },
+			{ MesenOverscanTop, "Top Overscan; None|4px|8px|12px|16px" },
+			{ MesenOverscanBottom, "Bottom Overscan; None|4px|8px|12px|16px" },
 			{ MesenAspectRatio, "Aspect Ratio; Auto|No Stretching|NTSC|PAL|4:3|16:9" },
 			{ MesenControllerTurboSpeed, "Controller Turbo Speed; Fast|Very Fast|Disabled|Slow|Normal" },
+			{ MesenShiftButtonsClockwise, u8"Shift A/B/X/Y clockwise; disabled|enabled" },
 			{ MesenHdPacks, "Enable HD Packs; enabled|disabled" },
-			{ MesenNoSpriteLimit, "Remove sprite limit; enabled|disabled" },
+			{ MesenNoSpriteLimit, "Remove sprite limit; disabled|enabled" },
 			{ MesenFakeStereo, u8"Enable fake stereo effect; disabled|enabled" },
 			{ MesenMuteTriangleUltrasonic, u8"Reduce popping on Triangle channel; enabled|disabled" },
 			{ MesenReduceDmcPopping, u8"Reduce popping on DMC channel; enabled|disabled" },
@@ -165,6 +176,7 @@ extern "C" {
 			{ MesenRamState, "Default power-on state for RAM; All 0s (Default)|All 1s|Random Values" },
 			{ MesenFdsAutoSelectDisk, "FDS: Automatically insert disks; disabled|enabled" },
 			{ MesenFdsFastForwardLoad, "FDS: Fast forward while loading; disabled|enabled" },
+			{ MesenAudioSampleRate, "Sound Output Sample Rate; 96000|192000|384000|11025|22050|44100|48000" },
 			{ NULL, NULL },
 		};
 
@@ -176,6 +188,7 @@ extern "C" {
 			{ "Arkanoid", DEVICE_ARKANOID },
 			{ "SNES Controller", DEVICE_SNESGAMEPAD },
 			{ "SNES Mouse", DEVICE_SNESMOUSE },
+			{ "Virtual Boy Controller" ,DEVICE_VBGAMEPAD },
 			{ NULL, 0 },
 		};
 
@@ -187,6 +200,7 @@ extern "C" {
 			{ "Arkanoid", DEVICE_ARKANOID },
 			{ "SNES Controller", DEVICE_SNESGAMEPAD },
 			{ "SNES Mouse", DEVICE_SNESMOUSE },
+			{ "Virtual Boy Controller", DEVICE_VBGAMEPAD },
 			{ NULL, 0 },
 		};
 
@@ -239,11 +253,11 @@ extern "C" {
 
 	RETRO_API void retro_set_audio_sample(retro_audio_sample_t sendAudioSample)
 	{
-		_soundManager->SetSendAudioSample(sendAudioSample);
 	}
 
 	RETRO_API void retro_set_audio_sample_batch(retro_audio_sample_batch_t audioSampleBatch)
 	{
+		_soundManager->SetSendAudioSample(audioSampleBatch);
 	}
 
 	RETRO_API void retro_set_input_poll(retro_input_poll_t pollInput)
@@ -269,6 +283,24 @@ extern "C" {
 			return true;
 		}
 		return false;
+	}
+
+	uint8_t readOverscanValue(const char* key)
+	{
+		retro_variable var = {};
+		if(readVariable(key, var)) {
+			string value = string(var.value);
+			if(value == "4px") {
+				return 4;
+			} else if(value == "8px") {
+				return 8;
+			} else if(value == "12px") {
+				return 12;
+			} else if(value == "16px") {
+				return 16;
+			}
+		}
+		return 0;
 	}
 
 	void set_flag(const char* flagName, uint64_t flagValue)
@@ -426,26 +458,12 @@ extern "C" {
 			}
 		}
 
-		int overscanHorizontal = 0;
-		int overscanVertical = 0;		
-		if(readVariable(MesenOverscanHorizontal, var)) {
-			string value = string(var.value);
-			if(value == "8px") {
-				overscanHorizontal = 8;
-			} else if(value == "16px") {
-				overscanHorizontal = 16;
-			}
-		}
-
-		if(readVariable(MesenOverscanVertical, var)) {
-			string value = string(var.value);
-			if(value == "8px") {
-				overscanVertical = 8;
-			} else if(value == "16px") {
-				overscanVertical = 16;
-			}
-		}
-		_console->GetSettings()->SetOverscanDimensions(overscanHorizontal, overscanHorizontal, overscanVertical, overscanVertical);
+		_console->GetSettings()->SetOverscanDimensions(
+			readOverscanValue(MesenOverscanLeft),
+			readOverscanValue(MesenOverscanRight),
+			readOverscanValue(MesenOverscanTop),
+			readOverscanValue(MesenOverscanBottom)
+		);
 
 		if(readVariable(MesenAspectRatio, var)) {
 			string value = string(var.value);
@@ -518,6 +536,31 @@ extern "C" {
 			}
 		}
 
+		_shiftButtonsClockwise = false;
+		if(readVariable(MesenShiftButtonsClockwise, var)) {
+			string value = string(var.value);
+			if(value == "enabled") {
+				_shiftButtonsClockwise = true;
+ 			}
+		}
+
+		if(readVariable(MesenAudioSampleRate, var)) {
+			int old_value = _audioSampleRate;
+
+			_audioSampleRate = atoi(var.value);
+
+			if(old_value != _audioSampleRate) {
+				_console->GetSettings()->SetSampleRate(_audioSampleRate);
+
+				// switch when core actively running
+				if(_saveStateSize != -1) {
+					struct retro_system_av_info system_av_info;
+					retro_get_system_av_info(&system_av_info);
+					retroEnv(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
+				}
+			}
+		}
+
 		auto getKeyCode = [=](int port, int retroKey) {
 			return (port << 8) | (retroKey + 1);
 		};
@@ -533,11 +576,11 @@ extern "C" {
 				keyMappings.Mapping1.TurboA = getKeyCode(port, RETRO_DEVICE_ID_JOYPAD_X);
 				keyMappings.Mapping1.TurboB = getKeyCode(port, RETRO_DEVICE_ID_JOYPAD_Y);
 			} else {
-				keyMappings.Mapping1.A = getKeyCode(port, RETRO_DEVICE_ID_JOYPAD_B);
-				keyMappings.Mapping1.B = getKeyCode(port, RETRO_DEVICE_ID_JOYPAD_Y);
+				keyMappings.Mapping1.A = getKeyCode(port, _shiftButtonsClockwise ? RETRO_DEVICE_ID_JOYPAD_B : RETRO_DEVICE_ID_JOYPAD_A);
+				keyMappings.Mapping1.B = getKeyCode(port, _shiftButtonsClockwise ? RETRO_DEVICE_ID_JOYPAD_Y : RETRO_DEVICE_ID_JOYPAD_B);
 				if(turboEnabled) {
-					keyMappings.Mapping1.TurboA = getKeyCode(port, RETRO_DEVICE_ID_JOYPAD_A);
-					keyMappings.Mapping1.TurboB = getKeyCode(port, RETRO_DEVICE_ID_JOYPAD_X);
+					keyMappings.Mapping1.TurboA = getKeyCode(port, _shiftButtonsClockwise ? RETRO_DEVICE_ID_JOYPAD_A : RETRO_DEVICE_ID_JOYPAD_X);
+					keyMappings.Mapping1.TurboB = getKeyCode(port, _shiftButtonsClockwise ? RETRO_DEVICE_ID_JOYPAD_X : RETRO_DEVICE_ID_JOYPAD_Y);
 				}
 			}
 
@@ -658,7 +701,7 @@ extern "C" {
 	RETRO_API bool retro_serialize(void *data, size_t size)
 	{
 		std::stringstream ss;
-		_console->SaveState(ss);
+		_console->GetSaveStateManager()->SaveState(ss);
 		
 		string saveStateData = ss.str();
 		memset(data, 0, size);
@@ -669,8 +712,13 @@ extern "C" {
 
 	RETRO_API bool retro_unserialize(const void *data, size_t size)
 	{
-		_console->LoadState((uint8_t*)data, (uint32_t)size);
-		return true;
+		std::stringstream ss;
+		ss.write((char*)data, size);
+
+		bool result = _console->GetSaveStateManager()->LoadState(ss, false);
+		if(result)
+			_console->GetSettings()->SetSampleRate(_audioSampleRate);
+		return result;
 	}
 
 	RETRO_API void retro_cheat_reset()
@@ -736,6 +784,7 @@ extern "C" {
 						case ControllerType::SnesMouse: device = DEVICE_SNESMOUSE; break;
 						case ControllerType::Zapper: device = DEVICE_ZAPPER; break;
 						case ControllerType::ArkanoidController: device = DEVICE_ARKANOID; break;
+						case ControllerType::VbController: device = DEVICE_VBGAMEPAD; break;
 						default: return;
 					}
 				} else if(port == 4) {
@@ -771,10 +820,17 @@ extern "C" {
 					addDesc(port, RETRO_DEVICE_ID_JOYPAD_L, "L");
 					addDesc(port, RETRO_DEVICE_ID_JOYPAD_R, "R");
 				} else {
-					addDesc(port, RETRO_DEVICE_ID_JOYPAD_B, "A");
-					addDesc(port, RETRO_DEVICE_ID_JOYPAD_Y, "B");
-					addDesc(port, RETRO_DEVICE_ID_JOYPAD_A, "Turbo A");
-					addDesc(port, RETRO_DEVICE_ID_JOYPAD_X, "Turbo B");
+					if(_shiftButtonsClockwise) {
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_B, "A");
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_Y, "B");
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_A, "Turbo A");
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_X, "Turbo B");
+					} else {
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_A, "A");
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_B, "B");
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_X, "Turbo A");
+						addDesc(port, RETRO_DEVICE_ID_JOYPAD_Y, "Turbo B");
+					}
 
 					if(port == 0) {
 						addDesc(port, RETRO_DEVICE_ID_JOYPAD_L, "(FDS) Insert Next Disk");
@@ -818,6 +874,21 @@ extern "C" {
 			} else if(device == DEVICE_PACHINKO) {
 				addDesc(port, RETRO_DEVICE_ID_JOYPAD_L, "Release Trigger");
 				addDesc(port, RETRO_DEVICE_ID_JOYPAD_R, "Press Trigger");
+			} else if(device == DEVICE_VBGAMEPAD) {
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_B, "Virtual Boy D-Pad 2 Down");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_Y, "Virtual Boy D-Pad 2 Left");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_SELECT, "Virtual Boy Select");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_START, "Virtual Boy Start");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_UP, "Virtual Boy D-Pad 1 Up");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_DOWN, "Virtual Boy D-Pad 1 Down");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_LEFT, "Virtual Boy D-Pad 1 Left");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Virtual Boy D-Pad 1 Right");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_A, "Virtual Boy D-Pad 2 Right");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_X, "Virtual Boy D-Pad 2 Up");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_L, "Virtual Boy L");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_R, "Virtual Boy R");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_L2, "Virtual Boy B");
+				addDesc(port, RETRO_DEVICE_ID_JOYPAD_R2, "Virtual Boy A");
 			}
 		};
 
@@ -855,6 +926,7 @@ extern "C" {
 						case DEVICE_ARKANOID: type = ControllerType::ArkanoidController; break;
 						case DEVICE_SNESGAMEPAD: type = ControllerType::SnesController; break;
 						case DEVICE_SNESMOUSE: type = ControllerType::SnesMouse; break;
+						case DEVICE_VBGAMEPAD: type = ControllerType::VbController; break;
 					}
 					_console->GetSettings()->SetControllerType(port, type);
 				} else {
@@ -899,40 +971,24 @@ extern "C" {
 	void retro_set_memory_maps()
 	{
 		//Expose internal RAM and work/save RAM for retroachievements
-		memset(_descriptors, 0, sizeof(_descriptors));
-		memset(&_memoryMap, 0, sizeof(_memoryMap));
+		retro_memory_descriptor descriptors[256] = {};
+		retro_memory_map memoryMap = {};
 
-		uint32_t i = 0;
-		uint32_t size = 0;
-		int32_t startAddr = 0;
-		uint8_t* internalRam = _console->GetRamBuffer(DebugMemoryType::InternalRam, size, startAddr);
-		_descriptors[i].ptr = internalRam;
-		_descriptors[i].start = startAddr;
-		_descriptors[i].len = size;
-		_descriptors[i].select = 0;
-		i++;
-
-		uint8_t* saveRam = _console->GetRamBuffer(DebugMemoryType::SaveRam, size, startAddr);
-		if(size > 0 && startAddr > 0) {
-			_descriptors[i].ptr = saveRam;
-			_descriptors[i].start = startAddr;
-			_descriptors[i].len = size;
-			_descriptors[i].select = 0;
-			i++;
+		int count = 0;
+		for(int i = 0; i <= 0xFFFF; i += 0x100) {
+			uint8_t* ram = _console->GetRamBuffer(i);
+			if(ram) {
+				descriptors[count].ptr = ram;
+				descriptors[count].start = i;
+				descriptors[count].len = 0x100;
+				count++;
+			}
 		}
 
-		uint8_t* workRam = _console->GetRamBuffer(DebugMemoryType::WorkRam, size, startAddr);
-		if(size > 0 && startAddr > 0) {
-			_descriptors[i].ptr = workRam;
-			_descriptors[i].start = startAddr;
-			_descriptors[i].len = size;
-			_descriptors[i].select = 0;
-			i++;
-		}
+		memoryMap.descriptors = descriptors;
+		memoryMap.num_descriptors = count;
 
-		_memoryMap.descriptors = _descriptors;
-		_memoryMap.num_descriptors = i;
-		retroEnv(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &_memoryMap);
+		retroEnv(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &memoryMap);
 	}
 
 	RETRO_API void retro_set_controller_port_device(unsigned port, unsigned device)
@@ -996,7 +1052,7 @@ extern "C" {
 			//Retroarch doesn't like this for netplay or rewinding - it requires the states to always be the exact same size
 			//So we need to send a large enough size to Retroarch to ensure Mesen's state will always fit within that buffer.
 			std::stringstream ss;
-			_console->SaveState(ss);
+			_console->GetSaveStateManager()->SaveState(ss);
 
 			//Round up to the next 1kb multiple
 			_saveStateSize = ((ss.str().size() * 2) + 0x400) & ~0x3FF;
@@ -1060,23 +1116,21 @@ extern "C" {
 
 	RETRO_API void *retro_get_memory_data(unsigned id)
 	{
-		uint32_t size;
-		int32_t startAddr;
+		BaseMapper* mapper = _console->GetMapper();
 		switch(id) {
-			case RETRO_MEMORY_SAVE_RAM: return _console->GetRamBuffer(DebugMemoryType::SaveRam, size, startAddr);
-			case RETRO_MEMORY_SYSTEM_RAM: return _console->GetRamBuffer(DebugMemoryType::InternalRam, size, startAddr);
+			case RETRO_MEMORY_SAVE_RAM: return mapper->GetSaveRam();
+			case RETRO_MEMORY_SYSTEM_RAM: return _console->GetMemoryManager()->GetInternalRAM();
 		}
 		return nullptr;
 	}
 
 	RETRO_API size_t retro_get_memory_size(unsigned id)
 	{
-		uint32_t size = 0;
-		int32_t startAddr;
+		BaseMapper* mapper = _console->GetMapper();
 		switch(id) {
-			case RETRO_MEMORY_SAVE_RAM: _console->GetRamBuffer(DebugMemoryType::SaveRam, size, startAddr); break;
-			case RETRO_MEMORY_SYSTEM_RAM: _console->GetRamBuffer(DebugMemoryType::InternalRam, size, startAddr); break;
+			case RETRO_MEMORY_SAVE_RAM: return mapper->GetMemorySize(DebugMemoryType::SaveRam);
+			case RETRO_MEMORY_SYSTEM_RAM: return MemoryManager::InternalRAMSize;
 		}
-		return size;
+		return 0;
 	}
 }

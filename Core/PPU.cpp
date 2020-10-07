@@ -15,6 +15,8 @@
 PPU::PPU(shared_ptr<Console> console)
 {
 	_console = console;
+	_masterClock = 0;
+	_masterClockDivider = 4;
 	_settings = _console->GetSettings();
 
 	_outputBuffers[0] = new uint16_t[256 * 240];
@@ -27,6 +29,9 @@ PPU::PPU(shared_ptr<Console> console)
 	uint8_t paletteRamBootValues[0x20] { 0x09, 0x01, 0x00, 0x01, 0x00, 0x02, 0x02, 0x0D, 0x08, 0x10, 0x08, 0x24, 0x00, 0x00, 0x04, 0x2C,
 		0x09, 0x01, 0x34, 0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20, 0x2C, 0x08 };
 	memcpy(_paletteRAM, paletteRamBootValues, sizeof(_paletteRAM));
+
+	//This should (presumably) persist across resets
+	memset(_corruptOamRow, 0, sizeof(_corruptOamRow));
 
 	_console->InitializeRam(_spriteRAM, 0x100);
 	_console->InitializeRam(_secondarySpriteRAM, 0x20);
@@ -42,7 +47,8 @@ PPU::~PPU()
 
 void PPU::Reset()
 {
-	_cyclesNeeded = 0;
+	_masterClock = 0;
+	_preventVblFlag = false;
 
 	_needStateUpdate = false;
 	_prevRenderingEnabled = false;
@@ -73,14 +79,12 @@ void PPU::Reset()
 	_oamCopyDone = false;
 	_renderingEnabled = false;
 	_prevRenderingEnabled = false;
-	_cyclesNeeded = 0.0;
 
 	memset(_hasSprite, 0, sizeof(_hasSprite));
 	memset(_spriteTiles, 0, sizeof(_spriteTiles));
 	_spriteCount = 0;
 	_secondaryOAMAddr = 0;
 	_sprite0Visible = false;
-	_overflowSpriteAddr = 0;
 	_spriteIndex = 0;
 	_openBus = 0;
 	memset(_openBusDecayStamp, 0, sizeof(_openBusDecayStamp));
@@ -118,18 +122,21 @@ void PPU::SetNesModel(NesModel model)
 			_vblankEnd = 260;
 			_standardNmiScanline = 241;
 			_standardVblankEnd = 260;
+			_masterClockDivider = 4;
 			break;
 		case NesModel::PAL:
 			_nmiScanline = 241;
 			_vblankEnd = 310;
 			_standardNmiScanline = 241;
 			_standardVblankEnd = 310;
+			_masterClockDivider = 5;
 			break;
 		case NesModel::Dendy:
 			_nmiScanline = 291;
 			_vblankEnd = 310;
 			_standardNmiScanline = 291;
 			_standardVblankEnd = 310;
+			_masterClockDivider = 5;
 			break;
 	}
 
@@ -191,6 +198,10 @@ void PPU::UpdateVideoRamAddr()
 {
 	if(_scanline >= 240 || !IsRenderingEnabled()) {
 		_state.VideoRamAddr = (_state.VideoRamAddr + (_flags.VerticalWrite ? 32 : 1)) & 0x7FFF;
+
+		if(!_renderingEnabled) {
+			_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
+		}
 
 		//Trigger memory read when setting the vram address - needed by MMC3 IRQ counter
 		//"Should be clocked when A12 changes to 1 via $2007 read/write"
@@ -260,7 +271,7 @@ uint8_t PPU::PeekRAM(uint16_t addr)
 	switch(GetRegisterID(addr)) {
 		case PPURegisters::Status:
 			returnValue = ((uint8_t)_statusFlags.SpriteOverflow << 5) | ((uint8_t)_statusFlags.Sprite0Hit << 6) | ((uint8_t)_statusFlags.VerticalBlank << 7);
-			if(_scanline == 241 && _cycle < 3) {
+			if(_scanline == _nmiScanline && _cycle < 3) {
 				//Clear vertical blank flag
 				returnValue &= 0x7F;
 			}
@@ -408,7 +419,9 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 				_state.TmpVideoRamAddr = (_state.TmpVideoRamAddr & ~0x73E0) | ((value & 0xF8) << 2) | ((value & 0x07) << 12);
 			} else {
 				_state.XScroll = value & 0x07;
-				_state.TmpVideoRamAddr = (_state.TmpVideoRamAddr & ~0x001F) | (value >> 3);
+
+				uint16_t newAddr = (_state.TmpVideoRamAddr & ~0x001F) | (value >> 3);
+				ProcessTmpAddrScrollGlitch(newAddr, _console->GetMemoryManager()->GetOpenBus() >> 3, 0x001F);
 			}
 			_state.WriteToggle = !_state.WriteToggle;
 			break;
@@ -416,14 +429,14 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 			if(_state.WriteToggle) {
 				_state.TmpVideoRamAddr = (_state.TmpVideoRamAddr & ~0x00FF) | value;
 
-				//Video RAM update is apparently delayed by 2-3 PPU cycles (based on Visual NES findings)
-				//A 3-cycle delay causes issues with the scanline test.
+				//Video RAM update is apparently delayed by 3 PPU cycles (based on Visual NES findings)
 				_needStateUpdate = true;
-				_updateVramAddrDelay = 2;
+				_updateVramAddrDelay = 3;
 				_updateVramAddr = _state.TmpVideoRamAddr;
 				_console->DebugSetLastFramePpuScroll(_updateVramAddr, _state.XScroll, false);
 			} else {
-				_state.TmpVideoRamAddr = (_state.TmpVideoRamAddr & ~0xFF00) | ((value & 0x3F) << 8);
+				uint16_t newAddr = (_state.TmpVideoRamAddr & ~0xFF00) | ((value & 0x3F) << 8);
+				ProcessTmpAddrScrollGlitch(newAddr, _console->GetMemoryManager()->GetOpenBus() << 8, 0x0C00);
 			}
 			_state.WriteToggle = !_state.WriteToggle;
 			break;
@@ -484,27 +497,36 @@ bool PPU::IsRenderingEnabled()
 	return _renderingEnabled;
 }
 
+void PPU::ProcessTmpAddrScrollGlitch(uint16_t normalAddr, uint16_t value, uint16_t mask)
+{
+	_state.TmpVideoRamAddr = normalAddr;
+	if(_cycle == 257 && _settings->CheckFlag(EmulationFlags::EnablePpu2000ScrollGlitch) && _scanline < 240 && IsRenderingEnabled()) {
+		//Use open bus to set some parts of V (glitch that occurs when writing to $2000/$2005/$2006 on cycle 257)
+		_state.VideoRamAddr = (_state.VideoRamAddr & ~mask) | (value & mask);
+	}
+}
+
 void PPU::SetControlRegister(uint8_t value)
 {
 	_state.Control = value;
 
 	uint8_t nameTable = (_state.Control & 0x03);
-	_state.TmpVideoRamAddr = (_state.TmpVideoRamAddr & ~0x0C00) | (nameTable << 10);
 
+	uint16_t normalAddr = (_state.TmpVideoRamAddr & ~0x0C00) | (nameTable << 10);
+	ProcessTmpAddrScrollGlitch(normalAddr, _console->GetMemoryManager()->GetOpenBus() << 10, 0x0400);
+	
 	_flags.VerticalWrite = (_state.Control & 0x04) == 0x04;
 	_flags.SpritePatternAddr = ((_state.Control & 0x08) == 0x08) ? 0x1000 : 0x0000;
 	_flags.BackgroundPatternAddr = ((_state.Control & 0x10) == 0x10) ? 0x1000 : 0x0000;
 	_flags.LargeSprites = (_state.Control & 0x20) == 0x20;
 
-	//"By toggling NMI_output ($2000 bit 7) during vertical blank without reading $2002, a program can cause /NMI to be pulled low multiple times, causing multiple NMIs to be generated."
-	bool originalVBlank = _flags.VBlank;
 	_flags.VBlank = (_state.Control & 0x80) == 0x80;
-
-	if(!originalVBlank && _flags.VBlank && _statusFlags.VerticalBlank && (_scanline != -1 || _cycle != 0)) {
-		_console->GetCpu()->SetNmiFlag();
-	}
-	if(_scanline == 241 && _cycle < 3 && !_flags.VBlank) {
+	
+	//"By toggling NMI_output ($2000 bit 7) during vertical blank without reading $2002, a program can cause /NMI to be pulled low multiple times, causing multiple NMIs to be generated."
+	if(!_flags.VBlank) {
 		_console->GetCpu()->ClearNmiFlag();
+	} else if(_flags.VBlank && _statusFlags.VerticalBlank) {
+		_console->GetCpu()->SetNmiFlag();
 	}
 }
 
@@ -546,6 +568,8 @@ void PPU::SetMaskRegister(uint8_t value)
 		_flags.IntensifyGreen = (_state.Mask & 0x20) == 0x20;
 		_intensifyColorBits = (_flags.IntensifyRed ? 0x40 : 0x00) | (_flags.IntensifyGreen ? 0x80 : 0x00) | (_flags.IntensifyBlue ? 0x100 : 0x00);
 	}
+
+	_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
 }
 
 void PPU::UpdateStatusFlag()
@@ -554,16 +578,11 @@ void PPU::UpdateStatusFlag()
 		((uint8_t)_statusFlags.Sprite0Hit << 6) |
 		((uint8_t)_statusFlags.VerticalBlank << 7);
 	_statusFlags.VerticalBlank = false;
+	_console->GetCpu()->ClearNmiFlag();
 
-	if(_scanline == 241 && _cycle < 3) {
-		//"Reading on the same PPU clock or one later reads it as set, clears it, and suppresses the NMI for that frame."
-		_statusFlags.VerticalBlank = false;
-		_console->GetCpu()->ClearNmiFlag();
-
-		if(_cycle == 0) {
-			//"Reading one PPU clock before reads it as clear and never sets the flag or generates NMI for that frame. "
-			_state.Status = ((uint8_t)_statusFlags.SpriteOverflow << 5) | ((uint8_t)_statusFlags.Sprite0Hit << 6);
-		}
+	if(_scanline == _nmiScanline && _cycle == 0) {
+		//"Reading one PPU clock before reads it as clear and never sets the flag or generates NMI for that frame."
+		_preventVblFlag = true;
 	}
 }
 
@@ -639,8 +658,8 @@ void PPU::WriteVram(uint16_t addr, uint8_t value)
 void PPU::LoadTileInfo()
 {
 	if(IsRenderingEnabled()) {
-		switch((_cycle - 1) & 0x07) {
-			case 0: {
+		switch(_cycle & 0x07) {
+			case 1: {
 				_previousTile = _currentTile;
 				_currentTile = _nextTile;
 
@@ -653,18 +672,18 @@ void PPU::LoadTileInfo()
 				break;
 			}
 
-			case 2: {
+			case 3: {
 				uint8_t shift = ((_state.VideoRamAddr >> 4) & 0x04) | (_state.VideoRamAddr & 0x02);
 				_nextTile.PaletteOffset = ((ReadVram(GetAttributeAddr()) >> shift) & 0x03) << 2;
 				break;
 			}
 
-			case 3:
+			case 5:
 				_nextTile.LowByte = ReadVram(_nextTile.TileAddr);
 				_nextTile.AbsoluteTileAddr = _console->GetMapper()->ToAbsoluteChrAddress(_nextTile.TileAddr);
 				break;
 
-			case 5:
+			case 7:
 				_nextTile.HighByte = ReadVram(_nextTile.TileAddr + 8);
 				break;
 		}
@@ -766,7 +785,7 @@ void PPU::LoadExtraSprites()
 		}
 
 		if(loadExtraSprites) {
-			for(uint32_t i = _overflowSpriteAddr; i < 0x100; i += 4) {
+			for(uint32_t i = (_lastVisibleSpriteAddr + 4) & 0xFF; i != _firstVisibleSpriteAddr; i = (i + 4) & 0xFF) {
 				uint8_t spriteY = _spriteRAM[i];
 				if(_scanline >= spriteY && _scanline < spriteY + (_flags.LargeSprites ? 16 : 8)) {
 					LoadSprite(spriteY, _spriteRAM[i + 1], _spriteRAM[i + 2], _spriteRAM[i + 3], true);
@@ -781,9 +800,6 @@ void PPU::LoadSpriteTileInfo()
 {
 	uint8_t *spriteAddr = _secondarySpriteRAM + _spriteIndex * 4;
 	LoadSprite(*spriteAddr, *(spriteAddr+1), *(spriteAddr+2), *(spriteAddr+3), false);
-	if(_cycle == 316) {
-		LoadExtraSprites();
-	}
 }
 
 void PPU::ShiftTileRegisters()
@@ -855,6 +871,17 @@ void PPU::DrawPixel()
 	}
 }
 
+uint16_t PPU::GetCurrentBgColor()
+{
+	uint16_t color;
+	if(IsRenderingEnabled() || (_state.VideoRamAddr & 0x3F00) != 0x3F00) {
+		color = _paletteRAM[0];
+	} else {
+		color = _paletteRAM[_state.VideoRamAddr & 0x1F];
+	}
+	return (color & _paletteRamMask) | _intensifyColorBits;
+}
+
 void PPU::UpdateGrayscaleAndIntensifyBits()
 {
 	if(_scanline < 0 || _scanline > _nmiScanline) {
@@ -911,6 +938,7 @@ void PPU::ProcessScanline()
 			//Pre-render scanline logic
 			if(_cycle == 1) {
 				_statusFlags.VerticalBlank = false;
+				_console->GetCpu()->ClearNmiFlag();
 			}
 			if(_state.SpriteRamAddr >= 0x08 && IsRenderingEnabled() && !_settings->CheckFlag(EmulationFlags::DisableOamAddrBug)) {
 				//This should only be done if rendering is enabled (otherwise oam_stress test fails immediately)
@@ -932,7 +960,7 @@ void PPU::ProcessScanline()
 			//"OAMADDR is set to 0 during each of ticks 257-320 (the sprite tile loading interval) of the pre-render and visible scanlines." (When rendering)
 			_state.SpriteRamAddr = 0;
 
-			if((_cycle - 260) % 8 == 0) {
+			if((_cycle - 261) % 8 == 0) {
 				//Cycle 260, 268, etc.  This is an approximation (each tile is actually loaded in 8 steps (e.g from 257 to 264))
 				LoadSpriteTileInfo();
 			} else if((_cycle - 257) % 8 == 0) {
@@ -949,18 +977,22 @@ void PPU::ProcessScanline()
 			}
 		}
 	} else if(_cycle >= 321 && _cycle <= 336) {
-		LoadTileInfo();
 		if(_cycle == 321) {
 			if(IsRenderingEnabled()) {
+				LoadExtraSprites();
 				_oamCopybuffer = _secondarySpriteRAM[0];
 			}
+			LoadTileInfo();
 			if(_scanline == -1) {
 				_console->DebugSetLastFramePpuScroll(_state.VideoRamAddr, _state.XScroll, false);
 			}
 		} else if(_prevRenderingEnabled && (_cycle == 328 || _cycle == 336)) {
+			LoadTileInfo();
 			_state.LowBitShift <<= 8;
 			_state.HighBitShift <<= 8;
 			IncHorizontalScrolling();
+		} else {
+			LoadTileInfo();
 		}
 	} else if(_cycle == 337 || _cycle == 339) {
 		if(IsRenderingEnabled()) {
@@ -987,12 +1019,15 @@ void PPU::ProcessSpriteEvaluation()
 				_sprite0Added = false;
 				_spriteInRange = false;
 				_secondaryOAMAddr = 0;
-				_overflowSpriteAddr = 0;
+				
 				_overflowBugCounter = 0;
 
 				_oamCopyDone = false;
 				_spriteAddrH = (_state.SpriteRamAddr >> 2) & 0x3F;
 				_spriteAddrL = _state.SpriteRamAddr & 0x03;
+
+				_firstVisibleSpriteAddr = _spriteAddrH * 4;
+				_lastVisibleSpriteAddr = _firstVisibleSpriteAddr;
 			} else if(_cycle == 256) {
 				_sprite0Visible = _sprite0Added;
 				_spriteCount = (_secondaryOAMAddr >> 2);
@@ -1025,10 +1060,14 @@ void PPU::ProcessSpriteEvaluation()
 								_sprite0Added = true;
 							}
 
-							if(_spriteAddrL == 4) {
+							//Note: Using "(_secondaryOAMAddr & 0x03) == 0" instead of "_spriteAddrL == 0" is required
+							//to replicate a hardware bug noticed in oam_flicker_test_reenable when disabling & re-enabling
+							//rendering on a single scanline
+							if((_secondaryOAMAddr & 0x03) == 0) {
 								//Done copying all 4 bytes
 								_spriteInRange = false;
 								_spriteAddrL = 0;
+								_lastVisibleSpriteAddr = _spriteAddrH * 4;
 								_spriteAddrH = (_spriteAddrH + 1) & 0x3F;
 								if(_spriteAddrH == 0) {
 									_oamCopyDone = true;
@@ -1046,11 +1085,6 @@ void PPU::ProcessSpriteEvaluation()
 						_oamCopybuffer = _secondarySpriteRAM[_secondaryOAMAddr & 0x1F];
 
 						//8 sprites have been found, check next sprite for overflow + emulate PPU bug
-						if(_overflowSpriteAddr == 0) {
-							//Used to remove sprite limit
-							_overflowSpriteAddr = _spriteAddrH * 4;
-						}
-
 						if(_spriteInRange) {
 							//Sprite is visible, consider this to be an overflow
 							_statusFlags.SpriteOverflow = true;
@@ -1104,7 +1138,7 @@ uint8_t PPU::ReadSpriteRam(uint8_t addr)
 					debugger->BreakImmediately(BreakSource::BreakOnDecayedOamRead);
 				}
 			}
-			//If this 8-byte row hasn't been read/written to in over 3000 cpu cycles (~1.7ms), return 0xFF to simulate decay
+			//If this 8-byte row hasn't been read/written to in over 3000 cpu cycles (~1.7ms), return 0x10 to simulate decay
 			return 0x10;
 		}
 	}
@@ -1121,6 +1155,11 @@ void PPU::WriteSpriteRam(uint8_t addr, uint8_t value)
 void PPU::DebugSendFrame()
 {
 	_console->GetVideoDecoder()->UpdateFrame(_currentOutputBuffer);
+}
+
+uint16_t* PPU::GetScreenBuffer(bool previousBuffer)
+{
+	return previousBuffer ? ((_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0]) : _currentOutputBuffer;
 }
 
 void PPU::DebugCopyOutputBuffer(uint16_t *target)
@@ -1157,7 +1196,6 @@ void PPU::BeginVBlank()
 
 void PPU::TriggerNmi()
 {
-	_statusFlags.VerticalBlank = true;
 	if(_flags.VBlank) {
 		_console->GetCpu()->SetNmiFlag();
 	}
@@ -1190,6 +1228,49 @@ void PPU::DebugUpdateFrameBuffer(bool toGrayscale)
 	}
 }
 
+void PPU::SetOamCorruptionFlags()
+{
+	if(!_settings->CheckFlag(EmulationFlags::EnablePpuOamRowCorruption)) {
+		return;
+	}
+
+	//Note: Still pending more research, but this currently matches a portion of the issues that have been observed
+	//When rendering is disabled in some sections of the screen, either:
+	// A- During Secondary OAM clear (first ~64 cycles)
+	// B- During OAM tile fetching (cycle ~256 to cycle ~320)
+	//then OAM memory gets corrupted the next time the PPU starts rendering again (usually at the start of the next frame)
+	//This usually causes the first "row" of OAM (the first 8 bytes) to get copied over another, causing some sprites to be missing
+	//and causing an extra set of the first 2 sprites to appear on the screen (not possible to see them except via any overflow they may cause)
+
+	if(_cycle >= 0 && _cycle < 64) {
+		//Every 2 dots causes the corruption to shift down 1 OAM row (8 bytes)
+		_corruptOamRow[_cycle >> 1] = true;
+	} else if(_cycle >= 256 && _cycle < 320) {
+		//This section is in 8-dot segments.
+		//The first 3 dot increment the corrupted row by 1, and then the last 5 dots corrupt the next row for 5 dots.
+		uint8_t base = (_cycle - 256) >> 3;
+		uint8_t offset = std::min<uint8_t>(3, (_cycle - 256) & 0x07);
+		_corruptOamRow[base * 4 + offset] = true;
+	}
+}
+
+void PPU::ProcessOamCorruption()
+{
+	if(!_settings->CheckFlag(EmulationFlags::EnablePpuOamRowCorruption)) {
+		return;
+	}
+
+	//Copy first OAM row over another row, as needed by corruption flags (can be over itself, which causes no actual harm)
+	for(int i = 0; i < 32; i++) {
+		if(_corruptOamRow[i]) {
+			if(i > 0) {
+				memcpy(_spriteRAM + i * 8, _spriteRAM, 8);
+			}
+			_corruptOamRow[i] = false;
+		}
+	}
+}
+
 void PPU::Exec()
 {
 	if(_cycle > 339) {
@@ -1197,6 +1278,14 @@ void PPU::Exec()
 		if(++_scanline > _vblankEnd) {
 			_lastUpdatedPixel = -1;
 			_scanline = -1;
+
+			//Force prerender scanline sprite fetches to load the dummy $FF tiles (fixes shaking in Ninja Gaiden 3 stage 1 after beating boss)
+			_spriteCount = 0;
+
+			if(_renderingEnabled) {
+				ProcessOamCorruption();
+			}
+
 			UpdateMinimumDrawCycles();
 		}
 
@@ -1221,8 +1310,6 @@ void PPU::Exec()
 			SetBusAddress(_state.VideoRamAddr);
 			SendFrame();
 			_frameCount++;
-		} else if(_scanline == _nmiScanline) {
-			BeginVBlank();
 		}
 	} else {
 		//Cycle > 0
@@ -1231,6 +1318,12 @@ void PPU::Exec()
 		_console->DebugProcessPpuCycle();
 		if(_scanline < 240) {
 			ProcessScanline();
+		} else if(_cycle == 1 && _scanline == _nmiScanline) {
+			if(!_preventVblFlag) {
+				_statusFlags.VerticalBlank = true;
+				BeginVBlank();
+			}
+			_preventVblFlag = false;
 		} else if(_nesModel == NesModel::PAL && _scanline >= _palSpriteEvalScanline) {
 			//"On a PAL machine, because of its extended vertical blank, the PPU begins refreshing OAM roughly 21 scanlines after NMI[2], to prevent it 
 			//from decaying during the longer hiatus of rendering. Additionally, it will continue to refresh during the visible portion of the screen 
@@ -1254,28 +1347,77 @@ void PPU::UpdateState()
 	_needStateUpdate = false;
 
 	//Rendering enabled flag is apparently set with a 1 cycle delay (i.e setting it at cycle 5 will render cycle 6 like cycle 5 and then take the new settings for cycle 7)
-	_prevRenderingEnabled = _renderingEnabled;
-	_renderingEnabled = _flags.BackgroundEnabled | _flags.SpritesEnabled;
 	if(_prevRenderingEnabled != _renderingEnabled) {
+		_prevRenderingEnabled = _renderingEnabled;
+		if(_scanline < 240) {
+			if(_prevRenderingEnabled) {
+				//Rendering was just enabled, perform oam corruption if any is pending
+				ProcessOamCorruption();
+			} else if(!_prevRenderingEnabled) {
+				//Rendering was just disabled by a write to $2001, check for oam row corruption glitch
+				SetOamCorruptionFlags();
+
+				//When rendering is disabled midscreen, set the vram bus back to the value of 'v'
+				SetBusAddress(_state.VideoRamAddr & 0x3FFF);
+
+				if(_cycle >= 65 && _cycle <= 256) {
+					//Disabling rendering during OAM evaluation will trigger a glitch causing the current address to be incremented by 1
+					//The increment can be "delayed" by 1 PPU cycle depending on whether or not rendering is disabled on an even/odd cycle
+					//e.g, if rendering is disabled on an even cycle, the following PPU cycle will increment the address by 5 (instead of 4)
+					//     if rendering is disabled on an odd cycle, the increment will wait until the next odd cycle (at which point it will be incremented by 1)
+					//In practice, there is no way to see the difference, so we just increment by 1 at the end of the next cycle after rendering was disabled
+					_state.SpriteRamAddr++;
+
+					//Also corrupt H/L to replicate a bug found in oam_flicker_test_reenable when rendering is disabled around scanlines 128-136
+					//Reenabling the causes the OAM evaluation to restart misaligned, and ends up generating a single sprite that's offset by 1
+					//such that it's Y=tile index, index = attributes, attributes = x, and X = the next sprite's Y value
+					_spriteAddrH = (_state.SpriteRamAddr >> 2) & 0x3F;
+					_spriteAddrL = _state.SpriteRamAddr & 0x03;
+				}
+			}
+		}
+	}
+
+	if(_renderingEnabled != (_flags.BackgroundEnabled | _flags.SpritesEnabled)) {
+		_renderingEnabled = _flags.BackgroundEnabled | _flags.SpritesEnabled;
 		_needStateUpdate = true;
 	}
 
-	if(_prevRenderingEnabled && !_renderingEnabled && _cycle >= 65 && _cycle <= 256 && _scanline < 240) {
-		//Disabling rendering during OAM evaluation will trigger a glitch causing the current address to be incremented by 1
-		//The increment can be "delayed" by 1 PPU cycle depending on whether or not rendering is disabled on an even/odd cycle
-		//e.g, if rendering is disabled on an even cycle, the following PPU cycle will increment the address by 5 (instead of 4)
-		//     if rendering is disabled on an odd cycle, the increment will wait until the next odd cycle (at which point it will be incremented by 1)
-		//In practice, there is no way to see the difference, so we just increment by 1 at the end of the next cycle after rendering was disabled
-		_state.SpriteRamAddr++;
-	}
+	_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
 
 	if(_updateVramAddrDelay > 0) {
 		_updateVramAddrDelay--;
 		if(_updateVramAddrDelay == 0) {
-			_state.VideoRamAddr = _updateVramAddr;
+			if(_settings->CheckFlag(EmulationFlags::EnablePpu2006ScrollGlitch) && _scanline < 240 && IsRenderingEnabled()) {
+				//When a $2006 address update lands on the Y or X increment, the written value is bugged and is ANDed with the incremented value
+				if(_cycle == 257) {
+					_state.VideoRamAddr &= _updateVramAddr;
+					shared_ptr<Debugger> debugger = _console->GetDebugger(false);
+					if(debugger && debugger->CheckFlag(DebuggerFlags::BreakOnPpu2006ScrollGlitch)) {
+						debugger->BreakImmediately(BreakSource::BreakOnPpu2006ScrollGlitch);
+					}
+				} else if(_cycle > 0 && (_cycle & 0x07) == 0 && (_cycle <= 256 || _cycle > 320)) {
+					_state.VideoRamAddr = (_updateVramAddr & ~0x41F) | (_state.VideoRamAddr & _updateVramAddr & 0x41F);
+					shared_ptr<Debugger> debugger = _console->GetDebugger(false);
+					if(debugger && debugger->CheckFlag(DebuggerFlags::BreakOnPpu2006ScrollGlitch)) {
+						debugger->BreakImmediately(BreakSource::BreakOnPpu2006ScrollGlitch);
+					}
+				} else {
+					_state.VideoRamAddr = _updateVramAddr;
+				}
+			} else {
+				_state.VideoRamAddr = _updateVramAddr;
+			}
+
+			if(!_renderingEnabled) {
+				_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
+			}
+
+			//The glitches updates corrupt both V and T, so set the new value of V back into T
+			_state.TmpVideoRamAddr = _state.VideoRamAddr;
 
 			if(_scanline >= 240 || !IsRenderingEnabled()) {
-				//Only set the VRAM address on the bus if the PPU is rendering
+				//Only set the VRAM address on the bus if the PPU is not rendering
 				//More info here: https://forums.nesdev.com/viewtopic.php?p=132145#p132145
 				//Trigger bus address change when setting the vram address - needed by MMC3 IRQ counter
 				//"4) Should be clocked when A12 changes to 1 via $2006 write"
@@ -1285,36 +1427,11 @@ void PPU::UpdateState()
 			_needStateUpdate = true;
 		}
 	}
-
+	
 	if(_ignoreVramRead > 0) {
 		_ignoreVramRead--;
 		if(_ignoreVramRead > 0) {
 			_needStateUpdate = true;
-		}
-	}
-}
-
-void PPU::ProcessCpuClock()
-{
-	if(!_settings->HasOverclock()) {
-		Exec();
-		Exec();
-		Exec();
-		if(_nesModel == NesModel::PAL && _console->GetCpu()->GetCycleCount() % 5 == 0) {
-			//PAL PPU runs 3.2 clocks for every CPU clock, so we need to run an extra clock every 5 CPU clocks
-			Exec();
-		}
-	} else {
-		if(_nesModel == NesModel::PAL) {
-			//PAL PPU runs 3.2 clocks for every CPU clock, so we need to run an extra clock every 5 CPU clocks
-			_cyclesNeeded += 3.2 / (_settings->GetOverclockRate() / 100.0);
-		} else {
-			_cyclesNeeded += 3.0 / (_settings->GetOverclockRate() / 100.0);
-		}
-
-		while(_cyclesNeeded >= 1.0) {
-			Exec();
-			_cyclesNeeded--;
 		}
 	}
 }
@@ -1366,8 +1483,8 @@ void PPU::StreamState(bool saving)
 		_nextTile.PaletteOffset, _nextTile.TileAddr, _previousTile.LowByte, _previousTile.HighByte, _previousTile.PaletteOffset, _spriteIndex, _spriteCount,
 		_secondaryOAMAddr, _sprite0Visible, _oamCopybuffer, _spriteInRange, _sprite0Added, _spriteAddrH, _spriteAddrL, _oamCopyDone, _nesModel,
 		_prevRenderingEnabled, _renderingEnabled, _openBus, _ignoreVramRead, paletteRam, spriteRam, secondarySpriteRam,
-		openBusDecayStamp, _cyclesNeeded, disablePpu2004Reads, disablePaletteRead, disableOamAddrBug, _overflowBugCounter, _updateVramAddr, _updateVramAddrDelay,
-		_needStateUpdate, _ppuBusAddress);
+		openBusDecayStamp, disablePpu2004Reads, disablePaletteRead, disableOamAddrBug, _overflowBugCounter, _updateVramAddr, _updateVramAddrDelay,
+		_needStateUpdate, _ppuBusAddress, _preventVblFlag, _masterClock);
 
 	for(int i = 0; i < 64; i++) {
 		Stream(_spriteTiles[i].SpriteX, _spriteTiles[i].LowByte, _spriteTiles[i].HighByte, _spriteTiles[i].PaletteOffset, _spriteTiles[i].HorizontalMirror, _spriteTiles[i].BackgroundPriority);
@@ -1385,6 +1502,8 @@ void PPU::StreamState(bool saving)
 			//Set oam decay cycle to the current cycle to ensure it doesn't decay when loading a state
 			_oamDecayCycles[i] = _console->GetCpu()->GetCycleCount();
 		}
+
+		memset(_corruptOamRow, 0, sizeof(_corruptOamRow));
 
 		for(int i = 0; i < 257; i++) {
 			_hasSprite[i] = true;

@@ -71,7 +71,6 @@ namespace Mesen.GUI.Debugger
 
 			this.UpdateWorkspace();
 			this.AutoLoadCdlFiles();
-			DebugWorkspaceManager.AutoLoadDbgFiles(true);
 
 			if(!Program.IsMono) {
 				this.mnuSplitView.Checked = ConfigManager.Config.DebugInfo.SplitView;
@@ -111,7 +110,9 @@ namespace Mesen.GUI.Debugger
 			this.mnuBreakOnUnofficialOpcodes.Checked = ConfigManager.Config.DebugInfo.BreakOnUnofficialOpcodes;
 			this.mnuBreakOnBrk.Checked = ConfigManager.Config.DebugInfo.BreakOnBrk;
 			this.mnuBreakOnUninitMemoryRead.Checked = ConfigManager.Config.DebugInfo.BreakOnUninitMemoryRead;
+			this.mnuBreakOnBusConflict.Checked = ConfigManager.Config.DebugInfo.BreakOnBusConflict;
 			this.mnuBreakOnDecayedOamRead.Checked = ConfigManager.Config.DebugInfo.BreakOnDecayedOamRead;
+			this.mnuBreakOnPpu2006ScrollGlitch.Checked = ConfigManager.Config.DebugInfo.BreakOnPpu2006ScrollGlitch;
 			this.mnuBreakOnCrash.Checked = ConfigManager.Config.DebugInfo.BreakOnCrash;
 			this.mnuBreakOnDebuggerFocus.Checked = ConfigManager.Config.DebugInfo.BreakOnDebuggerFocus;
 			this.mnuBringToFrontOnBreak.Checked = ConfigManager.Config.DebugInfo.BringToFrontOnBreak;
@@ -134,10 +135,7 @@ namespace Mesen.GUI.Debugger
 			ctrlDebuggerCodeSplit.ShowMemoryValues = mnuShowMemoryValues.Checked;
 
 			if(ConfigManager.Config.DebugInfo.WindowWidth > -1) {
-				this.StartPosition = FormStartPosition.Manual;
-				this.Width = ConfigManager.Config.DebugInfo.WindowWidth;
-				this.Height = ConfigManager.Config.DebugInfo.WindowHeight;
-				this.Location = ConfigManager.Config.DebugInfo.WindowLocation;
+				RestoreLocation(ConfigManager.Config.DebugInfo.WindowLocation, new Size(ConfigManager.Config.DebugInfo.WindowWidth, ConfigManager.Config.DebugInfo.WindowHeight));
 			}
 
 			tsToolbar.Visible = mnuShowToolbar.Checked;
@@ -339,15 +337,15 @@ namespace Mesen.GUI.Debugger
 			if(ConfigManager.Config.DebugInfo.BreakOnDebuggerFocus && !InteropEmu.DebugIsExecutionStopped()) {
 				InteropEmu.DebugStep(1, BreakSource.BreakOnFocus);
 			}
+
+			//Refresh debugger in case memory has been changed by the memory tools, etc
+			UpdateDebugger(false, false);
 		}
 
-		private void ctrlProfiler_OnFunctionSelected(object sender, EventArgs e)
+		private void ctrlProfiler_OnFunctionSelected(object relativeAddress, EventArgs e)
 		{
-			int relativeAddress = InteropEmu.DebugGetRelativeAddress((UInt32)sender, AddressType.PrgRom);
-			if(relativeAddress >= 0) {
-				BringToFront();
-				LastCodeWindow.ScrollToLineNumber(relativeAddress);
-			}
+			BringToFront();
+			LastCodeWindow.ScrollToLineNumber((int)relativeAddress);
 		}
 
 		private void mnuFile_DropDownOpening(object sender, EventArgs e)
@@ -430,6 +428,8 @@ namespace Mesen.GUI.Debugger
 			SetFlag(DebuggerFlags.BreakOnBrk, config.BreakOnBrk);
 			SetFlag(DebuggerFlags.BreakOnUninitMemoryRead, config.BreakOnUninitMemoryRead);
 			SetFlag(DebuggerFlags.BreakOnDecayedOamRead, config.BreakOnDecayedOamRead);
+			SetFlag(DebuggerFlags.BreakOnPpu2006ScrollGlitch, config.BreakOnPpu2006ScrollGlitch);
+			SetFlag(DebuggerFlags.BreakOnBusConflict, config.BreakOnBusConflict);
 			SetFlag(DebuggerFlags.BreakOnInit, config.BreakOnInit);
 			SetFlag(DebuggerFlags.BreakOnPlay, config.BreakOnPlay);
 			SetFlag(DebuggerFlags.BreakOnFirstCycle, config.BreakOnFirstCycle);
@@ -450,19 +450,24 @@ namespace Mesen.GUI.Debugger
 					BreakpointType bpType = (BreakpointType)(byte)((param >> 8) & 0x0F);
 					UInt16 bpAddress = (UInt16)(param >> 16);
 
-					ReadOnlyCollection<Breakpoint> breakpoints = BreakpointManager.Breakpoints;
+					int regularBpCount = BreakpointManager.Breakpoints.Count;
+					List<Breakpoint> breakpoints = BreakpointManager.GetAllBreakpoints();
 					if(breakpointId >= 0 && breakpointId < breakpoints.Count) {
 						Breakpoint bp = breakpoints[breakpointId];
-						if(bpType != BreakpointType.Global) {
-							message += ": " + ResourceHelper.GetEnumText(bpType) + " ($" + bpAddress.ToString("X4") + ":$" + bpValue.ToString("X2") + ")";
-						}
-						if(!string.IsNullOrWhiteSpace(bp.Condition)) {
-							string cond = bp.Condition.Trim();
-							if(cond.Length > 27) {
-								message += Environment.NewLine + cond.Substring(0, 24) + "...";
-							} else {
-								message += Environment.NewLine + cond;
+						if(breakpointId < regularBpCount) {
+							if(bpType != BreakpointType.Global) {
+								message += ": " + ResourceHelper.GetEnumText(bpType) + " ($" + bpAddress.ToString("X4") + ":$" + bpValue.ToString("X2") + ")";
 							}
+							if(!string.IsNullOrWhiteSpace(bp.Condition)) {
+								string cond = bp.Condition.Trim();
+								if(cond.Length > 27) {
+									message += Environment.NewLine + cond.Substring(0, 24) + "...";
+								} else {
+									message += Environment.NewLine + cond;
+								}
+							}
+						} else {
+							message = "Assert failed: " + bp.Condition.Substring(2, bp.Condition.Length - 3);
 						}
 					}
 				} else if(source == BreakSource.BreakOnUninitMemoryRead) {
@@ -580,17 +585,6 @@ namespace Mesen.GUI.Debugger
 			this.MinimumSize = new Size(minWidth, minHeight);
 		}
 
-		private void UpdateVectorAddresses()
-		{
-			int nmiHandler = InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFA) | (InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFB) << 8);
-			int resetHandler = InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFC) | (InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFD) << 8);
-			int irqHandler = InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFE) | (InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFF) << 8);
-
-			mnuGoToNmiHandler.Text = "NMI Handler ($" + nmiHandler.ToString("X4") + ")";
-			mnuGoToResetHandler.Text = "Reset Handler ($" + resetHandler.ToString("X4") + ")";
-			mnuGoToIrqHandler.Text = "IRQ Handler ($" + irqHandler.ToString("X4") + ")";
-		}
-
 		public void UpdateDebugger(bool updateActiveAddress = true, bool bringToFront = true)
 		{
 			if(!_debuggerInitialized) {
@@ -605,7 +599,6 @@ namespace Mesen.GUI.Debugger
 			ctrlLabelList.UpdateLabelListAddresses();
 			ctrlFunctionList.UpdateFunctionList(false);
 			UpdateDebuggerFlags();
-			UpdateVectorAddresses();
 
 			string newCode = InteropEmu.DebugGetCode(_firstBreak);
 			if(newCode != null) {
@@ -615,7 +608,7 @@ namespace Mesen.GUI.Debugger
 			DebugState state = new DebugState();
 			InteropEmu.DebugGetState(ref state);
 
-			lblCyclesElapsedCount.Text = (state.CPU.CycleCount - _previousCycle).ToString();
+			lblCyclesElapsedCount.Text = ((Int64)state.CPU.CycleCount - (Int64)_previousCycle).ToString();
 			_previousCycle = state.CPU.CycleCount;
 
 			if(UpdateSplitView()) {
@@ -928,29 +921,6 @@ namespace Mesen.GUI.Debugger
 			LastCodeWindow.CodeViewer.GoToAddress();
 		}
 
-		private void mnuGoToIrqHandler_Click(object sender, EventArgs e)
-		{
-			int address = (InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFF) << 8) | InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFE);
-			LastCodeWindow.ScrollToLineNumber(address);
-		}
-
-		private void mnuGoToNmiHandler_Click(object sender, EventArgs e)
-		{
-			int address = (InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFB) << 8) | InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFA);
-			LastCodeWindow.ScrollToLineNumber(address);
-		}
-
-		private void mnuGoToResetHandler_Click(object sender, EventArgs e)
-		{
-			int address = (InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFD) << 8) | InteropEmu.DebugGetMemoryValue(DebugMemoryType.CpuMemory, 0xFFFC);
-			LastCodeWindow.ScrollToLineNumber(address);
-		}
-		
-		private void mnuGoToProgramCount_Click(object sender, EventArgs e)
-		{
-			LastCodeWindow.CodeViewerActions.ScrollToActiveAddress();
-		}
-
 		private void mnuIncreaseFontSize_Click(object sender, EventArgs e)
 		{
 			LastCodeWindow.CodeViewer.TextZoom += 10;
@@ -1221,9 +1191,23 @@ namespace Mesen.GUI.Debugger
 			UpdateDebuggerFlags();
 		}
 
+		private void mnuBreakOnBusConflict_Click(object sender, EventArgs e)
+		{
+			ConfigManager.Config.DebugInfo.BreakOnBusConflict = mnuBreakOnBusConflict.Checked;
+			ConfigManager.ApplyChanges();
+			UpdateDebuggerFlags();
+		}
+
 		private void mnuBreakOnDecayedOamRead_Click(object sender, EventArgs e)
 		{
 			ConfigManager.Config.DebugInfo.BreakOnDecayedOamRead = mnuBreakOnDecayedOamRead.Checked;
+			ConfigManager.ApplyChanges();
+			UpdateDebuggerFlags();
+		}
+		
+		private void mnuBreakOnPpu2006ScrollGlitch_Click(object sender, EventArgs e)
+		{
+			ConfigManager.Config.DebugInfo.BreakOnPpu2006ScrollGlitch = mnuBreakOnPpu2006ScrollGlitch.Checked;
 			ConfigManager.ApplyChanges();
 			UpdateDebuggerFlags();
 		}
@@ -1744,6 +1728,7 @@ namespace Mesen.GUI.Debugger
 		private void mnuBreakOptions_DropDownOpening(object sender, EventArgs e)
 		{
 			this.mnuBreakOnDecayedOamRead.Enabled = ConfigManager.Config.EmulationInfo.EnableOamDecay;
+			this.mnuBreakOnBusConflict.Enabled = InteropEmu.GetRomInfo().HasBusConflicts;
 
 			bool isNsf = InteropEmu.IsNsf();
 			mnuBreakOnInit.Visible = isNsf;
@@ -1890,6 +1875,11 @@ namespace Mesen.GUI.Debugger
 		private void mnuWatchWindow_Click(object sender, EventArgs e)
 		{
 			DebugWindowManager.OpenDebugWindow(DebugWindow.WatchWindow);
+		}
+
+		private void mnuSearch_DropDownOpening(object sender, EventArgs e)
+		{
+			ctrlConsoleStatus.CloneGoToMenu(mnuGoTo);
 		}
 	}
 }

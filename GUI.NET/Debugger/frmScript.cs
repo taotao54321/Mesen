@@ -26,6 +26,7 @@ namespace Mesen.GUI.Debugger
 		private DateTime _lastTimestamp = DateTime.MinValue;
 		private AutocompleteMenu _popupMenu;
 		private string _originalText = "";
+		private string _builtInScriptName = null;
 
 		public frmScript(bool forceBlank = false)
 		{
@@ -103,12 +104,9 @@ namespace Mesen.GUI.Debugger
 				}
 			}
 
-			if(!config.ScriptWindowSize.IsEmpty) {
-				this.StartPosition = FormStartPosition.Manual;
-				this.Size = config.ScriptWindowSize;
-				this.Location = config.ScriptWindowLocation;
-			}
+			RestoreLocation(config.ScriptWindowLocation, config.ScriptWindowSize);
 			mnuSaveBeforeRun.Checked = config.SaveScriptBeforeRun;
+			mnuAutoRestart.Checked = config.AutoRestartScript;
 
 			if(config.ScriptCodeWindowHeight >= ctrlSplit.Panel1MinSize) {
 				if(config.ScriptCodeWindowHeight == Int32.MaxValue) {
@@ -151,11 +149,27 @@ namespace Mesen.GUI.Debugger
 
 		private void _notifListener_OnNotification(InteropEmu.NotificationEventArgs e)
 		{
-			if(e.NotificationType == InteropEmu.ConsoleNotificationType.GameStopped) {
-				this._scriptId = -1;
-				this.BeginInvoke((Action)(() => {
-					lblScriptActive.Visible = false;
-				}));
+			switch(e.NotificationType) {
+				case InteropEmu.ConsoleNotificationType.EmulationStopped:
+					this._scriptId = -1;
+					break;
+
+				case InteropEmu.ConsoleNotificationType.GameStopped:
+					if(e.Parameter == IntPtr.Zero) {
+						this._scriptId = -1;
+					}
+					break;
+
+				case InteropEmu.ConsoleNotificationType.GameInitCompleted:
+					bool wasRunning = this._scriptId >= 0;
+					this._scriptId = -1;
+					this.BeginInvoke((Action)(() => {
+						lblScriptActive.Visible = false;
+						if(e.NotificationType == InteropEmu.ConsoleNotificationType.GameInitCompleted && wasRunning && mnuAutoRestart.Checked) {
+							RunScript();
+						}
+					}));
+					break;
 			}
 		}
 
@@ -185,6 +199,7 @@ namespace Mesen.GUI.Debugger
 			ConfigManager.Config.DebugInfo.ScriptFontStyle = txtScriptContent.OriginalFont.Style;
 			ConfigManager.Config.DebugInfo.ScriptFontSize = txtScriptContent.OriginalFont.Size;
 			ConfigManager.Config.DebugInfo.AutoLoadLastScript = mnuAutoLoadLastScript.Checked;
+			ConfigManager.Config.DebugInfo.AutoRestartScript = mnuAutoRestart.Checked;
 			ConfigManager.ApplyChanges();
 
 			base.OnClosing(e);
@@ -223,6 +238,8 @@ namespace Mesen.GUI.Debugger
 			this.Text = $"{name} - Script Window";
 			txtScriptContent.Text = ResourceManager.ReadZippedResource(name);
 			_originalText = txtScriptContent.Text;
+			_filePath = null;
+			_builtInScriptName = name;
 			txtScriptContent.ClearUndo();
 		}
 
@@ -270,6 +287,8 @@ namespace Mesen.GUI.Debugger
 			{
 				if(_filePath != null) {
 					return Path.GetFileName(_filePath);
+				} else if(_builtInScriptName != null) {
+					return _builtInScriptName;
 				} else {
 					return "unnamed.lua";
 				}
@@ -324,6 +343,7 @@ namespace Mesen.GUI.Debugger
 					ConfigManager.Config.DebugInfo.AddRecentScript(sfd.FileName);
 					UpdateRecentScripts();
 					_originalText = txtScriptContent.Text;
+					_builtInScriptName = null;
 					return true;
 				}
 			}
@@ -493,8 +513,8 @@ namespace Mesen.GUI.Debugger
 
 		static readonly List<List<string>> _availableFunctions = new List<List<string>>() {
 			new List<string> {"enum", "emu", "", "", "", "", "" },
-			new List<string> {"func","emu.addEventCallback","emu.addEventCallback(function, type)","function - A Lua function.\ntype - *Enum* See eventCallbackType.","Returns an integer value that can be used to remove the callback by calling removeEventCallback.","Registers a callback function to be called whenever the specified event occurs.",},
-			new List<string> {"func","emu.removeEventCallback","emu.removeEventCallback(reference, type)","reference - The value returned by the call to addEventCallback.\ntype - *Enum* See eventCallbackType.","","Removes a previously registered callback function.",},
+			new List<string> {"func","emu.addEventCallback","emu.addEventCallback(function, type)","function - A Lua function.\ntype - *Enum* See eventType.","Returns an integer value that can be used to remove the callback by calling removeEventCallback.","Registers a callback function to be called whenever the specified event occurs.",},
+			new List<string> {"func","emu.removeEventCallback","emu.removeEventCallback(reference, type)","reference - The value returned by the call to addEventCallback.\ntype - *Enum* See eventType.","","Removes a previously registered callback function.",},
 			new List<string> {"func","emu.addMemoryCallback","emu.addMemoryCallback(function, type, startAddress, endAddress)","function - A Lua function.\ntype - *Enum* See memCallbackType\nstartAddress - *Integer* Start of the CPU memory address range to register the callback on.\nendAddress - (optional) *Integer* End of the CPU memory address range to register the callback on.","Returns an integer value that can be used to remove the callback by callingremoveMemoryCallback.","Registers a callback function to be called whenever the specified event occurs."},
 			new List<string> {"func","emu.removeMemoryCallback","emu.removeMemoryCallback(reference, type, startAddress, endAddress)","reference - The value returned by the call to addMemoryCallback.\ntype - *Enum* See memCallbackType.\nstartAddress - *Integer* Start of the CPU memory address range to unregister the callback from.\nendAddress - (optional) *Integer* End of the CPU memory address range to unregister the callback from.","","Removes a previously registered callback function."},
 			new List<string> {"func","emu.read","emu.read(address, type, signed)","address - *Integer* The address/offset to read from.\ntype - *Enum* The type of memory to read from. See memType.\nsigned - (optional) *Boolean* If true, the value returned will be interpreted as a signed value.","An 8-bit (read) or 16-bit (readWord) value.","Reads a value from the specified memory type.\n\nWhen calling read / readWord with the memType.cpu or memType.ppu memory types, emulation side-effects may occur.\nTo avoid triggering side-effects, use the memType.cpuDebug or memType.ppuDebug types, which will not cause side-effects."},

@@ -8,6 +8,7 @@
 #include "WaveRecorder.h"
 #include "OggMixer.h"
 #include "Console.h"
+#include "BaseMapper.h"
 
 SoundMixer::SoundMixer(shared_ptr<Console> console)
 {
@@ -92,7 +93,9 @@ void SoundMixer::Reset()
 
 	UpdateRates(true);
 	UpdateEqualizers(true);
-
+	if(_audioDevice) {
+		_audioDevice->UpdateSoundSettings();
+	}
 	_previousTargetRate = _sampleRate;
 }
 
@@ -113,6 +116,8 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 			_outputBuffer[i + 1] = _outputBuffer[i];
 		}
 	}
+
+	_console->GetMapper()->ApplySamples(_outputBuffer, sampleCount, _settings->GetMasterVolume());
 
 	if(_oggMixer) {
 		_oggMixer->ApplySamples(_outputBuffer, sampleCount, _settings->GetMasterVolume());
@@ -162,7 +167,7 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 		_crossFeedFilter.ApplyFilter(_outputBuffer, sampleCount, filterSettings.CrossFadeRatio);
 	}
 
-	if(rewindManager && rewindManager->SendAudio(_outputBuffer, (uint32_t)sampleCount, _sampleRate)) {
+	if(!_settings->IsRunAheadFrame() && rewindManager && rewindManager->SendAudio(_outputBuffer, (uint32_t)sampleCount, _sampleRate)) {
 		bool isRecording = _waveRecorder || _console->GetVideoRenderer()->IsRecording();
 		if(isRecording) {
 			shared_ptr<WaveRecorder> recorder = _waveRecorder;
@@ -203,9 +208,6 @@ void SoundMixer::SetNesModel(NesModel model)
 void SoundMixer::UpdateRates(bool forceUpdate)
 {
 	uint32_t newRate = _console->GetCpu()->GetClockRate(_model);
-	if(!_settings->GetOverclockAdjustApu()) {
-		newRate = (uint32_t)(newRate * (double)_settings->GetOverclockRate() / 100);
-	}
 
 	if(_settings->CheckFlag(EmulationFlags::IntegerFpsMode)) {
 		//Adjust sample rate when running at 60.0 fps instead of 60.1
@@ -328,7 +330,7 @@ void SoundMixer::ApplyEqualizer(orfanidis_eq::eq1* equalizer, size_t sampleCount
 			double in = _outputBuffer[i * 2 + offset];
 			double out;
 			equalizer->sbs_process(&in, &out);
-			_outputBuffer[i * 2 + offset] = (int16_t)out;
+			_outputBuffer[i * 2 + offset] = (int16_t)std::max(std::min(out, 32767.0), -32768.0);
 		}
 	}
 }

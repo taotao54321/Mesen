@@ -41,8 +41,6 @@ chapter: false
 
 **Display play/record icon when playing or recording a movie**: When enabled, an icon will be shown on the screen whenever a movie is playing or recording.
 
-**Enable developer mode**: When enabled, all debugging tools are moved to a `Debug` menu accessible directly from the main window. This makes debugging tools more accessible as they no longer require opening the debugger before being able to open any other tool.
-
 ## Shortcut Keys ##
 
 <div class="imgBox"><div>
@@ -66,8 +64,9 @@ Available shortcuts:
 * **Rewind 10 seconds**: Instantly rewinds 10 seconds of gameplay.
 * **Rewind 1 minute**: Instantly rewinds 1 minute of gameplay.
 * **Pause**: Pauses or unpauses the game.
-* **Reset**: Resets the game.
-* **Power Cycle**: Power cycles the game.
+* **Reset**: Resets the game (equivalent to pressing the reset button on the NES.)
+* **Power Cycle**: Power cycles the game (equivalent to turning the power off and then back on.)
+* **Reload ROM**: Reloads the ROM from the disk and power cycles the console.
 * **Power Off**: Powers off the game, returning to the game selection screen.
 * **Exit**: Exits the emulator.
 * **FDS - Insert Next Disk**: Inserts face A of the next disk.
@@ -116,6 +115,7 @@ Available shortcuts:
 * **Load State - Auto Save Slot**: Load the game's state from the auto save slot.
 * **Save State to File**: Save the game's state to a user-specified file.
 * **Load State from File**: Load the game's state from a user-specified file.
+* **Select Save Slot X**: Select the specified save state slot.
 * **Load Last Session**: Restores the game to the state it was the last time you stopped playing it.
 
 ## FDS / VS System / NSF settings ##

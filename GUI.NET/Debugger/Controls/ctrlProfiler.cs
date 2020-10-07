@@ -15,11 +15,10 @@ namespace Mesen.GUI.Debugger.Controls
 	public partial class ctrlProfiler : BaseControl
 	{
 		public static event EventHandler OnFunctionSelected;
-		private Int64[] _exclusiveTime;
-		private Int64[] _inclusiveTime;
-		private Int64[] _callCount;
-		private object _resetLock = new object();
 
+		private ProfiledFunction[] _newData = new ProfiledFunction[0];
+		private ProfiledFunction[] _functions = new ProfiledFunction[0];
+		UInt64 _exclusiveTotal = 0;
 		private int _sortColumn = 5;
 		private bool _sortOrder = true;
 
@@ -36,126 +35,39 @@ namespace Mesen.GUI.Debugger.Controls
 			if(!designMode) {
 				lstFunctions.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
 				int newWidth = Math.Max(colFunction.Width * 2, 250);
-				colExclusiveTimePercent.Width -= (newWidth - colFunction.Width) + 30;
+				columnHeader7.Width -= (newWidth - colFunction.Width) + 30;
 				colFunction.Width = newWidth;
 			}
 		}
 
 		public void RefreshData()
 		{
-			lock(_resetLock) {
-				_exclusiveTime = InteropEmu.DebugGetProfilerData(ProfilerDataType.FunctionExclusive);
-				_inclusiveTime = InteropEmu.DebugGetProfilerData(ProfilerDataType.FunctionInclusive);
-				_callCount = InteropEmu.DebugGetProfilerData(ProfilerDataType.FunctionCallCount);
-			}
-			RefreshList();
+			_newData = InteropEmu.DebugGetProfilerData();
 		}
 
-		private int GetMaxAddrHexSize()
+		public void RefreshList()
 		{
-			int size = _exclusiveTime.Length - 2;
-			int bitCount = 0;
-			int hexCount = 1;
-			while(size > 0) {
-				size /= 2;
-				if(bitCount == 4) {
-					hexCount++;
-				}
-			}
-
-			return hexCount;
-		}
-
-		private void RefreshList()
-		{
-			Int64 exclusiveTotal = _exclusiveTime.Sum();
-			
-			int hexCount = GetMaxAddrHexSize();
-
 			lstFunctions.BeginUpdate();
-			lstFunctions.ListViewItemSorter = null;
 
-			int? topItemIndex = lstFunctions.TopItem?.Index;
-			int selectedIndex = lstFunctions.SelectedIndices.Count > 0 ? lstFunctions.SelectedIndices[0] : -1;
-
-			int itemNumber = 0;
-			for(UInt32 i = 0; i < _exclusiveTime.Length; i++) {
-				if(_exclusiveTime[i] > 0) {
-					string functionName;
-
-					if(i == _exclusiveTime.Length - 2) {
-						functionName = "[Reset]";
-					} else if(i == _exclusiveTime.Length - 1) {
-						functionName = "[In-Memory Function]";
-					} else {
-						CodeLabel label = LabelManager.GetLabel((UInt32)i, AddressType.PrgRom);
-						functionName = "$" + i.ToString("X" + hexCount.ToString());
-						if(label != null) {
-							functionName = label.Label + " (" + functionName + ")";
-						}
-					}
-
-					ListViewItem item;
-					if(itemNumber >= lstFunctions.Items.Count) {
-						item = lstFunctions.Items.Add("");
-						item.SubItems.Add("");
-						item.SubItems.Add("");
-						item.SubItems.Add("");
-						item.SubItems.Add("");
-						item.SubItems.Add("");
-					} else {
-						item = lstFunctions.Items[itemNumber];
-					}
-
-					item.Text = functionName;
-
-					item.Tag = i;
-					item.Selected = false;
-					item.Focused = false;
-
-					item.SubItems[1].Text = _callCount[i].ToString();
-					item.SubItems[1].Tag = _callCount[i];
-
-					item.SubItems[2].Text = _inclusiveTime[i].ToString();
-					item.SubItems[2].Tag = _inclusiveTime[i];
-
-					double ratio = ((double)_inclusiveTime[i] / exclusiveTotal) *100;
-					item.SubItems[3].Text = ratio.ToString("0.00");
-					item.SubItems[3].Tag = (Int64)(ratio*100);
-
-					item.SubItems[4].Text = _exclusiveTime[i].ToString();
-					item.SubItems[4].Tag = _exclusiveTime[i];
-
-					ratio = ((double)_exclusiveTime[i] / exclusiveTotal)*100;
-					item.SubItems[5].Text = ratio.ToString("0.00");
-					item.SubItems[5].Tag = (Int64)(ratio*100);
-
-					itemNumber++;
-				}
+			_functions = _newData;
+			_exclusiveTotal = 0;
+			foreach(ProfiledFunction func in _functions) {
+				_exclusiveTotal += func.ExclusiveCycles;
 			}
 
-			lstFunctions.ListViewItemSorter = new ListComparer(_sortColumn, _sortOrder);
+			Array.Sort(_functions, new ListComparer(this, _sortColumn, _sortOrder));
+			lstFunctions.VirtualListSize = _functions.Length;
+
 			lstFunctions.EndUpdate();
-
-			if(topItemIndex.HasValue) {
-				lstFunctions.TopItem = lstFunctions.Items[topItemIndex.Value];
-			}
-
-			if(selectedIndex >= 0) {
-				lstFunctions.Items[selectedIndex].Selected = true;
-				lstFunctions.Items[selectedIndex].Focused = true;
-			}
 		}
 
 		private void btnReset_Click(object sender, EventArgs e)
 		{
-			lock(_resetLock) {
-				InteropEmu.DebugResetProfiler();
-			}
+			InteropEmu.DebugResetProfiler();
 			lstFunctions.Items.Clear();
 			RefreshData();
 		}
-		
+
 		private void lstFunctions_ColumnClick(object sender, ColumnClickEventArgs e)
 		{
 			if(_sortColumn == e.Column) {
@@ -167,40 +79,112 @@ namespace Mesen.GUI.Debugger.Controls
 
 			RefreshList();
 		}
-		
+
 		private void lstFunctions_DoubleClick(object sender, EventArgs e)
 		{
-			if(lstFunctions.SelectedItems.Count > 0) {
-				OnFunctionSelected?.Invoke(lstFunctions.SelectedItems[0].Tag, EventArgs.Empty);
+			if(lstFunctions.SelectedIndices.Count > 0) {
+				AddressTypeInfo addr = _functions[lstFunctions.SelectedIndices[0]].Address;
+				int relativeAddress = InteropEmu.DebugGetRelativeAddress((uint)addr.Address, addr.Type);
+				if(relativeAddress >= 0) {
+					OnFunctionSelected?.Invoke(relativeAddress, EventArgs.Empty);
+				}
 			}
 		}
 
-		private class ListComparer : IComparer
+		private void lstFunctions_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
+		{
+			e.Item = GetListItem(_functions[e.ItemIndex]);
+		}
+
+		private ListViewItem GetListItem(ProfiledFunction func)
+		{
+			ListViewItem item = new ListViewItem(GetFunctionName(func));
+			item.Selected = false;
+			item.Focused = false;
+
+			item.SubItems.Add(GetColumnContent(func, 1).ToString());
+			item.SubItems.Add(GetColumnContent(func, 2).ToString());
+			item.SubItems.Add(((double)GetColumnContent(func, 3)).ToString("0.00"));
+			item.SubItems.Add(GetColumnContent(func, 4).ToString());
+			item.SubItems.Add(((double)GetColumnContent(func, 5)).ToString("0.00"));
+			item.SubItems.Add(GetColumnContent(func, 6).ToString());
+			item.SubItems.Add((UInt64)GetColumnContent(func, 7) == UInt64.MaxValue ? "n/a" : GetColumnContent(func, 7).ToString());
+			item.SubItems.Add((UInt64)GetColumnContent(func, 8) == 0 ? "n/a" : GetColumnContent(func, 8).ToString());
+
+			return item;
+		}
+
+		private string GetFunctionName(ProfiledFunction func)
+		{
+			string functionName;
+
+			if(func.Address.Address == -1) {
+				functionName = "[Reset]";
+			} else {
+				CodeLabel label = LabelManager.GetLabel((UInt32)func.Address.Address, func.Address.Type);
+
+				switch(func.Address.Type) {
+					case AddressType.PrgRom: functionName = "PRG: $"; break;
+					case AddressType.Register: functionName = "REG: $"; break;
+					case AddressType.SaveRam: functionName = "SRAM: $"; break;
+					case AddressType.WorkRam: functionName = "WRAM: $"; break;
+					case AddressType.InternalRam: functionName = "RAM: $"; break;
+					default: throw new Exception("Unsupported type");
+				}
+
+				functionName += func.Address.Address.ToString("X4");
+				if(label != null) {
+					functionName = label.Label + " (" + functionName + ")";
+				}
+			}
+
+			return functionName;
+		}
+
+		private object GetColumnContent(ProfiledFunction func, int columnIndex)
+		{
+			switch(columnIndex) {
+				case 0: return GetFunctionName(func);
+				case 1: return func.CallCount;
+				case 2: return func.InclusiveCycles;
+				case 3: return (double)func.InclusiveCycles / _exclusiveTotal * 100;
+				case 4: return func.ExclusiveCycles;
+				case 5: return (double)func.ExclusiveCycles / _exclusiveTotal * 100;
+				case 6: return func.CallCount == 0 ? 0 : (func.InclusiveCycles / func.CallCount);
+				case 7: return func.MinCycles;
+				case 8: return func.MaxCycles;
+			}
+			throw new Exception("Invalid column index");
+		}
+
+		private class ListComparer : IComparer<ProfiledFunction>
 		{
 			private int _columnIndex;
 			private bool _sortOrder;
+			private ctrlProfiler _profiler;
 
-			public ListComparer(int columnIndex, bool sortOrder)
+			public ListComparer(ctrlProfiler profiler, int columnIndex, bool sortOrder)
 			{
+				_profiler = profiler;
 				_columnIndex = columnIndex;
 				_sortOrder = sortOrder;
 			}
 
-			public int Compare(object x, object y)
+			public int Compare(ProfiledFunction x, ProfiledFunction y)
 			{
 				if(_columnIndex == 0) {
 					if(_sortOrder) {
-						return String.Compare(((ListViewItem)y).SubItems[0].Text, ((ListViewItem)x).SubItems[0].Text);
+						return String.Compare(_profiler.GetFunctionName(y), _profiler.GetFunctionName(x));
 					} else {
-						return String.Compare(((ListViewItem)x).SubItems[0].Text, ((ListViewItem)y).SubItems[0].Text);
+						return String.Compare(_profiler.GetFunctionName(x), _profiler.GetFunctionName(y));
 					}
 				} else {
-					Int64 columnValueY = (Int64)((ListViewItem)y).SubItems[_columnIndex].Tag;
-					Int64 columnValueX = (Int64)((ListViewItem)x).SubItems[_columnIndex].Tag;
+					IComparable columnValueY = (IComparable)_profiler.GetColumnContent(x, _columnIndex);
+					IComparable columnValueX = (IComparable)_profiler.GetColumnContent(y, _columnIndex);
 					if(_sortOrder) {
-						return (int)(columnValueY - columnValueX);
+						return columnValueX.CompareTo(columnValueY);
 					} else {
-						return (int)(columnValueX - columnValueY);
+						return columnValueY.CompareTo(columnValueX);
 					}
 				}
 			}

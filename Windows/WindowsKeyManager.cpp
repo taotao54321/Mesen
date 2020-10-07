@@ -230,12 +230,11 @@ WindowsKeyManager::WindowsKeyManager(shared_ptr<Console> console, HWND hWnd)
 
 	for(KeyDefinition &keyDef : _keyDefinitions) {
 		_keyNames[keyDef.keyCode] = keyDef.description;
-		_keyExtendedNames[keyDef.keyCode] = keyDef.extDescription.empty() ? "Ext " + keyDef.description : keyDef.extDescription;
+		_keyExtendedNames[keyDef.keyCode | 0x100] = keyDef.extDescription.empty() ? "Ext " + keyDef.description : keyDef.extDescription;
 		
-		uint32_t keyCode = keyDef.keyCode <= 0xFFFF ? MapVirtualKeyEx(keyDef.keyCode & 0xFF, MAPVK_VK_TO_VSC, nullptr) : keyDef.keyCode;
-		_keyCodes[keyDef.description] = keyCode;
+		_keyCodes[keyDef.description] = keyDef.keyCode;
 		if(!keyDef.extDescription.empty()) {
-			_keyCodes[keyDef.extDescription] = 0x100 | keyCode;
+			_keyCodes[keyDef.extDescription] = 0x100 | (keyDef.keyCode);
 		}
 	}
 	
@@ -256,12 +255,11 @@ void WindowsKeyManager::StartUpdateDeviceThread()
 		_directInput.reset(new DirectInputManager(_console, _hWnd));
 
 		while(!_stopUpdateDeviceThread) {
-			//Check for newly plugged in controllers every 5 secs (this takes ~60-70ms when no new controllers are found)
+			//Check for newly plugged in XInput controllers every 5 secs
+			//Do not check for DirectInput controllers because this takes more times and sometimes causes issues/freezes
 			if(_xInput->NeedToUpdate()) {
 				_xInput->UpdateDeviceList();
 			}
-			_directInput->UpdateDeviceList();
-
 			_stopSignal.Wait(5000);
 		}
 	});
@@ -334,7 +332,7 @@ vector<uint32_t> WindowsKeyManager::GetPressedKeys()
 
 	_directInput->RefreshState();
 	for(int i = _directInput->GetJoystickCount() - 1; i >= 0; i--) {
-		for(int j = 0; j < 0x29; j++) {
+		for(int j = 0; j < 16+128; j++) {
 			if(_directInput->IsPressed(i, j)) {
 				result.push_back(0x11000 + i * 0x100 + j);
 			}
@@ -349,10 +347,9 @@ vector<uint32_t> WindowsKeyManager::GetPressedKeys()
 	return result;
 }
 
-string WindowsKeyManager::GetKeyName(uint32_t scanCode)
+string WindowsKeyManager::GetKeyName(uint32_t keyCode)
 {
-	uint32_t keyCode = scanCode <= 0xFFFF ? MapVirtualKeyEx(scanCode & 0xFF, MAPVK_VSC_TO_VK, nullptr) : scanCode;
-	bool extendedKey = (scanCode <= 0xFFFF && scanCode & 0x100);
+	bool extendedKey = (keyCode <= 0xFFFF && (keyCode & 0x100));
 	auto keyDef = (extendedKey ? _keyExtendedNames : _keyNames).find(keyCode);
 	if(keyDef != (extendedKey ? _keyExtendedNames : _keyNames).end()) {
 		return keyDef->second;
@@ -375,10 +372,8 @@ void WindowsKeyManager::UpdateDevices()
 		return;
 	}
 
-	_console->Pause();
 	_xInput->UpdateDeviceList();
 	_directInput->UpdateDeviceList();
-	_console->Resume();
 }
 
 void WindowsKeyManager::SetKeyState(uint16_t scanCode, bool state)
@@ -386,12 +381,12 @@ void WindowsKeyManager::SetKeyState(uint16_t scanCode, bool state)
 	if(scanCode > 0x1FF) {
 		_mouseState[scanCode & 0x03] = state;
 	} else {
-		uint32_t keyCode = MapVirtualKeyEx(scanCode & 0xFF, MAPVK_VSC_TO_VK, nullptr);
+		uint32_t keyCode = MapVirtualKeyEx(scanCode & 0xFF, MAPVK_VSC_TO_VK, GetKeyboardLayout(0));
 		if(keyCode >= 0x10 && keyCode <= 0x12) {
 			//Ignore "ext" flag for alt, ctrl & shift
-			scanCode = MapVirtualKeyEx(keyCode, MAPVK_VK_TO_VSC, nullptr);
+			scanCode = MapVirtualKeyEx(keyCode, MAPVK_VK_TO_VSC, GetKeyboardLayout(0));
 		}
-		_keyState[scanCode & 0x1FF] = state;
+		_keyState[keyCode | (scanCode & 0x100)] = state;
 	}
 }
 

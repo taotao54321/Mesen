@@ -27,7 +27,6 @@ class MMC3 : public BaseMapper
 		bool _wramWriteProtected;
 
 		A12Watcher _a12Watcher;
-		bool _needIrq;
 
 		bool _forceMmc3RevAIrqs;
 
@@ -36,11 +35,6 @@ class MMC3 : public BaseMapper
 			uint8_t RegA000;
 			uint8_t RegA001;
 		} _state;
-
-		bool IsMcAcc()
-		{
-			return _romInfo.MapperID == 4 && _romInfo.SubMapperID == 3;
-		}
 
 	protected:
 		uint8_t _irqReloadValue;
@@ -93,8 +87,6 @@ class MMC3 : public BaseMapper
 
 			_wramEnabled = GetPowerOnByte() & 0x01;
 			_wramWriteProtected = GetPowerOnByte() & 0x01;
-
-			_needIrq = false;
 		}
 
 		virtual bool ForceMmc3RevAIrqs() { return _forceMmc3RevAIrqs; }
@@ -158,11 +150,15 @@ class MMC3 : public BaseMapper
 			_prgMode = (_state.Reg8000 & 0x40) >> 6;
 
 			if(_romInfo.MapperID == 4 && _romInfo.SubMapperID == 1) {
-				//bool wramEnabled = (_state.Reg8000 & 0x20) == 0x20;
-				RemoveCpuMemoryMapping(0x6000, 0x7000);
+				//MMC6
+				bool wramEnabled = (_state.Reg8000 & 0x20) == 0x20;
 				
 				uint8_t firstBankAccess = (_state.RegA001 & 0x10 ? MemoryAccessType::Write : 0) | (_state.RegA001 & 0x20 ? MemoryAccessType::Read : 0);
 				uint8_t lastBankAccess = (_state.RegA001 & 0x40 ? MemoryAccessType::Write : 0) | (_state.RegA001 & 0x80 ? MemoryAccessType::Read : 0);
+				if(!wramEnabled) {
+					firstBankAccess = MemoryAccessType::NoAccess;
+					lastBankAccess = MemoryAccessType::NoAccess;
+				}
 
 				for(int i = 0; i < 4; i++) {
 					SetCpuMemoryMapping(0x7000 + i * 0x400, 0x71FF + i * 0x400, 0, PrgMemoryType::SaveRam, firstBankAccess);
@@ -173,11 +169,13 @@ class MMC3 : public BaseMapper
 				_wramWriteProtected = (_state.RegA001 & 0x40) == 0x40;
 
 				if(_romInfo.SubMapperID == 0) {
+					MemoryAccessType access;
 					if(_wramEnabled) {
-						SetCpuMemoryMapping(0x6000, 0x7FFF, 0, HasBattery() ? PrgMemoryType::SaveRam : PrgMemoryType::WorkRam, CanWriteToWorkRam() ? MemoryAccessType::ReadWrite : MemoryAccessType::Read);
+						access = CanWriteToWorkRam() ? MemoryAccessType::ReadWrite : MemoryAccessType::Read;
 					} else {
-						RemoveCpuMemoryMapping(0x6000, 0x7FFF);
+						access = MemoryAccessType::NoAccess;
 					}
+					SetCpuMemoryMapping(0x6000, 0x7FFF, 0, HasBattery() ? PrgMemoryType::SaveRam : PrgMemoryType::WorkRam, access);
 				}
 			}
 
@@ -192,7 +190,7 @@ class MMC3 : public BaseMapper
 			SnapshotInfo a12Watcher{ &_a12Watcher };
 			Stream(_state.Reg8000, _state.RegA000, _state.RegA001, _currentRegister, _chrMode, _prgMode,
 				_irqReloadValue, _irqCounter, _irqReload, _irqEnabled, a12Watcher,
-				_wramEnabled, _wramWriteProtected, registers, _needIrq);
+				_wramEnabled, _wramWriteProtected, registers);
 		}
 
 		virtual uint16_t GetPRGPageSize() override { return 0x2000; }
@@ -261,52 +259,31 @@ class MMC3 : public BaseMapper
 
 		virtual void TriggerIrq()
 		{
-			if(IsMcAcc()) {
-				//MC-ACC (Acclaim copy of the MMC3)
-				//IRQ will be triggered on the next falling edge of A12 instead of on the rising edge like normal MMC3 behavior
-				//This adds a 4 ppu cycle delay (until the PPU fetches the next garbage NT tile between sprites)
-				_needIrq = true;
-			} else {
-				_console->GetCpu()->SetIrqSource(IRQSource::External);
-			}
+			_console->GetCpu()->SetIrqSource(IRQSource::External);
 		}
-
 
 	public:
 		virtual void NotifyVRAMAddressChange(uint16_t addr) override
 		{
-			switch(_a12Watcher.UpdateVramAddress(addr, _console->GetPpu()->GetFrameCycle())) {
-				case A12StateChange::None:
-					break;
+			if(_a12Watcher.UpdateVramAddress(addr, _console->GetPpu()->GetFrameCycle()) == A12StateChange::Rise) {
+				uint32_t count = _irqCounter;
+				if(_irqCounter == 0 || _irqReload) {
+					_irqCounter = _irqReloadValue;
+				} else {
+					_irqCounter--;
+				}
 
-				case A12StateChange::Fall:
-					if(_needIrq) {
-						//Used by MC-ACC (Acclaim copy of the MMC3), see TriggerIrq above
-						_console->GetCpu()->SetIrqSource(IRQSource::External);
-						_needIrq = false;
+				if(ForceMmc3RevAIrqs() || _console->GetSettings()->CheckFlag(EmulationFlags::Mmc3IrqAltBehavior)) {
+					//MMC3 Revision A behavior
+					if((count > 0 || _irqReload) && _irqCounter == 0 && _irqEnabled) {
+						TriggerIrq();
 					}
-					break;
-				case A12StateChange::Rise:
-					uint32_t count = _irqCounter;
-					if(_irqCounter == 0 || _irqReload) {
-						_irqCounter = _irqReloadValue;
-					} else {
-						_irqCounter--;
+				} else {
+					if(_irqCounter == 0 && _irqEnabled) {
+						TriggerIrq();
 					}
-
-					//SubMapper 2 = MC-ACC (Acclaim MMC3 clone)
-					if(!IsMcAcc() && (ForceMmc3RevAIrqs() || _console->GetSettings()->CheckFlag(EmulationFlags::Mmc3IrqAltBehavior))) {
-						//MMC3 Revision A behavior
-						if((count > 0 || _irqReload) && _irqCounter == 0 && _irqEnabled) {
-							TriggerIrq();
-						}
-					} else {
-						if(_irqCounter == 0 && _irqEnabled) {
-							TriggerIrq();
-						}
-					}
-					_irqReload = false;
-					break;
+				}
+				_irqReload = false;
 			}
 		}
 };

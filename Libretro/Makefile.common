@@ -24,7 +24,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/Assembler.cpp \
                $(CORE_DIR)/AutomaticRomTest.cpp \
                $(CORE_DIR)/AutoSaveManager.cpp \
-               $(CORE_DIR)/AviRecorder.cpp \
                $(CORE_DIR)/BaseControlDevice.cpp \
                $(CORE_DIR)/BaseExpansionAudio.cpp \
                $(CORE_DIR)/BaseMapper.cpp \
@@ -49,6 +48,7 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/Disassembler.cpp \
                $(CORE_DIR)/DisassemblyInfo.cpp \
                $(CORE_DIR)/EmulationSettings.cpp \
+               $(CORE_DIR)/EventManager.cpp \
                $(CORE_DIR)/ExpressionEvaluator.cpp \
                $(CORE_DIR)/FceuxMovie.cpp \
                $(CORE_DIR)/FDS.cpp \
@@ -106,6 +106,7 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/StereoCombFilter.cpp \
                $(CORE_DIR)/StereoDelayFilter.cpp \
                $(CORE_DIR)/StereoPanningFilter.cpp \
+               $(CORE_DIR)/StudyBoxLoader.cpp \
                $(CORE_DIR)/TraceLogger.cpp \
                $(CORE_DIR)/UnifLoader.cpp \
                $(CORE_DIR)/VideoDecoder.cpp \
@@ -116,12 +117,14 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/WaveRecorder.cpp \
                $(UTIL_DIR)/ArchiveReader.cpp \
                $(UTIL_DIR)/AutoResetEvent.cpp \
+               $(UTIL_DIR)/AviRecorder.cpp \
                $(UTIL_DIR)/AviWriter.cpp \
                $(UTIL_DIR)/blip_buf.cpp \
                $(UTIL_DIR)/BpsPatcher.cpp \
                $(UTIL_DIR)/CamstudioCodec.cpp \
                $(UTIL_DIR)/CRC32.cpp \
                $(UTIL_DIR)/FolderUtilities.cpp \
+               $(UTIL_DIR)/GifRecorder.cpp \
                $(UTIL_DIR)/HexUtilities.cpp \
                $(UTIL_DIR)/IpsPatcher.cpp \
                $(UTIL_DIR)/md5.cpp \
@@ -138,6 +141,7 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(UTIL_DIR)/Timer.cpp \
                $(UTIL_DIR)/UpsPatcher.cpp \
                $(UTIL_DIR)/UTF8Util.cpp \
+               $(UTIL_DIR)/WavReader.cpp \
                $(UTIL_DIR)/ZipReader.cpp \
                $(UTIL_DIR)/ZipWriter.cpp \
                $(UTIL_DIR)/ZmbvCodec.cpp \

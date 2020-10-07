@@ -224,7 +224,7 @@
    #if defined(_MSC_VER) || defined(__MINGW32__)
       #include <malloc.h>
    #endif
-   #if defined(__linux__) || defined(__linux) || defined(__EMSCRIPTEN__)
+   #if defined(__linux__) || defined(__linux) || defined(__EMSCRIPTEN__) || defined(HAVE_LIBNX)
       #include <alloca.h>
    #endif
 #else // STB_VORBIS_NO_CRT
@@ -4621,7 +4621,7 @@ stb_vorbis * stb_vorbis_open_file(FILE *file, int close_on_free, int *error, con
 stb_vorbis * stb_vorbis_open_filename(const char *filename, int *error, const stb_vorbis_alloc *alloc)
 {
 	FILE *f;
-#if _WIN32 || _WIN64
+#if defined(_MSC_VER) || defined(__MINGW64__)
    fopen_s(&f, filename, "rb");
 #else
 	f = fopen(filename, "rb");

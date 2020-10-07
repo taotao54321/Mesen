@@ -55,14 +55,14 @@ Before you start recording, select the options you want to use and the location 
 
 ## File Format (hires.txt) ##
 
-The following are the specifications for the hires.txt file, as of version "104".
+The following are the specifications for the hires.txt file, as of version "106".
 
 ### &lt;ver&gt; tag ###
 
 **Syntax**: `<ver>[integer]`  
-**Example**: `<ver>104`
+**Example**: `<ver>106`
 
-The format's version number (currently 104).
+The format's version number (currently 106).
 
 ### &lt;scale&gt; tag ###
 
@@ -76,7 +76,8 @@ The scale used for the replacement graphics -- this can be any integer number (m
 **Syntax**: `<overscan>[top],[right],[bottom],[left]`  
 **Example**: `<overscan>8,8,8,8`
 
-The overscan values to use when the HD Pack is loaded - this is useful for games that produce glitches on the edges of the screen.
+The overscan values to use when the HD Pack is loaded - this is useful for games that produce glitches on the edges of the screen.  
+**Note:** This feature is only available for HD Packs that contain tile replacement rules. HD Packs that only replace audio cannot use the overscan setting.
 
 ### &lt;patch&gt; tag ###
 
@@ -174,7 +175,7 @@ The condition is true when the following expression is true:
 
 ### &lt;tile&gt; tag ###
 
-**Syntax**: `<tile>[img index - integer], [tile data], [palette data], [x - integer], [y - integer], [brightness - 0.0 to 1.0], [default tile - Y or N]`  
+**Syntax**: `<tile>[img index - integer], [tile data], [palette data], [x - integer], [y - integer], [brightness - float (default: 1.0)], [default tile - Y or N]`  
 **Example (CHR ROM)**: `<tile>0,2E,FF16360F,0,0,1,N`  
 **Example (CHR RAM)**: `<tile>0,0E0E079C1E3EA7076101586121010000,0F100017,176,1168,1,N`
 
@@ -185,20 +186,36 @@ For CHR RAM games, `tile data` is a 32-character hexadecimal string representing
 `<tile>` define mappings between the original game's tile data and their replacements in the PNG file.
 The `tile data` and `palette data` are used to identify the original tile, while the `img index`, `x` and `y` fields are used to specify in which PNG file the replacement can be found, and at what x,y coordinates in that PNG file.
 
-`brightness` can be used to reuse the same HD tile for multiple original tiles -- this can be useful when a game has fade in and out effects.  
+`brightness` can be used to reuse the same HD tile for multiple original tiles -- this can be useful when a game has fade in and out effects (the brightness can be set to values above 1.0 to increase the PNG's normal brightness level).  
 When `default tile` is enabled (with `Y`), the tile is marked as the `default tile` for all palettes.  Whenever a tile appears on the screen that matches the tile data, but has no rules matching its palette data, the default tile will be used instead.
 
 ### &lt;background&gt; tag ###
 
-**Syntax**: `<background>[name - text], [brightness level - 0.0 to 1.0], [horizontal scroll ratio (optional) - float], [vertical scroll ratio (optional) - float], [showBehindBackgroundPrioritySprites (optional) - Y or N]`  
-**Example**: `<background>myBackground.png,1.0,0,0,N`
+**Syntax**: `<background>[name - text], [brightness level - float (default: 1.0)], [horizontal scroll ratio (optional) - float], [vertical scroll ratio (optional) - float], [priority level (optional) - int, 0 to 39 (default 10)], [image left offset (optional) - int], [image top offset (optional) - int]`  
+**Example**: `<background>myBackground.png,1.0,0,0,10,0,0`
 
-`<background>` tags meant to be used alongside conditions to add a background image under certain conditions (e.g on a specific screen, for example).
+`<background>` tags are meant to be used alongside conditions to add a background image under certain conditions (e.g on a specific screen, for example).
 
 The `Horizontal Scroll Ratio` and `Vertical Scroll Ratio` parameters are optional (their default value is `0.0`) and can be used to specify at what speed the background picture should scroll compared to the NES' scrolling.  
 This can be used to create simple parallax scrolling effects.
 
-When the `Show Behind Background Priority Sprites` parameter is enabled (`Y`), the background priority sprites will be shown in front of the background image.
+The `Image Left Offset` and `Image Top Offset` parameters are optional (their default value is `0`) and can be used to offset the position of the background image within the PNG file. e.g: Specifying 100 for the left offset will cause the background to be scrolled 100 pixels to the left by default.
+With conditions, this can be used to create scrolling effects that are based on something other than the PPU's current scroll offset.
+
+The `Priority Level` parameter determines where the background is inserted compared to the NES' 3 "layers" (background sprites -> background tiles -> foreground sprites).  
+The screen is drawn in this order:
+
+* Priority 0 to 9 HD backgrounds (priority 0 is below priority 1, etc.)
+* Background-priority sprites
+* Priority 10 to 19 HD backgrounds
+* Background tiles
+* Priority 20 to 29 HD backgrounds
+* Foreground-priority sprites
+* Priority 30 to 39 HD backgrounds
+
+Note: Only a single background can be active per priority level.
+
+Backgrounds can use a PNG's alpha channel to allow the graphics below to show through them (this can be used to add a fog effect to the screen, etc.)
 
 ### &lt;options&gt; tag ###
 
@@ -207,7 +224,7 @@ When the `Show Behind Background Priority Sprites` parameter is enabled (`Y`), t
 
 **Available options**:  
 `disableSpriteLimit`: Forces the emulator to disable the sprite limit when the HD pack is loaded.  
-`disableContours`: Disables the outline effect that appears around sprites/tiles when using the `<background>` feature.  
+`disableOriginalTiles`: Normally, when a replacement for a tile is not found, the original tile is drawn. When this option is enabled, the original tiles are never drawn, only their HD replacements.
 
 ### &lt;bgm&gt; tag ###
 
@@ -219,8 +236,8 @@ Album and track numbers are used to form a unique ID for each bgm, allowing up t
 
 ### &lt;sfx&gt; tag ###
 
-**Syntax**: `<sfc>[album - integer],[track - integer],[filename - ogg]`  
-**Example**: `<sfc>0,0,myBgm.ogg`
+**Syntax**: `<sfx>[album - integer],[track - integer],[filename - ogg]`  
+**Example**: `<sfx>0,0,myBgm.ogg`
 
 Used to assign a sound effect (`.ogg` audio file) to a specific album and track number.
 Album and track numbers are used to form a unique ID for each sound effect, allowing up to 64k different sound effects.
@@ -303,6 +320,17 @@ Returns the current revision of the HD Audio API.  This value is currently set t
 These registers return the ASCII string `NEA` (NES Enhanced Audio) - this can be used to detect whether or not the audio API is available.
 
 ## File Format Changelog ##
+
+### Version 106 ###
+
+* Replaced `Show Behind Background Priority Sprites` flag for `<background>` tags by a 0 to 39 priority level value.
+* Removed contour feature for backgrounds, and removed `disableContours` option.
+
+### Version 105 ###
+
+* Brightness values above 1.0 are now allowed.
+* Added `disableOriginalTiles` option
+* Background tags can now specify `left` and `top` values.
 
 ### Version 104 ###
 

@@ -36,6 +36,8 @@ class PPU : public IMemoryHandler, public Snapshotable
 		int32_t _scanline;
 		uint32_t _cycle;
 		uint32_t _frameCount;
+		uint64_t _masterClock;
+		uint8_t _masterClockDivider;
 		uint8_t _memoryReadBuffer;
 
 		uint8_t _paletteRAM[0x20];
@@ -53,7 +55,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		uint16_t _vblankEnd;
 		uint16_t _nmiScanline;
 		uint16_t _palSpriteEvalScanline;
-		
+
 		PPUControlFlags _flags;
 		PPUStatusFlags _statusFlags;
 
@@ -73,7 +75,8 @@ class PPU : public IMemoryHandler, public Snapshotable
 		uint32_t _secondaryOAMAddr;
 		bool _sprite0Visible;
 
-		uint32_t _overflowSpriteAddr;
+		uint8_t _firstVisibleSpriteAddr;
+		uint8_t _lastVisibleSpriteAddr;
 		uint32_t _spriteIndex;
 
 		uint8_t _openBus;
@@ -91,8 +94,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		bool _needStateUpdate;
 		bool _renderingEnabled;
 		bool _prevRenderingEnabled;
-
-		double _cyclesNeeded;
+		bool _preventVblFlag;
 
 		uint16_t _updateVramAddr;
 		uint8_t _updateVramAddrDelay;
@@ -103,6 +105,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 
 		uint64_t _oamDecayCycles[0x40];
 		bool _enableOamDecay;
+		bool _corruptOamRow[32];
 
 		void UpdateStatusFlag();
 
@@ -110,6 +113,8 @@ class PPU : public IMemoryHandler, public Snapshotable
 		void SetMaskRegister(uint8_t value);
 
 		bool IsRenderingEnabled();
+
+		void ProcessTmpAddrScrollGlitch(uint16_t normalAddr, uint16_t value, uint16_t mask);
 
 		void SetOpenBus(uint8_t mask, uint8_t value);
 		uint8_t ApplyOpenBus(uint8_t mask, uint8_t value);
@@ -136,10 +141,13 @@ class PPU : public IMemoryHandler, public Snapshotable
 
 		__forceinline uint8_t ReadSpriteRam(uint8_t addr);
 		__forceinline void WriteSpriteRam(uint8_t addr, uint8_t value);
+		
+		void SetOamCorruptionFlags();
+		void ProcessOamCorruption();
 
 		void UpdateMinimumDrawCycles();
 
-		__forceinline uint8_t GetPixelColor();
+		uint8_t GetPixelColor();
 		__forceinline virtual void DrawPixel();
 		void UpdateGrayscaleAndIntensifyBits();
 		virtual void SendFrame();
@@ -176,6 +184,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		void Reset();
 
 		void DebugSendFrame();
+		uint16_t* GetScreenBuffer(bool previousBuffer);
 		void DebugCopyOutputBuffer(uint16_t *target);
 		void DebugUpdateFrameBuffer(bool toGrayscale);
 		void GetState(PPUDebugState &state);
@@ -188,7 +197,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 			ranges.AddHandler(MemoryOperation::Write, 0x4014);
 		}
 
-		__forceinline uint8_t ReadPaletteRAM(uint16_t addr);
+		uint8_t ReadPaletteRAM(uint16_t addr);
 		void WritePaletteRAM(uint16_t addr, uint8_t value);
 
 		uint8_t ReadRAM(uint16_t addr) override;
@@ -199,7 +208,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		double GetOverclockRate();
 		
 		void Exec();
-		void ProcessCpuClock();
+		__forceinline void Run(uint64_t runTo);
 
 		uint32_t GetFrameCount()
 		{
@@ -234,9 +243,18 @@ class PPU : public IMemoryHandler, public Snapshotable
 		}
 		
 		uint32_t GetPixelBrightness(uint8_t x, uint8_t y);
+		uint16_t GetCurrentBgColor();
 
 		uint16_t GetPixel(uint8_t x, uint8_t y)
 		{
 			return _currentOutputBuffer[y << 8 | x];
 		}
 };
+
+void PPU::Run(uint64_t runTo)
+{
+	while(_masterClock + _masterClockDivider <= runTo) {
+		Exec();
+		_masterClock += _masterClockDivider;
+	}
+}

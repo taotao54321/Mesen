@@ -32,11 +32,7 @@ namespace Mesen.GUI.Debugger
 			InitializeComponent();
 
 			DebugInfo debugInfo = ConfigManager.Config.DebugInfo;
-			if(!debugInfo.TraceLoggerSize.IsEmpty) {
-				this.StartPosition = FormStartPosition.Manual;
-				this.Size = debugInfo.TraceLoggerSize;
-				this.Location = debugInfo.TraceLoggerLocation;
-			}
+			RestoreLocation(debugInfo.TraceLoggerLocation, debugInfo.TraceLoggerSize);
 
 			_tooltipManager = new CodeTooltipManager(this, txtTraceLog);
 
@@ -265,9 +261,6 @@ namespace Mesen.GUI.Debugger
 			if(_refreshRunning) {
 				return;
 			}
-
-			//Make sure labels are up to date
-			DebugWorkspaceManager.GetWorkspace();
 
 			_refreshRunning = true;
 			SetOptions();

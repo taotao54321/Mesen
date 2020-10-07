@@ -37,6 +37,7 @@ namespace Mesen.GUI.Config
 		public bool AssociateNsfFiles = false;
 		public bool AssociateMstFiles = false;
 		public bool AssociateUnfFiles = false;
+		public bool AssociateStudyBoxFiles = false;
 
 		public VsDualOutputOption VsDualVideoOutput = VsDualOutputOption.Both;
 		public VsDualOutputOption VsDualAudioOutput = VsDualOutputOption.Both;
@@ -58,6 +59,7 @@ namespace Mesen.GUI.Config
 		public DateTime CloudLastSync = DateTime.MinValue;
 
 		public bool DefaultsInitialized = false;
+		public bool NeedWindowsShortcutReset = true;
 		public List<ShortcutKeyInfo> ShortcutKeys1;
 		public List<ShortcutKeyInfo> ShortcutKeys2;
 
@@ -77,8 +79,6 @@ namespace Mesen.GUI.Config
 		public bool GameSelectionScreenResetGame = false;
 
 		public bool ConfirmExitResetPower = false;
-
-		public bool DeveloperMode = false;
 
 		public UInt32 RewindBufferSize = 300;
 
@@ -111,6 +111,9 @@ namespace Mesen.GUI.Config
 				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.IncreaseSpeed, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("=") }));
 				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.DecreaseSpeed, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("-") }));
 				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.MaxSpeed, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("F9") }));
+
+				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.IncreaseVolume, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("Ctrl"), Key2 = InteropEmu.GetKeyCode("=") }));
+				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.DecreaseVolume, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("Ctrl"), Key2 = InteropEmu.GetKeyCode("-") }));
 
 				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.ToggleFps, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("F10") }));
 				ShortcutKeys1.Add(new ShortcutKeyInfo(EmulatorShortcut.ToggleFullscreen, new KeyCombination() { Key1 = InteropEmu.GetKeyCode("F11") }));
@@ -173,12 +176,11 @@ namespace Mesen.GUI.Config
 				FileAssociationHelper.UpdateFileAssociation("nsf", preferenceInfo.AssociateNsfFiles);
 				FileAssociationHelper.UpdateFileAssociation("nsfe", preferenceInfo.AssociateNsfFiles);
 				FileAssociationHelper.UpdateFileAssociation("unf", preferenceInfo.AssociateUnfFiles);
+				FileAssociationHelper.UpdateFileAssociation("studybox", preferenceInfo.AssociateStudyBoxFiles);
 			}
 
 			InteropEmu.SetOsdState(!preferenceInfo.DisableOsd);
 			InteropEmu.SetGameDatabaseState(!preferenceInfo.DisableGameDatabase);
-
-			InteropEmu.SetFlag(EmulationFlags.DeveloperMode, preferenceInfo.DeveloperMode);
 
 			InteropEmu.SetFlag(EmulationFlags.FdsAutoLoadDisk, preferenceInfo.FdsAutoLoadDisk);
 			InteropEmu.SetFlag(EmulationFlags.FdsFastForwardOnLoad, preferenceInfo.FdsFastForwardOnLoad);

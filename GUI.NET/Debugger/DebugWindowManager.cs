@@ -45,6 +45,12 @@ namespace Mesen.GUI.Debugger
 					case DebugWindow.Profiler: frm = new frmProfiler(); frm.Icon = Properties.Resources.Speed; break;
 					case DebugWindow.WatchWindow: frm = new frmWatchWindow(); frm.Icon = Properties.Resources.Find; break;
 				}
+
+				if(_openedWindows.Count == 0) {
+					DebugWorkspaceManager.GetWorkspace();
+					DebugWorkspaceManager.AutoLoadDbgFiles(true);
+				}
+
 				_openedWindows.Add(frm);
 				frm.FormClosed += Debugger_FormClosed;
 				frm.Show();
@@ -149,6 +155,7 @@ namespace Mesen.GUI.Debugger
 				case DebugWindow.TextHooker: return _openedWindows.ToList().Find((form) => form.GetType() == typeof(frmTextHooker));
 				case DebugWindow.Profiler: return _openedWindows.ToList().Find((form) => form.GetType() == typeof(frmProfiler));
 				case DebugWindow.WatchWindow: return _openedWindows.ToList().Find((form) => form.GetType() == typeof(frmWatchWindow));
+				case DebugWindow.EventViewer: return _openedWindows.ToList().Find((form) => form.GetType() == typeof(frmEventViewer));
 			}
 
 			return null;

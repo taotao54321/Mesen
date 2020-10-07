@@ -111,6 +111,7 @@ namespace InteropEmu {
 		uint32_t PrgCrc32;
 		RomFormat Format;
 		bool IsChrRam;
+		bool HasBusConflicts;
 		uint16_t MapperId;
 		uint32_t FilePrgOffset;
 		char Sha1[40];
@@ -219,7 +220,7 @@ namespace InteropEmu {
 			#endif
 		}
 
-		DllExport void __stdcall HistoryViewerRelease(void *windowHandle, void *viewerHandle)
+		DllExport void __stdcall HistoryViewerRelease()
 		{
 			_historyConsole->Stop();
 			_historyConsole->Release(true);
@@ -405,14 +406,18 @@ namespace InteropEmu {
 				interopRomInfo.PrgCrc32 = romInfo.Hash.PrgCrc32;
 				interopRomInfo.Format = romInfo.Format;
 				interopRomInfo.IsChrRam = romInfo.HasChrRam;
+				interopRomInfo.HasBusConflicts = romInfo.BusConflicts == BusConflictType::Yes;
 				interopRomInfo.MapperId = romInfo.MapperID;
 				interopRomInfo.FilePrgOffset = romInfo.FilePrgOffset;
 				if(romInfo.Hash.Sha1.size() == 40) {
 					memcpy(interopRomInfo.Sha1, romInfo.Hash.Sha1.c_str(), 40);
+				} else {
+					memset(interopRomInfo.Sha1, 0, 40);
 				}
 			} else {
 				RomLoader romLoader(true);
-				if(romLoader.LoadFile(romPath)) {
+				VirtualFile romFile = romPath;
+				if(romLoader.LoadFile(romFile)) {
 					RomData romData = romLoader.GetRomData();
 
 					_returnString = romPath;
@@ -441,6 +446,7 @@ namespace InteropEmu {
 
 		DllExport void __stdcall Reset() { _console->Reset(true); }
 		DllExport void __stdcall PowerCycle() { _console->Reset(false); }
+		DllExport void __stdcall ReloadRom() { _console->ReloadRom(); }
 		DllExport void __stdcall ResetLagCounter() { _console->ResetLagCounter(); }
 
 		DllExport void __stdcall StartServer(uint16_t port, char* password, char* hostPlayerName) { GameServer::StartServer(_console, port, password, hostPlayerName); }
@@ -541,7 +547,9 @@ namespace InteropEmu {
 		DllExport void __stdcall LoadState(uint32_t stateIndex) { _console->GetSaveStateManager()->LoadState(stateIndex); }
 		DllExport void __stdcall SaveStateFile(char* filepath) { _console->GetSaveStateManager()->SaveState(filepath); }
 		DllExport void __stdcall LoadStateFile(char* filepath) { _console->GetSaveStateManager()->LoadState(filepath); }
-		DllExport int64_t  __stdcall GetStateInfo(uint32_t stateIndex) { return _console->GetSaveStateManager()->GetStateInfo(stateIndex); }
+		
+		DllExport int32_t __stdcall GetSaveStatePreview(char* saveStatePath, uint8_t* pngData) { return _console->GetSaveStateManager()->GetSaveStatePreview(saveStatePath, pngData); }
+
 
 		DllExport void __stdcall MoviePlay(char* filename) { MovieManager::Play(string(filename), _console); }
 		
@@ -626,6 +634,7 @@ namespace InteropEmu {
 		DllExport void __stdcall SetSampleRate(uint32_t sampleRate) { _settings->SetSampleRate(sampleRate); }
 		DllExport void __stdcall SetAudioLatency(uint32_t msLatency) { _settings->SetAudioLatency(msLatency); }
 		DllExport void __stdcall SetAudioFilterSettings(AudioFilterSettings settings) { _settings->SetAudioFilterSettings(settings); }
+		DllExport void __stdcall SetRunAheadFrames(uint32_t frameCount) { _settings->SetRunAheadFrames(frameCount); }
 
 		DllExport NesModel __stdcall GetNesModel() { return _console->GetModel(); }
 		DllExport void __stdcall SetNesModel(uint32_t model) { _settings->SetNesModel((NesModel)model); }
@@ -640,7 +649,6 @@ namespace InteropEmu {
 			shared_ptr<RewindManager> rewindManager = _console->GetRewindManager();
 			return rewindManager ? rewindManager->IsRewinding() : false;
 		}
-		DllExport void __stdcall SetOverclockRate(uint32_t overclockRate, bool adjustApu) { _settings->SetOverclockRate(overclockRate, adjustApu); }
 		DllExport void __stdcall SetPpuNmiConfig(uint32_t extraScanlinesBeforeNmi, uint32_t extraScanlinesAfterNmi) { _settings->SetPpuNmiConfig(extraScanlinesBeforeNmi, extraScanlinesAfterNmi); }
 		DllExport void __stdcall SetVideoScale(double scale, ConsoleId consoleId) { GetConsoleById(consoleId)->GetSettings()->SetVideoScale(scale); }
 		DllExport void __stdcall SetScreenRotation(uint32_t angle) { _settings->SetScreenRotation(angle); }
@@ -663,7 +671,7 @@ namespace InteropEmu {
 			return _returnString.c_str();
 		}
 
-		DllExport void __stdcall SetAudioDevice(char* audioDevice) { if(_soundManager) { _soundManager->SetAudioDevice(audioDevice); } }
+		DllExport void __stdcall SetAudioDevice(char* audioDevice) { if(_soundManager) { _soundManager->SetAudioDevice(audioDevice ? audioDevice : ""); } }
 
 		DllExport void __stdcall GetScreenSize(ConsoleId consoleId, ScreenSize &size, bool ignoreScale) { GetConsoleById(consoleId)->GetVideoDecoder()->GetScreenSize(size, ignoreScale); }
 
@@ -673,6 +681,8 @@ namespace InteropEmu {
 		DllExport void __stdcall StartRecordingTapeFile(char *filepath) { _console->StartRecordingTapeFile(filepath); }
 		DllExport void __stdcall StopRecordingTapeFile() { _console->StopRecordingTapeFile(); }
 		DllExport bool __stdcall IsRecordingTapeFile() { return _console->IsRecordingTapeFile(); }
+
+		DllExport bool __stdcall IsKeyboardMode() { return _settings->IsKeyboardMode(); }
 
 		DllExport ConsoleFeatures __stdcall GetAvailableFeatures() { return _console->GetAvailableFeatures(); }
 

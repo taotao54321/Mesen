@@ -13,6 +13,7 @@
 			<Control ID="mnuPause">Pause</Control>
 			<Control ID="mnuReset">Reset</Control>
 			<Control ID="mnuPowerCycle">Arrêt &amp;&amp; redémarrage</Control>
+			<Control ID="mnuReloadRom">Recharger le ROM à partir du disque</Control>
 			<Control ID="mnuPowerOff">Arrêter le jeu</Control>
 			<Control ID="mnuSwitchDiskSide">Changer le disque de côté</Control>
 			<Control ID="mnuSelectDisk">Choisir le disque</Control>
@@ -242,6 +243,7 @@
 			<Control ID="chkShowFps">Afficher le FPS</Control>
 			<Control ID="chkUseHdPacks">Utiliser les packs haute-définition de HDNes</Control>
 			<Control ID="chkUseExclusiveFullscreen">Utiliser le mode plein écran exclusif</Control>
+			<Control ID="lblFullscreenResolution">Résolution plein écran :</Control>
 			<Control ID="lblRequestedRefreshRate">Taux de rafraîchissement :</Control>
 			<Control ID="tpgOverscan">Overscan</Control>
 			<Control ID="tpgOverscanGlobal">Global</Control>
@@ -307,6 +309,8 @@
 			<Control ID="lblTurboSpeed">Vitesse d'avance rapide :</Control>
 			<Control ID="lblRewindSpeedHint">%  (0 = Vitesse maximale)</Control>
 			<Control ID="lblRewindSpeed">Vitesse du rembobinage :</Control>
+			<Control ID="lblRunAhead">Run Ahead:</Control>
+			<Control ID="lblRunAheadFrames">images (réduit l'input lag, au coût de la performance)</Control>
 
 			<Control ID="tpgAdvanced">Avancé</Control>
 			<Control ID="lblDeveloperSettings">Options recommandées pour les développeurs (homebrew / ROM hacking)</Control>
@@ -320,6 +324,10 @@
 			<Control ID="chkDisablePpuReset">Ne pas faire un reset du PPU lors du reset de la console (Famicom)</Control>
 			<Control ID="chkUseNes101Hvc101Behavior">Simuler le comportement du NES/HVC-101 (Top Loader / AV Famicom)</Control>
 			<Control ID="chkMapperRandomPowerOnState">Démarrer le jeu avec le mapper dans un état aléatoire</Control>
+			<Control ID="chkRandomizeCpuPpuAlignment">Démarrer le jeu avec un alignement CPU/PPU aléatoire</Control>
+			<Control ID="chkEnablePpu2006ScrollGlitch">Simuler le bug de scrolling lors de l'écriture à $2006</Control>
+			<Control ID="chkEnablePpu2000ScrollGlitch">Simuler le bug de scrolling lors de l'écriture à $2000/$2005/$2006</Control>
+			<Control ID="chkEnablePpuOamRowCorruption">Simuler le bug de corruption de la rangée OAM</Control>
 
 			<Control ID="lblRamPowerOnState">État initial de la mémoire au démarrage : </Control>
 
@@ -349,8 +357,6 @@
 			<Control ID="lblDisplayLanguage">Langue d'affichage :</Control>
 			<Control ID="chkSingleInstance">Permettre une seule copie de Mesen à la fois</Control>
 			<Control ID="chkAutomaticallyCheckForUpdates">Rechercher des mises-à-jour automatiquement</Control>
-
-			<Control ID="chkDeveloperMode">Activer le mode développeur</Control>
 
 			<Control ID="lblPauseBackgroundSettings">Options d'arrière-plan et pause</Control>
 			<Control ID="lblMiscSettings">Options diverses</Control>
@@ -556,11 +562,21 @@
 		</Form>
 		<Form ID="frmAbout" Title="À propos de...">
 			<Control ID="labelProductName">Mesen</Control>
-			<Control ID="labelCopyright">© 2019 M. Bibaud (aka Sour)</Control>
+			<Control ID="labelCopyright">© 2020 M. Bibaud (aka Sour)</Control>
 			<Control ID="lblWebsite">Site web:</Control>
 			<Control ID="lblLink">www.mesen.ca</Control>
 			<Control ID="labelVersion">Version:</Control>
 			<Control ID="lblBuildDateLabel">Date de compilation:</Control>
+
+			<Control ID="grpAcknowledgements">Remerciements</Control>
+			<Control ID="lblUsedSoftware">Cette application utilise les librairies suivantes :</Control>
+			<Control ID="lblGeneral">Général:</Control>
+			<Control ID="lblVideo">Vidéo:</Control>
+			<Control ID="lblAudio">Audio:</Control>
+			<Control ID="lblEmulation">Émulation:</Control>
+			<Control ID="lblCheats">Codes:</Control>
+			<Control ID="lblSpecialThanks">Et merci à tous ceux qui ont contribué au développement! (donations, tests, partage d'information, etc.)</Control>
+
 			<Control ID="lblDonate">Pour supporter le développement de Mesen, vous pouvez faire une donation.&#xA;Merci de votre support!</Control>
 			<Control ID="okButton">&amp;OK</Control>
 		</Form>
@@ -769,14 +785,21 @@
 		<Message ID="FilterMovie">Films (*.mmo)|*.mmo|Tous les fichiers (*.*)|*.*</Message>
 		<Message ID="FilterWave">Fichiers wave (*.wav)|*.wav|Tous les fichiers (*.*)|*.*</Message>
 		<Message ID="FilterAvi">Fichiers avi (*.avi)|*.avi|Tous les fichiers (*.*)|*.*</Message>
+		<Message ID="FilterGif">Fichiers GIF (*.gif)|*.gif|Tous les fichiers (*.*)|*.*</Message>
 		<Message ID="FilterPalette">Fichier de palette (*.pal)|*.pal|Tous les fichiers (*.*)|*.*</Message>
-		<Message ID="FilterRom">Tous les formats supportés (*.nes, *.zip, *.7z, *.fds, *.nsf, *.nsfe, *.unf, *.unif)|*.NES;*.ZIP;*.7z;*.FDS;*.NSF;*.NSFE;*.UNF;*.UNIF|Roms de NES (*.nes, *.unf, *.unif)|*.NES;*.UNF;*.UNIF|Roms du Famicom Disk System (*.fds)|*.FDS|Fichiers NSF (*.nsf, *.nsfe)|*.NSF;*.NSFE|Fichiers ZIP (*.zip)|*.ZIP|Fichiers 7-Zip (*.7z)|*.7z|Tous les fichiers (*.*)|*.*</Message>
-		<Message ID="FilterRomIps">Tous les formats supportés (*.nes, *.zip, *.7z, *.fds, *.nsf, *.nsfe, *.unf, *.unif, *.ips, *.bps, *.ups)|*.NES;*.ZIP;*.7z;*.IPS;*.BPS;*.UPS;*.FDS;*.NSF;*.NSFE;*.UNF;*.UNIF|Roms de NES (*.nes, *.unf, *.unif)|*.NES;*.UNF;*.UNIF|Roms du Famicom Disk System (*.fds)|*.FDS|Fichiers NSF (*.nsf, *.nsfe)|*.NSF;*.NSFE|Fichiers ZIP (*.zip)|*.ZIP|Fichiers 7-Zip (*.7z)|*.7z|Fichiers IPS/UPS/BPS (*.ips, *.bps, *.ups)|*.IPS;*.BPS;*.UPS|Tous les fichiers (*.*)|*.*</Message>
+		<Message ID="FilterRom">Tous les formats supportés (*.nes, *.zip, *.7z, *.fds, *.nsf, *.nsfe, *.unf, *.unif, *.studybox)|*.NES;*.ZIP;*.7z;*.FDS;*.NSF;*.NSFE;*.UNF;*.UNIF;*.STUDYBOX|Roms de NES (*.nes, *.unf, *.unif)|*.NES;*.UNF;*.UNIF|Roms du Famicom Disk System (*.fds)|*.FDS|Fichiers NSF (*.nsf, *.nsfe)|*.NSF;*.NSFE|Fichiers ZIP (*.zip)|*.ZIP|Fichiers 7-Zip (*.7z)|*.7z|Tous les fichiers (*.*)|*.*</Message>
+		<Message ID="FilterRomIps">Tous les formats supportés (*.nes, *.zip, *.7z, *.fds, *.nsf, *.nsfe, *.unf, *.unif, *.studybox, *.ips, *.bps, *.ups)|*.NES;*.ZIP;*.7z;*.IPS;*.BPS;*.UPS;*.FDS;*.NSF;*.NSFE;*.UNF;*.UNIF;*.STUDYBOX|Roms de NES (*.nes, *.unf, *.unif)|*.NES;*.UNF;*.UNIF|Roms du Famicom Disk System (*.fds)|*.FDS|Fichiers NSF (*.nsf, *.nsfe)|*.NSF;*.NSFE|Fichiers ZIP (*.zip)|*.ZIP|Fichiers 7-Zip (*.7z)|*.7z|Fichiers IPS/UPS/BPS (*.ips, *.bps, *.ups)|*.IPS;*.BPS;*.UPS|Tous les fichiers (*.*)|*.*</Message>
 		<Message ID="FilterTest">Fichiers de test (*.mtp)|*.mtp|Tous les fichiers (*.*)|*.*</Message>
 		<Message ID="FilterCheat">Tous les formats supportés (*.cht, *.xml)|*.cht;*.xml</Message>
 		<Message ID="FilterSavestate">Sauvegardes d'états Mesen (*.mst)|*.mst|Tous les fichiers (*.*)|*.*</Message>
 		<Message ID="FilterTapeFiles">Fichiers de cassettes Family Basic (*.fbt)|*.fbt|Tous les fichiers (*.*)|*.*</Message>
 
+		<Message ID="LastSession">Session précédente</Message>
+		<Message ID="AutoSave">Sauvegarde auto.</Message>
+		<Message ID="SlotNumber">Position #{0}</Message>
+		<Message ID="LoadStateDialog">Menu de chargement rapide</Message>
+		<Message ID="SaveStateDialog">Menu de sauvegarde rapide</Message>
+		
 		<Message ID="LoadFromFile">Charger à partir d'un fichier...</Message>
 		<Message ID="SaveToFile">Sauvegarder dans un fichier...</Message>
 
@@ -807,6 +830,7 @@
 		<Message ID="PlayerNumber">Joueur {0}</Message>
 
 		<Message ID="PressToExitFullscreen">Quitter le mode plein écran: {0}</Message>
+		<Message ID="DefaultResolution">Défaut</Message>
 
 		<Message ID="RomsFound">{0} roms trouvés</Message>
 
@@ -828,13 +852,13 @@
 		<Message ID="NsfUnknownField">[inconnu]</Message>
 
 		<Message ID="CouldNotInstallRuntime">Le package Redistribuable Visual C++ pour Visual Studio 2015 n'a pas été installé correctement.</Message>
-		<Message ID="EmptyState">&lt;aucune sauvegarde&gt;</Message>
+		<Message ID="EmptyState">&lt;vide&gt;</Message>
 		<Message ID="ErrorWhileCheckingUpdates">Une erreur s'est produite lors de la recherche de mises-à-jour. Vérifier votre connexion internet et essayez à nouveau.&#xA;&#xA;Détails de l'erreur :&#xA;{0}</Message>
 		<Message ID="AutoUpdateDisabledMessage">Les mises-à-jour automatiques ne sont pas disponibles avec votre build - s.v.p télécharger la dernière version du code et recompiler Mesen pour avoir accès à la version la plus récente.</Message>
-		<Message ID="FdsBiosNotFound">Un bios pour le FDS n'a pas été trouvé. Le bios est requis pour jouer à des jeux de FDS.&#xA;&#xA;Voulez-vous sélectionnez un bios maintenant?</Message>
+		<Message ID="BiosNotFound">Un bios est requis pour ce jeu.&#xA;&#xA;  Nom du fichier : {0}&#xA;  Taille : {1} octets&#xA;&#xA;Voulez-vous choisir le fichier bios maintenant?</Message>
+		<Message ID="BiosMismatch">Le fichier sélectionné ne correspond pas au bios requis pour ce jeu.&#xA;&#xA;SHA-256 requis:&#xA;{0}&#xA;&#xA;SHA-256 du fichier sélectionné:&#xA;{1}&#xA;&#xA;Voulez-vous quand même utiliser ce fichier?</Message>
 		<Message ID="FdsDiskSide">Disque {0} Côté {1}</Message>
 		<Message ID="FileNotFound">Fichier non trouvé: {0}</Message>
-		<Message ID="InvalidFdsBios">Le bios sélectionné est invalide.</Message>
 
 		<Message ID="HDNesTooltip">Cette option permet à Mesen de charger des packages de graphiques haute-résolution dans le même format que l'émulateur HDNes.&#xA;&#xA;Les packages haute-résolution doivent être placés dans le dossier "HdPacks", dans un sous-dossier correspondant au nom du ROM.&#xA;Exemple : Un package pour "MonRom.nes" doit être placé dans "HdPacks\MonRom\hires.txt".</Message>
 		<Message ID="HdPackBuilderScaleHelp">Sélectionne la taille et le filtre à utiliser lors de la génération des fichiers PNG&#xA;pour le HD Pack. Utilisez les filtres "Prescale" pour générer l'image&#xA;avec une plus grande taille sans appliquer un filtre aux pixels.</Message>
@@ -884,6 +908,7 @@
 		<Message ID="EmulatorShortcutMappings_Pause">Pause</Message>
 		<Message ID="EmulatorShortcutMappings_Reset">Reset</Message>
 		<Message ID="EmulatorShortcutMappings_PowerCycle">Arrêt &amp; redémarrage</Message>
+		<Message ID="EmulatorShortcutMappings_ReloadRom">Recharger le ROM à partir du disque</Message>
 		<Message ID="EmulatorShortcutMappings_PowerOff">Arrêter le jeu</Message>
 		<Message ID="EmulatorShortcutMappings_Exit">Quitter</Message>
 		<Message ID="EmulatorShortcutMappings_TakeScreenshot">Capture d'écran</Message>
@@ -902,6 +927,8 @@
 		<Message ID="EmulatorShortcutMappings_LoadState">Charger l'état de la position courante</Message>
 		<Message ID="EmulatorShortcutMappings_ToggleCheats">Activer/désactiver tous les codes</Message>
 		<Message ID="EmulatorShortcutMappings_ToggleAudio">Activer/désactiver l'audio</Message>
+		<Message ID="EmulatorShortcutMappings_IncreaseVolume">Augmenter le volume</Message>
+		<Message ID="EmulatorShortcutMappings_DecreaseVolume">Diminuer le volume</Message>
 		<Message ID="EmulatorShortcutMappings_RunSingleFrame">Avancer d'une seule image</Message>
 
 		<Message ID="EmulatorShortcutMappings_EjectDisk">FDS - Éjecter le disque</Message>
@@ -922,6 +949,11 @@
 		<Message ID="EmulatorShortcutMappings_ToggleBackground">Activer/désactiver l'arrière-plan</Message>
 		<Message ID="EmulatorShortcutMappings_ToggleSprites">Activer/désactiver les sprites</Message>
 		<Message ID="EmulatorShortcutMappings_ToggleKeyboardMode">Activer/désactiver le mode clavier</Message>
+
+		<Message ID="EmulatorShortcutMappings_ToggleRecordVideo">Démarrer/arrêter enregistrement vidéo</Message>
+		<Message ID="EmulatorShortcutMappings_ToggleRecordAudio">Démarrer/arrêter enregistrement audio</Message>
+		<Message ID="EmulatorShortcutMappings_ToggleRecordMovie">Démarrer/arrêter enregistrement du film</Message>
+		
 		<Message ID="EmulatorShortcutMappings_MaxSpeed">Activer/désactiver la vitesse maximale</Message>
 		<Message ID="EmulatorShortcutMappings_LoadRandomGame">Ouvrir un jeu aléatoire</Message>
 		<Message ID="EmulatorShortcutMappings_SaveStateSlot1">Sauvegarde d'état - Position 1</Message>
@@ -935,6 +967,7 @@
 		<Message ID="EmulatorShortcutMappings_SaveStateSlot9">Sauvegarde d'état - Position 9</Message>
 		<Message ID="EmulatorShortcutMappings_SaveStateSlot10">Sauvegarde d'état - Position 10</Message>
 		<Message ID="EmulatorShortcutMappings_SaveStateToFile">Sauvergarde l'état dans un fichier</Message>
+		<Message ID="EmulatorShortcutMappings_SaveStateDialog">Ouvrir le menu de sauvegarde rapide</Message>
 		<Message ID="EmulatorShortcutMappings_LoadStateSlot1">Chargement d'état - Position 1</Message>
 		<Message ID="EmulatorShortcutMappings_LoadStateSlot2">Chargement d'état - Position 2</Message>
 		<Message ID="EmulatorShortcutMappings_LoadStateSlot3">Chargement d'état - Position 3</Message>
@@ -947,7 +980,20 @@
 		<Message ID="EmulatorShortcutMappings_LoadStateSlot10">Chargement d'état - Position 10</Message>
 		<Message ID="EmulatorShortcutMappings_LoadStateSlotAuto">Chargement d'état - Sauvegarde auto</Message>
 		<Message ID="EmulatorShortcutMappings_LoadStateFromFile">Charger l'état à partir d'un fichier</Message>
+		<Message ID="EmulatorShortcutMappings_LoadStateDialog">Ouvrir le menu de chargement rapide</Message>
 		<Message ID="EmulatorShortcutMappings_LoadLastSession">Charger la session précédente</Message>
+
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot1">Choisir position de sauvegarde 1</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot2">Choisir position de sauvegarde 2</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot3">Choisir position de sauvegarde 3</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot4">Choisir position de sauvegarde 4</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot5">Choisir position de sauvegarde 5</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot6">Choisir position de sauvegarde 6</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot7">Choisir position de sauvegarde 7</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot8">Choisir position de sauvegarde 8</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot9">Choisir position de sauvegarde 9</Message>
+		<Message ID="EmulatorShortcutMappings_SelectSaveSlot10">Choisir position de sauvegarde 10</Message>
+		
 		<Message ID="EmulatorShortcutMappings_OpenFile">Ouvrir un fichier</Message>
 		<Message ID="EmulatorShortcutMappings_OpenDebugger">Ouvrir le débogueur</Message>
 		<Message ID="EmulatorShortcutMappings_OpenAssembler">Ouvrir l'assembleur</Message>
@@ -968,6 +1014,7 @@
 			<Value ID="PowerPad">Power Pad</Value>
 			<Value ID="SnesMouse">Souris SNES</Value>
 			<Value ID="SuborMouse">Souris Subor</Value>
+			<Value ID="VbController">Manette Virtual Boy</Value>
 		</Enum>
 		<Enum ID="ExpansionPortDevice">
 			<Value ID="None">Aucun</Value>
@@ -1082,11 +1129,12 @@
 			<Value ID="Ukrainian">Українська</Value>
 			<Value ID="Catalan">Català</Value>
 			<Value ID="Chinese">中文</Value>
+			<Value ID="Italian">Italiano</Value>
 		</Enum>
 		<Enum ID="RamPowerOnState">
 			<Value ID="AllZeros">Tous les bits à 0 (Défaut)</Value>
 			<Value ID="AllOnes">Tous les bits à 1</Value>
-			<Value ID="Random">Valeurs aléatoires</Value>
+			<Value ID="Random">Valeurs aléatoires (Recommandé pour le développement)</Value>
 		</Enum>
 		<Enum ID="CheatCurrentFilterType">
 			<Value ID="Smaller">Plus petite que</Value>

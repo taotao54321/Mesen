@@ -74,7 +74,9 @@ namespace Mesen.GUI.Forms
 		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
 		{
 			bool processed = false;
-			OnProcessCmdKey?.Invoke(keyData, ref processed);
+			if(keyData != Keys.None) {
+				OnProcessCmdKey?.Invoke(keyData, ref processed);
+			}
 			return processed || base.ProcessCmdKey(ref msg, keyData);
 		}
 
@@ -110,8 +112,12 @@ namespace Mesen.GUI.Forms
 					menuItem = menuItem.OwnerItem;
 				}
 				this.Icon = menuItem.Image;
+				return base.ShowDialog(owner);
+			} else if(sender is IWin32Window) {
+				return base.ShowDialog(sender as IWin32Window);
+			} else {
+				return base.ShowDialog();
 			}
-			return base.ShowDialog(owner);
 		}
 
 		protected override void OnLoad(EventArgs e)
@@ -197,7 +203,27 @@ namespace Mesen.GUI.Forms
 					base.AutoScaleMode = value;
 				}
 			}
-		}		
+		}
+
+		protected void RestoreLocation(Point? location, Size? size = null)
+		{
+			if(!location.HasValue || size.HasValue && size.Value.IsEmpty) {
+				return;
+			}
+
+			this.StartPosition = FormStartPosition.Manual;
+
+			if(!Screen.AllScreens.Any((screen) => screen.Bounds.Contains(location.Value))) {
+				//If no screen contains the top left corner of the form, reset it to the primary screen
+				this.Location = Screen.PrimaryScreen.Bounds.Location;
+			} else {
+				this.Location = location.Value;
+			}
+
+			if(size != null) {
+				this.Size = size.Value;
+			}
+		}
 
 		private void InitializeComponent()
 		{

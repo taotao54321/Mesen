@@ -1,5 +1,5 @@
 STATIC_LINKING := 0
-AR             := ar
+AR             ?= ar
 
 SPACE :=
 SPACE := $(SPACE) $(SPACE)
@@ -64,7 +64,7 @@ ifeq ($(STATIC_LINKING), 1)
 EXT := a
 endif
 
-ifeq ($(platform), unix)
+ifneq (,$(findstring unix,$(platform)))
   EXT ?= so
    TARGET := $(TARGET_NAME)_libretro.$(EXT)
    fpic := -fPIC -pthread
@@ -126,14 +126,29 @@ ifeq ($(IOSSDK),)
 endif
 
   DEFINES := -DIOS
+ifeq ($(platform), ios-arm64)
+  CC = cc -arch arm64 -isysroot $(IOSSDK) -stdlib=libc++
+else
   CC = cc -arch armv7 -isysroot $(IOSSDK)
-ifeq ($(platform),ios9)
+endif
+ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
 CC     += -miphoneos-version-min=8.0
 CXXFLAGS += -miphoneos-version-min=8.0
 else
 CC     += -miphoneos-version-min=5.0
 CXXFLAGS += -miphoneos-version-min=5.0
 endif
+
+else ifeq ($(platform), tvos-arm64)
+   TARGET := $(TARGET_NAME)_libretro_tvos.dylib
+   fpic := -fPIC
+   SHARED := -dynamiclib
+   DEFINES := -DIOS -stdlib=libc++
+
+ifeq ($(IOSSDK),)
+   IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
+endif
+
 else ifneq (,$(findstring qnx,$(platform)))
   TARGET := $(TARGET_NAME)_libretro_qnx.so
    fpic := -fPIC
@@ -148,6 +163,15 @@ else ifeq ($(platform), vita)
    AR = arm-vita-eabi-ar
    CXXFLAGS += -Wl,-q -Wall -O3
   STATIC_LINKING = 1
+# Nintendo Switch (libnx)
+else ifeq ($(platform), libnx)
+   include $(DEVKITPRO)/libnx/switch_rules
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   DEFINES := -DSWITCH=1 -D__SWITCH__ -D_LARGEFILE_SOURCE -DHAVE_LIBNX -D__aarch64__
+   CFLAGS := $(DEFINES) -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec 
+   CFLAGS += -march=armv8-a -mtune=cortex-a57 -mtp=soft -mcpu=cortex-a57+crc+fp+simd -ffast-math
+   CXXFLAGS := $(ASFLAGS) $(CFLAGS)
+   STATIC_LINKING = 1
 # Windows MSVC 2017 all architectures
 else ifneq (,$(findstring windows_msvc2017,$(platform)))
 
@@ -175,7 +199,7 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
   reg_query = $(call filter_out2,$(subst $2,,$(shell reg query "$2" -v "$1" 2>nul)))
   fix_path = $(subst $(SPACE),\ ,$(subst \,/,$1))
 
-  ProgramFiles86w := $(shell cmd /c "echo %PROGRAMFILES(x86)%")
+  ProgramFiles86w := $(shell cmd //c "echo %PROGRAMFILES(x86)%")
   ProgramFiles86 := $(shell cygpath "$(ProgramFiles86w)")
 
   WindowsSdkDir ?= $(call reg_query,InstallationFolder,HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0)
@@ -235,10 +259,10 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
   LDFLAGS += -DLL
   LIBM :=
 else
-   CC = gcc
-   CXX = g++
+   CC ?= gcc
+   CXX ?= g++
    TARGET := $(TARGET_NAME)_libretro.dll
-   SHARED := -shared -s -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined
+   SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined
 endif
 
 LDFLAGS += $(LIBM)
@@ -282,6 +306,15 @@ else
   LD = $(CXX)
 endif
 
+CONFLICTING_NAMES=std_vorbis std_vorbis_close stb_vorbis_open_memory stb_vorbis_get_info \
+  stb_vorbis_seek stb_vorbis_get_samples_short_interleaved stb_vorbis_seek_start \
+  stb_vorbis_get_file_offset
+ifeq ($(STATIC_LINKING),1)
+  PREFIX_DEFINES := $(foreach name,$(CONFLICTING_NAMES),-D$(name)=core_$(name))
+  CFLAGS   += $(PREFIX_DEFINES)
+  CXXFLAGS += $(PREFIX_DEFINES)
+endif
+
 include Makefile.common
 
 OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
@@ -297,7 +330,6 @@ CXXFLAGS += -D LIBRETRO $(fpic) -std=c++14
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@echo "** BUILDING $(TARGET) FOR PLATFORM $(platform) **"
 ifeq ($(STATIC_LINKING), 1)
 ifneq (,$(findstring msvc,$(platform)))
 	$(LD) $(LINKOUT)$@ $(OBJECTS)
@@ -307,7 +339,6 @@ endif
 else
 	$(LD) $(fpic) $(SHARED) $(INCLUDES) $(LINKOUT)$@ $(OBJECTS) $(LDFLAGS)
 endif
-	@echo "** BUILD SUCCESSFUL! GG NO RE **"
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(fpic) -c $< $(OBJOUT)$@

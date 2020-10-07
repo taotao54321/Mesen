@@ -3,6 +3,7 @@
 #include "BaseMapper.h"
 #include "PPU.h"
 #include "MMC5Audio.h"
+#include "MMC5MemoryHandler.h"
 
 class MMC5 : public BaseMapper
 {
@@ -13,6 +14,7 @@ private:
 	static constexpr uint8_t NtFillModeIndex = 3;
 
 	unique_ptr<MMC5Audio> _audio;
+	unique_ptr<MMC5MemoryHandler> _mmc5MemoryHandler;
 
 	uint8_t _prgRamProtect1;
 	uint8_t _prgRamProtect2;
@@ -50,18 +52,19 @@ private:
 	uint8_t _chrUpperBits;
 	uint16_t _chrBanks[12];
 	uint16_t _lastChrReg;
-	bool _spriteFetch;
-	bool _largeSprites;
+	bool _prevChrA;
 
 	//IRQ counter related fields
 	uint8_t _irqCounterTarget;
 	bool _irqEnabled;
-	int16_t _previousScanline;
-	uint8_t _irqCounter;
+	uint8_t _scanlineCounter;
 	bool _irqPending;
-	bool _ppuInFrame;
 
-	MemoryOperationType _lastVramOperationType;
+	bool _needInFrame;
+	bool _ppuInFrame;
+	uint8_t _ppuIdleCounter;
+	uint16_t _lastPpuReadAddr;
+	uint8_t _ntReadCounter;
 
 	void SwitchPrgBank(uint16_t reg, uint8_t value)
 	{
@@ -88,14 +91,15 @@ private:
 			// 1x 8kb   : 0 0 0 0 - - - -
 			// 2x 8kb   : 0 0 0 0 1 1 1 1
 			// 1x 32kb  : 0 1 2 3 - - - -
-			int32_t realWorkRamSize = _workRamSize - MMC5::ExRamSize;
+			int32_t realWorkRamSize = _workRamSize - (HasBattery() ? 0 : MMC5::ExRamSize);
+			int32_t realSaveRamSize = _saveRamSize - (!HasBattery() ? 0 : MMC5::ExRamSize);
 			if(IsNes20() || _romInfo.IsInDatabase) {
 				memoryType = PrgMemoryType::WorkRam;
-				if(HasBattery() && (bankNumber <= 3 || _saveRamSize > 0x2000)) {
+				if(HasBattery() && (bankNumber <= 3 || realSaveRamSize > 0x2000)) {
 					memoryType = PrgMemoryType::SaveRam;
 				}
 
-				if(_saveRamSize + realWorkRamSize != 0x4000 && bankNumber >= 4) {
+				if(realSaveRamSize + realWorkRamSize != 0x4000 && bankNumber >= 4) {
 					//When not 2x 8kb (=16kb), banks 4/5/6/7 select the empty socket and return open bus
 					accessType = MemoryAccessType::NoAccess;
 				}
@@ -107,6 +111,12 @@ private:
 				//Properly mirror work ram (by ignoring the extra 1kb ExRAM section)
 				bankNumber &= (realWorkRamSize / 0x2000) - 1;
 				if(_workRamSize == MMC5::ExRamSize) {
+					accessType = MemoryAccessType::NoAccess;
+				}
+			} else if(memoryType == PrgMemoryType::SaveRam) {
+				//Properly mirror work ram (by ignoring the extra 1kb ExRAM section)
+				bankNumber &= (realSaveRamSize / 0x2000) - 1;
+				if(_saveRamSize == MMC5::ExRamSize) {
 					accessType = MemoryAccessType::NoAccess;
 				}
 			}
@@ -166,26 +176,29 @@ private:
 
 	void SwitchChrBank(uint16_t reg, uint8_t value)
 	{
-		_chrBanks[reg - 0x5120] = value | (_chrUpperBits << 8);
-
-		if(_largeSprites) {
+		uint16_t newValue = value | (_chrUpperBits << 8);
+		if(newValue != _chrBanks[reg - 0x5120] || _lastChrReg != reg) {
+			_chrBanks[reg - 0x5120] = newValue;
 			_lastChrReg = reg;
-		} else {
-			//Using 8x8 sprites resets the last written to bank logic
-			//Unsure about this part (hasn't been tested specifically, but would make sense)
-			_lastChrReg = 0;
+			UpdateChrBanks(true);
 		}
-		UpdateChrBanks();
 	}
 
-	void UpdateChrBanks()
+	void UpdateChrBanks(bool forceUpdate)
 	{
-		if(!_largeSprites) {
+		bool largeSprites = (_mmc5MemoryHandler->GetReg(0x2000) & 0x20) != 0;
+
+		if(!largeSprites) {
 			//Using 8x8 sprites resets the last written to bank logic
 			_lastChrReg = 0;
 		}
 
-		bool chrA = !_largeSprites || (_largeSprites && _spriteFetch) || (_lastVramOperationType != MemoryOperationType::PpuRenderingRead && _lastChrReg <= 0x5127);
+		bool chrA = !largeSprites || (_splitTileNumber >= 32 && _splitTileNumber < 40) || (!_ppuInFrame && _lastChrReg <= 0x5127);
+		if(!forceUpdate && chrA == _prevChrA) {
+			return;
+		}
+		_prevChrA = chrA;
+
 		if(_chrMode == 0) {
 			SelectChrPage8x(0, _chrBanks[chrA ? 0x07 : 0x0B] << 3);
 		} else if(_chrMode == 1) {
@@ -211,36 +224,14 @@ private:
 	void ProcessCpuClock() override
 	{
 		_audio->Clock();
-	}
 
-	virtual void NotifyVRAMAddressChange(uint16_t addr) override
-	{
-		PPU* ppu = _console->GetPpu();
-		if(ppu->GetControlFlags().BackgroundEnabled || ppu->GetControlFlags().SpritesEnabled) {
-			int16_t currentScanline = ppu->GetCurrentScanline();
-			if(currentScanline != _previousScanline) {
-				if(currentScanline >= 239 || currentScanline < 0) {
-					_ppuInFrame = false;
-				} else {
-					if(!_ppuInFrame) {
-						_ppuInFrame = true;
-						_irqCounter = 0;
-						_irqPending = false;
-						_console->GetCpu()->ClearIrqSource(IRQSource::External);
-					} else {
-						_irqCounter++;
-						if(_irqCounter == _irqCounterTarget) {
-							_irqPending = true;
-							if(_irqEnabled) {
-								_console->GetCpu()->SetIrqSource(IRQSource::External);
-							}
-						}
-					}
-				}
-				_previousScanline = currentScanline;
+		if(_ppuIdleCounter) {
+			_ppuIdleCounter--;
+			if(_ppuIdleCounter == 0) {
+				//"The "in-frame" flag is cleared when the PPU is no longer rendering. This is detected when 3 CPU cycles pass without a PPU read having occurred (PPU /RD has not been low during the last 3 M2 rises)."
+				_ppuInFrame = false;
+				UpdateChrBanks(true);
 			}
-		} else {
-			_ppuInFrame = false;
 		}
 	}
 
@@ -258,7 +249,8 @@ private:
 		for(int i = 0; i < 4; i++) {
 			uint8_t nametableId = nametables[(value >> (i * 2)) & 0x03];
 			if(nametableId == NtWorkRamIndex) {
-				SetPpuMemoryMapping(0x2000+i*0x400, 0x2000+i*0x400+0x3FF, _workRam, MemoryAccessType::ReadWrite);
+				uint8_t* source = HasBattery() ? (_saveRam + (_saveRamSize - MMC5::ExRamSize)) : (_workRam + (_workRamSize - MMC5::ExRamSize));
+				SetPpuMemoryMapping(0x2000+i*0x400, 0x2000+i*0x400+0x3FF, source, MemoryAccessType::ReadWrite);
 			} else {
 				SetNametable(i, nametableId);
 			}
@@ -281,7 +273,12 @@ private:
 			//"Mode 3 - Read-only"
 			accessType = MemoryAccessType::Read;
 		}
-		SetCpuMemoryMapping(0x5C00, 0x5FFF, PrgMemoryType::WorkRam, _workRamSize - MMC5::ExRamSize, accessType);
+
+		if(HasBattery()) {
+			SetCpuMemoryMapping(0x5C00, 0x5FFF, PrgMemoryType::SaveRam, _saveRamSize - MMC5::ExRamSize, accessType);
+		} else {
+			SetCpuMemoryMapping(0x5C00, 0x5FFF, PrgMemoryType::WorkRam, _workRamSize - MMC5::ExRamSize, accessType);
+		}
 
 		SetNametableMapping(_nametableMapping);
 	}
@@ -299,11 +296,6 @@ private:
 		memset(GetNametable(NtFillModeIndex) + 32 * 30, attributeByte, 64); //Attribute table is 64 bytes
 	}
 
-	bool IsSpriteFetch()
-	{
-		return _console->GetPpu()->GetCurrentCycle() >= 257 && _console->GetPpu()->GetCurrentCycle() < 321;
-	}
-
 protected:
 	virtual uint16_t GetPRGPageSize() override { return 0x2000; }
 	virtual uint16_t GetCHRPageSize() override { return 0x400; }
@@ -316,34 +308,58 @@ protected:
 
 	virtual uint32_t GetSaveRamSize() override
 	{
+		uint32_t size;
 		if(IsNes20()) {
-			return _romInfo.NesHeader.GetSaveRamSize();
+			size = _romInfo.NesHeader.GetSaveRamSize();
 		} else if(_romInfo.IsInDatabase) {
-			return _romInfo.DatabaseInfo.SaveRamSize;
+			size = _romInfo.DatabaseInfo.SaveRamSize;
 		} else {
 			//Emulate as if a single 64k block of work/save ram existed
-			return _romInfo.HasBattery ? 0x10000 : 0;
+			size = _romInfo.HasBattery ? 0x10000 : 0;
 		}
+
+		if(HasBattery()) {
+			//If there's a battery on the board, exram gets saved, too.
+			size += MMC5::ExRamSize;
+		}
+
+		return size;
 	}
 
 	virtual uint32_t GetWorkRamSize() override
 	{
+		uint32_t size;
 		if(IsNes20()) {
-			return _romInfo.NesHeader.GetWorkRamSize() + MMC5::ExRamSize;
+			size = _romInfo.NesHeader.GetWorkRamSize();
 		} else if(_romInfo.IsInDatabase) {
-			return _romInfo.DatabaseInfo.WorkRamSize + MMC5::ExRamSize;
+			size = _romInfo.DatabaseInfo.WorkRamSize;
 		} else {
 			//Emulate as if a single 64k block of work/save ram existed (+ 1kb of ExRAM)
-			return (_romInfo.HasBattery ? 0 : 0x10000) + MMC5::ExRamSize;
+			size = (_romInfo.HasBattery ? 0 : 0x10000);
 		}
+		if(!HasBattery()) {
+			size += MMC5::ExRamSize;
+		}
+		
+		return size;
 	}
 
 	virtual bool AllowRegisterRead() override { return true; }
 
 	virtual void InitMapper() override
 	{
+		AddRegisterRange(0xFFFA, 0xFFFB, MemoryOperation::Read);
+
 		_audio.reset(new MMC5Audio(_console));
 		
+		//Override the 2000-2007 registers to catch all writes to the PPU registers (but not their mirrors)
+		_mmc5MemoryHandler.reset(new MMC5MemoryHandler(_console.get()));
+
+		_ppuIdleCounter = 0;
+		_lastPpuReadAddr = 0;
+		_ntReadCounter = 0;
+		_prevChrA = false;
+
 		_chrMode = 0;
 		_prgRamProtect1 = 0;
 		_prgRamProtect2 = 0;
@@ -361,8 +377,6 @@ protected:
 		_chrUpperBits = 0;
 		memset(_chrBanks, 0, sizeof(_chrBanks));
 		_lastChrReg = 0;
-		_spriteFetch = false;
-		_largeSprites = false;
 
 		_exAttrLastFetchCounter = 0;
 		_exAttributeLastNametableFetch = 0;
@@ -370,12 +384,10 @@ protected:
 		
 		_irqPending = false;
 		_irqCounterTarget = 0;
-		_irqCounter = 0;
+		_scanlineCounter = 0;
 		_irqEnabled = false;
-		_previousScanline = -1;
 		_ppuInFrame = false;
-
-		_lastVramOperationType = MemoryOperationType::Read;
+		_needInFrame = false;
 
 		_splitInSplitRegion = false;
 		_splitVerticalScroll = 0;
@@ -391,11 +403,22 @@ protected:
 
 		//"Games seem to expect $5117 to be $FF on powerup (last PRG page swapped in)."
 		WriteRegister(0x5117, 0xFF);
+
+		UpdateChrBanks(true);
+	}
+
+	void Reset(bool softReset) override
+	{
+		_console->GetMemoryManager()->RegisterWriteHandler(_mmc5MemoryHandler.get(), 0x2000, 0x2007);
 	}
 
 	void StreamState(bool saving) override
 	{
 		BaseMapper::StreamState(saving);
+
+		int16_t unusedPreviousScanline = 0;
+		bool unusedSpriteFetch = false;
+		bool unusedLargeSprites = false;
 
 		ArrayInfo<uint8_t> prgBanks = { _prgBanks, 5 };
 		ArrayInfo<uint16_t> chrBanks = { _chrBanks, 12 };
@@ -404,8 +427,8 @@ protected:
 				_verticalSplitDelimiterTile, _verticalSplitScroll, _verticalSplitBank, _multiplierValue1, _multiplierValue2,
 				_nametableMapping, _extendedRamMode, _exAttributeLastNametableFetch, _exAttrLastFetchCounter, _exAttrSelectedChrBank, 
 				_prgMode, prgBanks, _chrMode, _chrUpperBits, chrBanks, _lastChrReg, 
-				_spriteFetch, _largeSprites, _irqCounterTarget, _irqEnabled, _previousScanline, _irqCounter, _irqPending, _ppuInFrame, audio,
-				_splitInSplitRegion, _splitVerticalScroll, _splitTile, _splitTileNumber, _lastVramOperationType);
+				unusedSpriteFetch, unusedLargeSprites, _irqCounterTarget, _irqEnabled, unusedPreviousScanline, _scanlineCounter, _irqPending, _ppuInFrame, audio,
+				_splitInSplitRegion, _splitVerticalScroll, _splitTile, _splitTileNumber, _needInFrame);
 
 		if(!saving) {
 			UpdatePrgBanks();
@@ -415,103 +438,127 @@ protected:
 
 	virtual void WriteRAM(uint16_t addr, uint8_t value) override
 	{
-		if(addr >= 0x5C00 && addr <= 0x5FFF && _extendedRamMode <= 1) {
-			PPUControlFlags flags = _console->GetPpu()->GetControlFlags();
-			if(!flags.BackgroundEnabled && !flags.SpritesEnabled) {
-				//Expansion RAM ($5C00-$5FFF, read/write)
-				//Mode 0/1 - Not readable (returns open bus), can only be written while the PPU is rendering (otherwise, 0 is written)
-				value = 0;
-			}
+		if(addr >= 0x5C00 && addr <= 0x5FFF && _extendedRamMode <= 1 && !_ppuInFrame) {
+			//Expansion RAM ($5C00-$5FFF, read/write)
+			//Mode 0/1 - Not readable (returns open bus), can only be written while the PPU is rendering (otherwise, 0 is written)
+			value = 0;
 		}
 		BaseMapper::WriteRAM(addr, value);
 	}
 
+	void DetectScanlineStart(uint16_t addr)
+	{
+		if(addr >= 0x2000 && addr <= 0x2FFF) {
+			if(_lastPpuReadAddr == addr) {
+				//Count consecutive identical reads
+				_ntReadCounter++;
+			} else {
+				_ntReadCounter = 0;
+			}
+
+			if(_ntReadCounter >= 2) {
+				if(!_ppuInFrame && !_needInFrame) {
+					_needInFrame = true;
+					_scanlineCounter = 0;
+				} else {
+					_scanlineCounter++;
+					if(_irqCounterTarget == _scanlineCounter) {
+						_irqPending = true;
+						if(_irqEnabled) {
+							_console->GetCpu()->SetIrqSource(IRQSource::External);
+						}
+					}
+				}
+				_splitTileNumber = 0;
+			}
+		} else {
+			_ntReadCounter = 0;
+		}
+	}
+
 	virtual uint8_t MapperReadVRAM(uint16_t addr, MemoryOperationType memoryOperationType) override
 	{
-		PPU* ppu = _console->GetPpu();
-		if(_spriteFetch != IsSpriteFetch() || _largeSprites != ppu->GetControlFlags().LargeSprites || _lastVramOperationType != memoryOperationType) {
-			_lastVramOperationType = memoryOperationType;
-			_spriteFetch = IsSpriteFetch();
-			_largeSprites = ppu->GetControlFlags().LargeSprites;
-			UpdateChrBanks();
+		bool isNtFetch = addr >= 0x2000 && addr <= 0x2FFF && (addr & 0x3FF) < 0x3C0;
+		if(isNtFetch) {
+			//Nametable data, not an attribute fetch
+			_splitInSplitRegion = false;
+			_splitTileNumber++;
+
+			if(_ppuInFrame) {
+				UpdateChrBanks(false);
+			} else if(_needInFrame) {
+				_needInFrame = false;
+				_ppuInFrame = true;
+				UpdateChrBanks(false);
+			}
 		}
+		DetectScanlineStart(addr);
 
-		if(_extendedRamMode <= 1 && _verticalSplitEnabled && memoryOperationType == MemoryOperationType::PpuRenderingRead) {
-			uint32_t cycle = ppu->GetCurrentCycle();
-			int32_t scanline = ppu->GetCurrentScanline();
-			if(cycle == 321) {
-				_splitTileNumber = -1;
-				if(scanline == -1) {
-					_splitVerticalScroll = _verticalSplitScroll;
-				} else if(scanline < 240) {
-					_splitVerticalScroll++;
-				}
-				if(_splitVerticalScroll >= 240) {
-					_splitVerticalScroll -= 240;
-				}
-			}
+		_ppuIdleCounter = 3;
+		_lastPpuReadAddr = addr;
 
-			if((cycle - 1) % 8 == 0 && cycle != 337) {
-				_splitTileNumber++;
-			}
-
-			if(cycle < 256 || cycle >= 321) {
+		if(_extendedRamMode <= 1 && _ppuInFrame) {
+			if(_verticalSplitEnabled) {
+				uint16_t verticalSplitScroll = (_verticalSplitScroll + _scanlineCounter) % 240;
 				if(addr >= 0x2000) {
-					if((addr & 0x3FF) < 0x3C0) {
-						if((_verticalSplitRightSide && _splitTileNumber >= _verticalSplitDelimiterTile) || (!_verticalSplitRightSide && _splitTileNumber < _verticalSplitDelimiterTile)) {
-							//Split region
+					if(isNtFetch) {
+						uint8_t tileNumber = (_splitTileNumber + 2) % 42;
+						if(tileNumber <= 32 && ((_verticalSplitRightSide && tileNumber >= _verticalSplitDelimiterTile) || (!_verticalSplitRightSide && tileNumber < _verticalSplitDelimiterTile))) {
+							//Split region (for next 3 fetches, attribute + 2x tile data)
 							_splitInSplitRegion = true;
-							_splitTile = ((_splitVerticalScroll & 0xF8) << 2) | _splitTileNumber;
+							_splitTile = ((verticalSplitScroll & 0xF8) << 2) | tileNumber;
 							return InternalReadRam(0x5C00 + _splitTile);
 						} else {
-							//Regular data, result can get modified by ex ram mode code below
+							//Outside of split region (or sprite data), result can get modified by ex ram mode code below
 							_splitInSplitRegion = false;
 						}
 					} else if(_splitInSplitRegion) {
-						return InternalReadRam(0x5FC0 + ((_splitTile >> 4) & ~0x07) + ((_splitTile & 0x3F) >> 2));
+						return InternalReadRam(0x5FC0 | ((_splitTile & 0x380) >> 4) | ((_splitTile & 0x1F) >> 2));
 					}
 				} else if(_splitInSplitRegion) {
-					return _chrRom[(_verticalSplitBank % (GetCHRPageCount() / 4)) * 0x1000 + (((addr & ~0x07) | (_splitVerticalScroll & 0x07)) & 0xFFF)];
+					//CHR tile fetches for split region
+					return _chrRom[(_verticalSplitBank % (GetCHRPageCount() / 4)) * 0x1000 + (((addr & ~0x07) | (verticalSplitScroll & 0x07)) & 0xFFF)];
 				}
 			}
-		}
 
-		if(_extendedRamMode == 1 && !IsSpriteFetch() && memoryOperationType == MemoryOperationType::PpuRenderingRead) {
-			//"In Mode 1, nametable fetches are processed normally, and can come from CIRAM nametables, fill mode, or even Expansion RAM, but attribute fetches are replaced by data from Expansion RAM."
-			//"Each byte of Expansion RAM is used to enhance the tile at the corresponding address in every nametable"
+			if(_extendedRamMode == 1 && (_splitTileNumber < 32 || _splitTileNumber >= 40)) {
+				//"In Mode 1, nametable fetches are processed normally, and can come from CIRAM nametables, fill mode, or even Expansion RAM, but attribute fetches are replaced by data from Expansion RAM."
+				//"Each byte of Expansion RAM is used to enhance the tile at the corresponding address in every nametable"
 
-			//When fetching NT data, we set a flag and then alter the VRAM values read by the PPU on the following 3 cycles (palette, tile low/high byte)
-			if(addr >= 0x2000 && (addr & 0x3FF) < 0x3C0) {
-				//Nametable fetches
-				_exAttributeLastNametableFetch = addr & 0x03FF;
-				_exAttrLastFetchCounter = 3;
-			} else if(_exAttrLastFetchCounter > 0) {
-				//Attribute fetches
-				_exAttrLastFetchCounter--;
-				switch(_exAttrLastFetchCounter) {
-					case 2:
-					{
-						//PPU palette fetch
-						//Check work ram (expansion ram) to see which tile/palette to use
-						//Use InternalReadRam to bypass the fact that the ram is supposed to be write-only in mode 0/1
-						uint8_t value = InternalReadRam(0x5C00 + _exAttributeLastNametableFetch);
+				//When fetching NT data, we set a flag and then alter the VRAM values read by the PPU on the following 3 cycles (palette, tile low/high byte)
+				if(isNtFetch) {
+					//Nametable fetches
+					_exAttributeLastNametableFetch = addr & 0x03FF;
+					_exAttrLastFetchCounter = 3;
+				} else if(_exAttrLastFetchCounter > 0) {
+					//Attribute fetches
+					_exAttrLastFetchCounter--;
+					switch(_exAttrLastFetchCounter) {
+						case 2:
+						{
+							//PPU palette fetch
+							//Check work ram (expansion ram) to see which tile/palette to use
+							//Use InternalReadRam to bypass the fact that the ram is supposed to be write-only in mode 0/1
+							uint8_t value = InternalReadRam(0x5C00 + _exAttributeLastNametableFetch);
 
-						//"The pattern fetches ignore the standard CHR banking bits, and instead use the top two bits of $5130 and the bottom 6 bits from Expansion RAM to choose a 4KB bank to select the tile from."
-						_exAttrSelectedChrBank = ((value & 0x3F) | (_chrUpperBits << 6)) % (_chrRomSize / 0x1000);
+							//"The pattern fetches ignore the standard CHR banking bits, and instead use the top two bits of $5130 and the bottom 6 bits from Expansion RAM to choose a 4KB bank to select the tile from."
+							_exAttrSelectedChrBank = ((value & 0x3F) | (_chrUpperBits << 6)) % (_chrRomSize / 0x1000);
 
-						//Return a byte containing the same palette 4 times - this allows the PPU to select the right palette no matter the shift value
-						uint8_t palette = (value & 0xC0) >> 6;
-						return palette | palette << 2 | palette << 4 | palette << 6;
+							//Return a byte containing the same palette 4 times - this allows the PPU to select the right palette no matter the shift value
+							uint8_t palette = (value & 0xC0) >> 6;
+							return palette | palette << 2 | palette << 4 | palette << 6;
+						}
+
+						case 1:
+						case 0:
+							//PPU tile data fetch (high byte & low byte)
+							return _chrRom[_exAttrSelectedChrBank * 0x1000 + (addr & 0xFFF)];
 					}
-
-					case 1:
-					case 0:
-						//PPU tile data fetch (high byte & low byte)
-						return _chrRom[_exAttrSelectedChrBank * 0x1000 + (addr & 0xFFF)];
 				}
 			}
 		}
-		return BaseMapper::MapperReadVRAM(addr, memoryOperationType);
+		
+		return InternalReadVRAM(addr);
 	}
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
@@ -527,7 +574,7 @@ protected:
 					break;
 
 				case 0x5100: _prgMode = value & 0x03; UpdatePrgBanks(); break;
-				case 0x5101: _chrMode = value & 0x03; UpdateChrBanks(); break;
+				case 0x5101: _chrMode = value & 0x03; UpdateChrBanks(true); break;
 				case 0x5102: _prgRamProtect1 = value & 0x03; UpdatePrgBanks(); break;
 				case 0x5103: _prgRamProtect2 = value & 0x03; UpdatePrgBanks(); break;
 				case 0x5104: SetExtendedRamMode(value & 0x03); break;
@@ -576,6 +623,16 @@ protected:
 
 			case 0x5205: return (_multiplierValue1*_multiplierValue2) & 0xFF;
 			case 0x5206: return (_multiplierValue1*_multiplierValue2) >> 8;
+
+			case 0xFFFA: 
+			case 0xFFFB:
+				_ppuInFrame = false;
+				UpdateChrBanks(true);
+				_lastPpuReadAddr = 0;
+				_scanlineCounter = 0;
+				_irqPending = false;
+				_console->GetCpu()->ClearIrqSource(IRQSource::External);
+				return DebugReadRAM(addr);
 		}
 
 		return _console->GetMemoryManager()->GetOpenBus();

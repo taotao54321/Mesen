@@ -238,6 +238,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BiosHelper.cs" />
     <Compile Include="CommandLineHelper.cs" />
     <Compile Include="Config\DebuggerShortcutsConfig.cs" />
     <Compile Include="Config\GameSpecificInfo.cs" />
@@ -273,6 +274,9 @@
     <Compile Include="Controls\ctrlHorizontalTrackbar.Designer.cs">
       <DependentUpon>ctrlHorizontalTrackbar.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ctrlLinkLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\ctrlLoadingRom.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -296,6 +300,15 @@
     </Compile>
     <Compile Include="Controls\ctrlNsfPlayer.Designer.cs">
       <DependentUpon>ctrlNsfPlayer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ctrlPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ctrlRecentGame.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ctrlRecentGame.Designer.cs">
+      <DependentUpon>ctrlRecentGame.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\ctrlRecentGames.cs">
       <SubType>UserControl</SubType>
@@ -418,6 +431,9 @@
     <Compile Include="Debugger\Controls\ctrlCodeScrollbar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Debugger\Controls\ctrlColorPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Debugger\Controls\ctrlDbgShortcuts.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -441,6 +457,15 @@
     </Compile>
     <Compile Include="Debugger\Controls\ctrlFlagStatus.Designer.cs">
       <DependentUpon>ctrlFlagStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Debugger\Controls\ctrlImagePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Debugger\Controls\ctrlImagePanel.Designer.cs">
+      <DependentUpon>ctrlImagePanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Debugger\Controls\ctrlImageViewer.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Debugger\Controls\ctrlLabelList.cs">
       <SubType>UserControl</SubType>
@@ -706,12 +731,6 @@
     <Compile Include="Debugger\frmDbgPreferences.Designer.cs">
       <DependentUpon>frmDbgPreferences.cs</DependentUpon>
     </Compile>
-    <Compile Include="Debugger\frmEventViewerColors.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Debugger\frmEventViewerColors.Designer.cs">
-      <DependentUpon>frmEventViewerColors.cs</DependentUpon>
-    </Compile>
     <Compile Include="Debugger\frmDebuggerColors.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -884,6 +903,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Debugger\WatchManager.cs" />
+    <Compile Include="Debugger\WindowRefreshManager.cs" />
     <Compile Include="Forms\BaseConfigForm.Designer.cs">
       <DependentUpon>BaseConfigForm.cs</DependentUpon>
     </Compile>
@@ -941,6 +961,12 @@
     <Compile Include="Forms\Config\Controllers\ctrlBandaiMicrophone.Designer.cs">
       <DependentUpon>ctrlBandaiMicrophone.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Config\Controllers\ctrlVirtualBoyConfig.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Config\Controllers\ctrlVirtualBoyConfig.Designer.cs">
+      <DependentUpon>ctrlVirtualBoyConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Config\Controllers\frmPachinkoConfig.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -958,6 +984,12 @@
     </Compile>
     <Compile Include="Forms\Config\Controllers\frmBandaiMicrophone.Designer.cs">
       <DependentUpon>frmBandaiMicrophone.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Config\Controllers\frmVirtualBoyConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Config\Controllers\frmVirtualBoyConfig.Designer.cs">
+      <DependentUpon>frmVirtualBoyConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Config\ctrlDipSwitch.cs">
       <SubType>UserControl</SubType>
@@ -1265,6 +1297,7 @@
     <Compile Include="GoogleDriveIntegration\CloudSyncHelper.cs" />
     <Compile Include="GoogleDriveIntegration\GoogleDriveAccessor.cs" />
     <Compile Include="GoogleDriveIntegration\MesenCodeReceiver.cs" />
+    <Compile Include="ImageExtensions.cs" />
     <Compile Include="InteropEmu.cs" />
     <Compile Include="MonoToolStripHelper.cs" />
     <Compile Include="ThemeHelper.cs" />
@@ -1338,6 +1371,9 @@
     <None Include="app.manifest" />
     <None Include="Resources\Exclamation.png" />
     <None Include="Resources\Comment.png" />
+    <EmbeddedResource Include="Controls\ctrlRecentGame.resx">
+      <DependentUpon>ctrlRecentGame.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\MesenNumericUpDown.resx">
       <DependentUpon>MesenNumericUpDown.cs</DependentUpon>
     </EmbeddedResource>
@@ -1385,6 +1421,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Debugger\Controls\ctrlEventViewerPpuView.resx">
       <DependentUpon>ctrlEventViewerPpuView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Debugger\Controls\ctrlImagePanel.resx">
+      <DependentUpon>ctrlImagePanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Debugger\Controls\ctrlScanlineCycleSelect.resx">
       <DependentUpon>ctrlScanlineCycleSelect.cs</DependentUpon>
@@ -1543,9 +1582,6 @@
     <EmbeddedResource Include="Debugger\frmDbgPreferences.resx">
       <DependentUpon>frmDbgPreferences.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Debugger\frmEventViewerColors.resx">
-      <DependentUpon>frmEventViewerColors.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Debugger\frmDebuggerColors.resx">
       <DependentUpon>frmDebuggerColors.cs</DependentUpon>
     </EmbeddedResource>
@@ -1641,6 +1677,9 @@
     <EmbeddedResource Include="Forms\Config\Controllers\ctrlBandaiMicrophone.resx">
       <DependentUpon>ctrlBandaiMicrophone.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Config\Controllers\ctrlVirtualBoyConfig.resx">
+      <DependentUpon>ctrlVirtualBoyConfig.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Config\Controllers\frmPachinkoConfig.resx">
       <DependentUpon>frmPachinkoConfig.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -1651,6 +1690,9 @@
     <EmbeddedResource Include="Forms\Config\Controllers\frmBandaiMicrophone.resx">
       <DependentUpon>frmBandaiMicrophone.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Config\Controllers\frmVirtualBoyConfig.resx">
+      <DependentUpon>frmVirtualBoyConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Config\ctrlDipSwitch.resx">
       <DependentUpon>ctrlDipSwitch.cs</DependentUpon>
@@ -1819,9 +1861,6 @@
     <Content Include="Dependencies\CharacterMappings.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Dependencies\PixelFont.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -1896,6 +1935,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Dependencies\resources.it.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Dependencies\DipswitchDefinitions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -1941,6 +1984,7 @@
     <None Include="Resources\BreakpointEnableDisable.png" />
     <None Include="Resources\ArrowKeys.png" />
     <None Include="Resources\Barcode.png" />
+    <None Include="Resources\CloseWhite.png" />
     <Content Include="Resources\coins.png" />
     <None Include="Resources\DipSwitches.png" />
     <None Include="Resources\MesenIcon.png" />

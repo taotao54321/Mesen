@@ -27,7 +27,7 @@ class VideoDecoder
 {
 private:
 	shared_ptr<Console> _console;
-
+	EmulationSettings* _settings;
 	uint16_t *_ppuOutputBuffer = nullptr;
 	HdScreenInfo *_hdScreenInfo = nullptr;
 	bool _hdFilterEnabled = false;
@@ -61,7 +61,7 @@ public:
 
 	void DecodeFrame(bool synchronous = false);
 	void TakeScreenshot();
-	void TakeScreenshot(std::stringstream &stream);
+	void TakeScreenshot(std::stringstream &stream, bool rawScreenshot = false);
 
 	uint32_t GetFrameCount();
 

@@ -20,7 +20,6 @@ namespace Mesen.GUI.Debugger
 	{
 		private InteropEmu.NotificationListener _notifListener;
 		private DebugMemoryType _memoryType = DebugMemoryType.CpuMemory;
-		private DebugWorkspace _previousWorkspace;
 		private bool _updating = false;
 		private DateTime _lastUpdate = DateTime.MinValue;
 		private TabPage _selectedTab;
@@ -34,8 +33,6 @@ namespace Mesen.GUI.Debugger
 		protected override void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
-
-			DebugWorkspaceManager.AutoLoadDbgFiles(true);
 
 			this._selectedTab = this.tabMain.SelectedTab;
 
@@ -58,9 +55,6 @@ namespace Mesen.GUI.Debugger
 
 			this.ctrlHexViewer.TextZoom = config.RamTextZoom;
 			this.ctrlHexViewer.BaseFont = new Font(config.RamFontFamily, config.RamFontSize, config.RamFontStyle);
-
-			this.ctrlMemoryAccessCounters.BaseFont = new Font(config.RamFontFamily, config.RamFontSize, config.RamFontStyle);
-			this.ctrlMemoryAccessCounters.TextZoom = config.RamTextZoom;
 
 			this.mnuHighlightExecution.Checked = config.RamHighlightExecution;
 			this.mnuHightlightReads.Checked = config.RamHighlightReads;
@@ -94,13 +88,15 @@ namespace Mesen.GUI.Debugger
 			this.mnuShowCharacters.CheckedChanged += this.mnuShowCharacters_CheckedChanged;
 			this.mnuIgnoreRedundantWrites.CheckedChanged += mnuIgnoreRedundantWrites_CheckedChanged;
 
-			if(!ConfigManager.Config.DebugInfo.MemoryViewerSize.IsEmpty) {
-				this.StartPosition = FormStartPosition.Manual;
-				this.Size = ConfigManager.Config.DebugInfo.MemoryViewerSize;
-				this.Location = ConfigManager.Config.DebugInfo.MemoryViewerLocation;
-			}
+			RestoreLocation(ConfigManager.Config.DebugInfo.MemoryViewerLocation, ConfigManager.Config.DebugInfo.MemoryViewerSize);
 
 			this.InitShortcuts();
+		}
+
+		protected override void OnShown(EventArgs e)
+		{
+			base.OnShown(e);
+			ctrlHexViewer.Focus();
 		}
 
 		protected override void OnFormClosing(FormClosingEventArgs e)
@@ -266,6 +262,7 @@ namespace Mesen.GUI.Debugger
 						if(_formClosed) {
 							return;
 						}
+						this.InitTblMappings();
 						this.InitMemoryTypeDropdown(false);
 						ctrlMemoryAccessCounters.InitMemoryTypeDropdown();
 					}));
@@ -367,11 +364,6 @@ namespace Mesen.GUI.Debugger
 				return;
 			}
 
-			if(DebugWorkspaceManager.GetWorkspace() != this._previousWorkspace) {
-				this.InitTblMappings();
-				_previousWorkspace = DebugWorkspaceManager.GetWorkspace();
-			}
-
 			if(this.tabMain.SelectedTab == this.tpgAccessCounters) {
 				this.ctrlMemoryAccessCounters.RefreshData();
 			} else if(this.tabMain.SelectedTab == this.tpgMemoryViewer) {
@@ -398,9 +390,9 @@ namespace Mesen.GUI.Debugger
 		private void mnuGoTo_Click(object sender, EventArgs e)
 		{
 			if(_selectedTab == tpgMemoryViewer) {
-				this.ctrlHexViewer.GoToAddress();
+				ctrlHexViewer.GoToAddress();
 			} else if(_selectedTab == tpgAccessCounters) {
-				this.ctrlMemoryAccessCounters.GoToAddress();
+				ctrlMemoryAccessCounters.GoToAddress();
 			}
 		}
 
@@ -412,21 +404,18 @@ namespace Mesen.GUI.Debugger
 		private void mnuIncreaseFontSize_Click(object sender, EventArgs e)
 		{
 			this.ctrlHexViewer.TextZoom += 10;
-			this.ctrlMemoryAccessCounters.TextZoom += 10;
 			this.UpdateConfig();
 		}
 
 		private void mnuDecreaseFontSize_Click(object sender, EventArgs e)
 		{
 			this.ctrlHexViewer.TextZoom -= 10;
-			this.ctrlMemoryAccessCounters.TextZoom -= 10;
 			this.UpdateConfig();
 		}
 
 		private void mnuResetFontSize_Click(object sender, EventArgs e)
 		{
 			this.ctrlHexViewer.TextZoom = 100;
-			this.ctrlMemoryAccessCounters.TextZoom = 100;
 			this.UpdateConfig();
 		}
 
@@ -737,7 +726,6 @@ namespace Mesen.GUI.Debugger
 		private void mnuSelectFont_Click(object sender, EventArgs e)
 		{
 			ctrlHexViewer.BaseFont = FontDialogHelper.SelectFont(ctrlHexViewer.BaseFont);
-			ctrlMemoryAccessCounters.BaseFont = ctrlHexViewer.BaseFont;
 		}
 
 		private void mnuByteEditingMode_CheckedChanged(object sender, EventArgs e)
