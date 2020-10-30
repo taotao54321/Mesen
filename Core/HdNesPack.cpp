@@ -288,9 +288,8 @@ void HdNesPack::GetPixels(uint32_t x, uint32_t y, HdPpuPixelInfo &pixelInfo, uin
 	
 	DrawColor(_palette[pixelInfo.Tile.PpuBackgroundColor], outputBuffer, _hdData->Scale, screenWidth);
 
-	bool hasBackground = false;
 	for(int i = 0; i < _activeBgCount[0]; i++) {
-		hasBackground |= DrawBackgroundLayer(HdNesPack::BehindBgSpritesPriority+i, x, y, outputBuffer, screenWidth);
+		DrawBackgroundLayer(HdNesPack::BehindBgSpritesPriority+i, x, y, outputBuffer, screenWidth);
 	}
 
 	if(hasSprite) {
@@ -311,14 +310,14 @@ void HdNesPack::GetPixels(uint32_t x, uint32_t y, HdPpuPixelInfo &pixelInfo, uin
 	}
 	
 	for(int i = 0; i < _activeBgCount[1]; i++) {
-		hasBackground |= DrawBackgroundLayer(HdNesPack::BehindBgPriority+i, x, y, outputBuffer, screenWidth);
+		DrawBackgroundLayer(HdNesPack::BehindBgPriority+i, x, y, outputBuffer, screenWidth);
 	}
 	
 	if(hdPackTileInfo) {
 		DrawTile(pixelInfo.Tile, *hdPackTileInfo, outputBuffer, screenWidth);
 	} else if(renderOriginalTiles) {
 		//Draw regular SD background tile
-		if(!hasBackground || pixelInfo.Tile.BgColorIndex != 0) {
+		if(pixelInfo.Tile.BgColorIndex != 0) {
 			DrawColor(_palette[pixelInfo.Tile.BgColor], outputBuffer, _hdData->Scale, screenWidth);
 		}
 	}
