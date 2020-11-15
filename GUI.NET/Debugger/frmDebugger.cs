@@ -130,6 +130,7 @@ namespace Mesen.GUI.Debugger
 			this.mnuShowSelectionLength.Checked = ConfigManager.Config.DebugInfo.ShowSelectionLength;
 			this.mnuAlwaysScrollToCenter.Checked = ConfigManager.Config.DebugInfo.AlwaysScrollToCenter;
 			this.mnuRefreshWhileRunning.Checked = ConfigManager.Config.DebugInfo.RefreshWhileRunning;
+			this.mnuReloadRomOnPowerCycle.Checked = ConfigManager.Config.DebugInfo.ReloadRomOnPowerCycle;
 			this.mnuShowMemoryValues.Checked = ConfigManager.Config.DebugInfo.ShowMemoryValuesInCodeWindow;
 			ctrlDebuggerCode.ShowMemoryValues = mnuShowMemoryValues.Checked;
 			ctrlDebuggerCodeSplit.ShowMemoryValues = mnuShowMemoryValues.Checked;
@@ -1271,6 +1272,12 @@ namespace Mesen.GUI.Debugger
 			ConfigManager.ApplyChanges();
 		}
 
+		private void mnuReloadRomOnPowerCycle_Click(object sender, EventArgs e)
+		{
+			ConfigManager.Config.DebugInfo.ReloadRomOnPowerCycle = mnuReloadRomOnPowerCycle.Checked;
+			ConfigManager.ApplyChanges();
+		}
+
 		private void mnuShowMemoryValues_Click(object sender, EventArgs e)
 		{
 			ConfigManager.Config.DebugInfo.ShowMemoryValuesInCodeWindow = mnuShowMemoryValues.Checked;
@@ -1684,7 +1691,11 @@ namespace Mesen.GUI.Debugger
 
 		private void mnuPowerCycle_Click(object sender, EventArgs e)
 		{
-			InteropEmu.PowerCycle();
+			if(ConfigManager.Config.DebugInfo.ReloadRomOnPowerCycle) {
+				InteropEmu.ReloadRom();
+			} else { 
+				InteropEmu.PowerCycle();
+			}
 		}
 
 		protected override void OnResize(EventArgs e)

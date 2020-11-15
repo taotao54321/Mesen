@@ -339,6 +339,8 @@ namespace Mesen.GUI.Config
 		public bool RefreshWhileRunning = false;
 		public bool ShowMemoryValuesInCodeWindow = true;
 
+		public bool ReloadRomOnPowerCycle = false;
+
 		public bool BreakOnOpen = true;
 		public bool BreakOnReset = true;
 		public bool BreakOnUnofficialOpcodes = true;
