@@ -661,6 +661,9 @@ void HdPackLoader::ProcessBgmTag(vector<string> &tokens)
 			pt >> loopPoint;
 			_data->BgmLoopPointsById[trackId] = loopPoint;
 		}
+		else {
+			_data->BgmLoopPointsById[trackId] = 0;
+		}
 	}
 }
 
