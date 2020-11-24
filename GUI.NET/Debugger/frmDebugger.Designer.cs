@@ -181,6 +181,8 @@ namespace Mesen.GUI.Debugger
 			this.mnuAlwaysScrollToCenter = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuRefreshWhileRunning = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+			this.mnuReloadRomOnPowerCycle = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.mnuConfigureExternalEditor = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuPreferences = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1034,6 +1036,8 @@ namespace Mesen.GUI.Debugger
             this.mnuAlwaysScrollToCenter,
             this.mnuRefreshWhileRunning,
             this.toolStripMenuItem6,
+            this.mnuReloadRomOnPowerCycle,
+            this.toolStripSeparator2,
             this.mnuConfigureExternalEditor,
             this.mnuPreferences});
 			this.mnuOptions.Name = "mnuOptions";
@@ -1638,6 +1642,19 @@ namespace Mesen.GUI.Debugger
 			this.toolStripMenuItem6.Name = "toolStripMenuItem6";
 			this.toolStripMenuItem6.Size = new System.Drawing.Size(263, 6);
 			// 
+			// mnuReloadRomOnPowerCycle
+			// 
+			this.mnuReloadRomOnPowerCycle.CheckOnClick = true;
+			this.mnuReloadRomOnPowerCycle.Name = "mnuReloadRomOnPowerCycle";
+			this.mnuReloadRomOnPowerCycle.Size = new System.Drawing.Size(266, 22);
+			this.mnuReloadRomOnPowerCycle.Text = "Reload ROM on Power Cycle";
+			this.mnuReloadRomOnPowerCycle.Click += new System.EventHandler(this.mnuReloadRomOnPowerCycle_Click);
+			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(263, 6);
+			// 
 			// mnuConfigureExternalEditor
 			// 
 			this.mnuConfigureExternalEditor.Image = global::Mesen.GUI.Properties.Resources.Edit;
@@ -2236,5 +2253,7 @@ namespace Mesen.GUI.Debugger
 		private System.Windows.Forms.ToolStripMenuItem mnuBreakOnPpu2006ScrollGlitch;
 		private System.Windows.Forms.ToolStripMenuItem mnuBreakOnBusConflict;
 	  private System.Windows.Forms.ToolStripMenuItem mnuGoToAddress;
+	  private System.Windows.Forms.ToolStripMenuItem mnuReloadRomOnPowerCycle;
+	  private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
    }
 }
