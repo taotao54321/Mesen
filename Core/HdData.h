@@ -356,6 +356,7 @@ struct HdPackData
 	std::unordered_map<HdTileKey, vector<HdPackTileInfo*>> TileByKey;
 	std::unordered_map<string, string> PatchesByHash;
 	std::unordered_map<int, string> BgmFilesById;
+	std::unordered_map<int, uint32_t> BgmLoopPointsById;
 	std::unordered_map<int, string> SfxFilesById;
 	vector<uint32_t> Palette;
 

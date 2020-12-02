@@ -118,15 +118,6 @@ void HdNesPack::DrawTile(HdPpuTileInfo &tileInfo, HdPackTileInfo &hdPackTileInfo
 	uint32_t bitmapOffset = (tileInfo.OffsetY * scale) * tileWidth + tileOffsetX * scale;
 	int32_t bitmapSmallInc = 1;
 	int32_t bitmapLargeInc = tileWidth - scale;
-	if(tileInfo.HorizontalMirroring) {
-		bitmapOffset += scale - 1;
-		bitmapSmallInc = -1;
-		bitmapLargeInc = tileWidth + scale;
-	}
-	if(tileInfo.VerticalMirroring) {
-		bitmapOffset += tileWidth * (scale - 1);
-		bitmapLargeInc = (tileInfo.HorizontalMirroring ? (int32_t)scale : -(int32_t)scale) - (int32_t)tileWidth;
-	}
 
 	uint32_t rgbValue;
 	if(hdPackTileInfo.HasTransparentPixels || hdPackTileInfo.Brightness != 255) {

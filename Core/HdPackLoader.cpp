@@ -655,6 +655,15 @@ void HdPackLoader::ProcessBgmTag(vector<string> &tokens)
 		} else {
 			_data->BgmFilesById[trackId] = FolderUtilities::CombinePath(_hdPackFolder, tokens[2]);
 		}
+		if (tokens.size() >= 4) {
+			stringstream pt(tokens[3]);
+			uint32_t loopPoint;
+			pt >> loopPoint;
+			_data->BgmLoopPointsById[trackId] = loopPoint;
+		}
+		else {
+			_data->BgmLoopPointsById[trackId] = 0;
+		}
 	}
 }
 
