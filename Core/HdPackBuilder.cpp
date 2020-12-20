@@ -5,6 +5,7 @@
 #include "HdNesPack.h"
 #include "Console.h"
 #include "ConsolePauseHelper.h"
+#include "VideoDecoder.h"
 
 HdPackBuilder* HdPackBuilder::_instance = nullptr;
 
@@ -15,6 +16,7 @@ enum HdPackRecordFlags
 	SortByUsageFrequency = 2,
 	GroupBlankTiles = 4,
 	IgnoreOverscan = 8,
+	SaveFrame = 16,
 };
 
 HdPackBuilder::HdPackBuilder(shared_ptr<Console> console, string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, bool isChrRam)
@@ -25,7 +27,8 @@ HdPackBuilder::HdPackBuilder(shared_ptr<Console> console, string saveFolder, Sca
 	_chrRamBankSize = chrRamBankSize;
 	_flags = flags;
 	_isChrRam = isChrRam;
-
+	_hasNewTile = false;
+	_frameID = 0;
 	string existingPackDefinition = FolderUtilities::CombinePath(saveFolder, "hires.txt");
 	if(ifstream(existingPackDefinition)) {
 		HdPackLoader::LoadHdNesPack(existingPackDefinition, _hdData);
@@ -41,16 +44,128 @@ HdPackBuilder::HdPackBuilder(shared_ptr<Console> console, string saveFolder, Sca
 		_hdData.Scale = scale;
 	}
 
+	if (_flags & (HdPackRecordFlags::SaveFrame)) {
+		uint32_t foundID;
+		vector<string> screenFiles = FolderUtilities::GetFilesInFolder(saveFolder, { ".png", ".csv" }, false);
+		string filePrefix = FolderUtilities::CombinePath(_saveFolder, "");
+		for (string path : screenFiles) {
+			if (path.compare(filePrefix.length(), 7, "screen_") == 0) {
+				
+				foundID = std::stoi(path.substr(filePrefix.length() + 7, path.length() - filePrefix.length() - 11));
+				if (foundID >= _frameID) {
+					_frameID = foundID + 1;
+				}
+			}
+		}
+		FolderUtilities::CreateFolder(_saveFolder);
+	}
+
+
 	_romName = FolderUtilities::GetFilename(_console->GetRomInfo().RomName, false);
 	_instance = this;
 }
 
 HdPackBuilder::~HdPackBuilder()
 {
+
 	SaveHdPack();
 	if(_instance == this) {
 		_instance = nullptr;
 	}
+}
+
+void HdPackBuilder::endFrame() {
+	if (_hasNewTile && (spritesOnScreen.size() > 0 || bgTilesOnScreen.size() > 0) && _flags & (HdPackRecordFlags::SaveFrame)) {
+		//generate file name suffix
+		string counterStr = std::to_string(_frameID);
+		while (counterStr.length() < 3) {
+			counterStr = "0" + counterStr;
+		}
+
+		//save screen
+		_console->GetVideoDecoder()->TakeScreenshot(FolderUtilities::CombinePath(_saveFolder, "screen_" + counterStr + ".png"));
+
+		//save screen info
+		stringstream ss;
+		ss << "Type,X,Y,Tile,Palette,Background Priority,Horizontal Mirroring,Vertical Mirroring,Is New," << std::endl;
+
+		stringstream ssidx;
+		if (_frameID == 0) {
+			ssidx << "Type,Tile,Palette,Screen ID," << std::endl;
+		}
+
+		for (HdScreenTileInfo t:spritesOnScreen) {
+			ss << "Sprite," << t.ScreenX << "," << t.ScreenY << ",";
+
+			if (t.IsChrRamTile) {
+				for (int i = 0; i < 16; i++) {
+					ss << HexUtilities::ToHex(t.TileData[i]);
+				}
+			}
+			else {
+				ss << HexUtilities::ToHex(t.TileIndex);
+			}
+			ss << "," << HexUtilities::ToHex(t.PaletteColors, true) << "," <<
+				(t.BackgroundPriority ? "Y" : "N") << "," << 
+				(t.HorizontalMirroring ? "Y" : "N") << "," << 
+				(t.VerticalMirroring ? "Y" : "N") << "," <<
+				(t.IsNew ? "Y" : "N") << "," << std::endl;
+
+			if (t.IsNew) {
+				ssidx << "Sprite,";
+				if (t.IsChrRamTile) {
+					for (int i = 0; i < 16; i++) {
+						ssidx << HexUtilities::ToHex(t.TileData[i]);
+					}
+				}
+				else {
+					ssidx << HexUtilities::ToHex(t.TileIndex);
+				}
+				ssidx << "," << HexUtilities::ToHex(t.PaletteColors, true) << "," << counterStr << "," << std::endl;
+			}
+		}
+
+		for (HdScreenTileInfo t : bgTilesOnScreen) {
+			ss << "Background," << t.ScreenX << "," << t.ScreenY << ",";
+
+			if (t.IsChrRamTile) {
+				for (int i = 0; i < 16; i++) {
+					ss << HexUtilities::ToHex(t.TileData[i]);
+				}
+			}
+			else {
+				ss << HexUtilities::ToHex(t.TileIndex);
+			}
+			ss << "," << HexUtilities::ToHex(t.PaletteColors, true) << ",,,," << (t.IsNew ? "Y" : "N") << "," << std::endl;
+
+			if (t.IsNew) {
+				ssidx << "Background,";
+				if (t.IsChrRamTile) {
+					for (int i = 0; i < 16; i++) {
+						ssidx << HexUtilities::ToHex(t.TileData[i]);
+					}
+				}
+				else {
+					ssidx << HexUtilities::ToHex(t.TileIndex);
+				}
+				ssidx << "," << HexUtilities::ToHex(t.PaletteColors, true) << "," << counterStr << "," << std::endl;
+			}
+		}
+
+		ofstream screenInfoFile(FolderUtilities::CombinePath(_saveFolder, "screen_" + counterStr + ".csv"), ios::out);
+		screenInfoFile << ss.str();
+		screenInfoFile.close();
+
+		ofstream tileIndexFile(FolderUtilities::CombinePath(_saveFolder, "tileIndex.csv"), ios::app);
+		tileIndexFile << ssidx.str();
+		tileIndexFile.close();
+
+		_frameID++;
+	}
+	//reset for next frame
+	_hasNewTile = false;
+	spritesOnScreen.clear();
+	bgTilesOnScreen.clear();
 }
 
 void HdPackBuilder::AddTile(HdPackTileInfo *tile, uint32_t usageCount)
@@ -93,6 +208,7 @@ void HdPackBuilder::AddTile(HdPackTileInfo *tile, uint32_t usageCount)
 
 	_tilesByKey[tile->GetKey(false)] = tile;
 	_tileUsageCount[tile->GetKey(false)] = usageCount;
+	_hasNewTile = true;
 }
 
 void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpuTileInfo &tile, BaseMapper *mapper, bool isSprite, uint32_t chrBankHash, bool transparencyRequired)
@@ -110,7 +226,7 @@ void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpu
 		//Check to see if a default tile matches
 		result = _tileUsageCount.find(tile.GetKey(true));
 	}
-
+	bool isNew = false;
 	if(result == _tileUsageCount.end()) {
 		//First time seeing this tile/palette combination, store it
 		HdPackTileInfo* hdTile = new HdPackTileInfo();
@@ -126,6 +242,7 @@ void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpu
 
 		_hdData.Tiles.push_back(unique_ptr<HdPackTileInfo>(hdTile));
 		AddTile(hdTile, 1);
+		isNew = true;
 	} else {
 		if(transparencyRequired) {
 			auto existingTile = _tilesByKey.find(tile.GetKey(false));
@@ -137,6 +254,26 @@ void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpu
 		if(result->second < 0x7FFFFFFF) {
 			//Increase usage count
 			result->second++;
+		}
+	}
+
+	if ((x == 0 || ((tile.OffsetX & 0x07) == 0)) && (y == 0 || ((tile.OffsetY & 0x07) == 0))) {
+		HdScreenTileInfo t;
+		t.IsChrRamTile = tile.IsChrRamTile;
+		t.PaletteColors = tile.PaletteColors;
+		t.ScreenX = x - tile.OffsetX;
+		t.ScreenY = y - tile.OffsetY - (tile.IsSpriteTile() ? 1 : 0);
+		memcpy(t.TileData, tile.TileData, 16);
+		t.TileIndex = tile.TileIndex;
+		t.IsNew = isNew;
+		if (tile.IsSpriteTile()) {
+			t.BackgroundPriority = tile.BackgroundPriority;
+			t.HorizontalMirroring = tile.HorizontalMirroring;
+			t.VerticalMirroring = tile.VerticalMirroring;
+			spritesOnScreen.push_back(t);
+		}
+		else {
+			bgTilesOnScreen.push_back(t);
 		}
 	}
 }
@@ -352,7 +489,7 @@ void HdPackBuilder::SaveHdPack()
 	}
 
 	for(auto &bgmInfo : _hdData.BgmFilesById) {
-		ss << "<bgm>" << std::to_string(bgmInfo.first >> 8) << "," << std::to_string(bgmInfo.first & 0xFF) << "," << VirtualFile(bgmInfo.second).GetFileName() << std::endl;
+		ss << "<bgm>" << std::to_string(bgmInfo.first >> 8) << "," << std::to_string(bgmInfo.first & 0xFF) << "," << VirtualFile(bgmInfo.second.File).GetFileName() << "," << bgmInfo.second.LoopPoint << "," << bgmInfo.second.PlaybackOptions << "," << bgmInfo.second.Volume << std::endl;
 	}
 
 	for(auto &sfxInfo : _hdData.SfxFilesById) {

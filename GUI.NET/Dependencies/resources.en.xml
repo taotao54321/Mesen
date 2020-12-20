@@ -624,6 +624,7 @@
 			<Control ID="chkLargeSprites">Use 8x16 sprite display mode</Control>
 			<Control ID="chkGroupBlankTiles">Group blank tiles</Control>
 			<Control ID="chkIgnoreOverscan">Ignore tiles at the edges of the screen (overscan)</Control>
+			<Control ID="chkSaveFrame">Save frames which the tiles are first shown</Control>
 			<Control ID="lblFolder">Save Folder:</Control>
 			<Control ID="btnSelectFolder">Browse...</Control>
 			<Control ID="btnStartRecording">Start Recording</Control>
@@ -869,6 +870,7 @@
 		<Message ID="HdPackBuilderGroupBlankHelp">This option groups all the blank tiles sequentially into the same PNG&#xA;files - this helps reduce the number of PNG files produced by removing &#xA;almost-empty PNG files containing only blank tiles.</Message>
 		<Message ID="HdPackBuilderLargeSpritesHelp">When enabled, this option will alter the display order of CHR banks&#xA;that contain only sprites to make the sprites easier to edit in the PNG file.</Message>
 		<Message ID="HdPackBuilderIgnoreOverscanHelp">When enabled, this will make the builder ignore any pixels in the overscan area.&#xA;This is useful in games that contain glitches on the outer edge of the screen.&#xA;Incorrect palette combinations due to these glitches will be ignored and won't be shown in the PNG files.</Message>
+		<Message ID="HdPackBuilderSaveFrameHelp">When enabled, the builder will save a screenshot and the composition of the screen in the pack folder when it encounters new tile in a frame.&#xA;This is useful for checking where that tile is used.&#xA;These files are not needed in the pack and should be deleted when sharing the pack.</Message>
 
 		<Message ID="InstallHdPackWrongRom">The selected HD Pack is not compatible with the currently running game and cannot be installed.</Message>
 		<Message ID="InstallHdPackError">An error occurred while trying to install the HD Pack: &#xA;&#xA;{0}</Message>

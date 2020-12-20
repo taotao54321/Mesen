@@ -346,6 +346,14 @@ struct HdBackgroundInfo
 	}
 };
 
+
+struct HdBGMInfo {
+	string File;
+	uint32_t LoopPoint;
+	int16_t Volume;
+	int16_t PlaybackOptions;
+};
+
 struct HdPackData
 {
 	vector<HdBackgroundInfo> Backgrounds;
@@ -355,8 +363,7 @@ struct HdPackData
 	std::unordered_set<uint32_t> WatchedMemoryAddresses;
 	std::unordered_map<HdTileKey, vector<HdPackTileInfo*>> TileByKey;
 	std::unordered_map<string, string> PatchesByHash;
-	std::unordered_map<int, string> BgmFilesById;
-	std::unordered_map<int, uint32_t> BgmLoopPointsById;
+	std::unordered_map<int, HdBGMInfo> BgmFilesById;
 	std::unordered_map<int, string> SfxFilesById;
 	vector<uint32_t> Palette;
 
@@ -381,4 +388,14 @@ enum class HdPackOptions
 	AlternateRegisterRange = 2,
 	DisableCache = 8,
 	DontRenderOriginalTiles = 16
+};
+
+struct HdScreenTileInfo : public HdTileKey
+{
+	int16_t ScreenX;
+	int16_t ScreenY;
+	bool HorizontalMirroring;
+	bool VerticalMirroring;
+	bool BackgroundPriority;
+	bool IsNew;
 };
