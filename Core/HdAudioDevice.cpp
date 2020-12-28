@@ -41,10 +41,15 @@ bool HdAudioDevice::PlayBgmTrack(uint8_t track, uint32_t startOffset)
 {
 	int trackId = _album * 256 + track;
 	auto result = _hdData->BgmFilesById.find(trackId);
-	auto result2 = _hdData->BgmLoopPointsById.find(trackId);
 	if(result != _hdData->BgmFilesById.end()) {
-		if(_oggMixer->Play(result->second, false, startOffset, result2->second)) {
+		if(_oggMixer->Play(result->second.File, false, startOffset, result->second.LoopPoint)) {
 			_lastBgmTrack = trackId;
+			if (result->second.PlaybackOptions != -1) {
+				_oggMixer->SetPlaybackOptions(result->second.PlaybackOptions);
+			}
+			if (result->second.Volume != -1) {
+				_oggMixer->SetBgmVolume(result->second.Volume);
+			}
 			return true;
 		}
 	} else {

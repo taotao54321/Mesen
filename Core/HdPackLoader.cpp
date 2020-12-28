@@ -651,18 +651,30 @@ void HdPackLoader::ProcessBgmTag(vector<string> &tokens)
 	if(trackId >= 0) {
 		if(_loadFromZip) {
 			VirtualFile file(_hdPackFolder, tokens[2]);
-			_data->BgmFilesById[trackId] = file;
+			_data->BgmFilesById[trackId].File = file;
 		} else {
-			_data->BgmFilesById[trackId] = FolderUtilities::CombinePath(_hdPackFolder, tokens[2]);
+			_data->BgmFilesById[trackId].File = FolderUtilities::CombinePath(_hdPackFolder, tokens[2]);
 		}
+		_data->BgmFilesById[trackId].LoopPoint = 0;
+		_data->BgmFilesById[trackId].PlaybackOptions = -1;
+		_data->BgmFilesById[trackId].Volume = -1;
 		if (tokens.size() >= 4) {
 			stringstream pt(tokens[3]);
 			uint32_t loopPoint;
 			pt >> loopPoint;
-			_data->BgmLoopPointsById[trackId] = loopPoint;
-		}
-		else {
-			_data->BgmLoopPointsById[trackId] = 0;
+			_data->BgmFilesById[trackId].LoopPoint = loopPoint;
+			if (tokens.size() >= 5) {
+				stringstream pt(tokens[4]);
+				int16_t pbo;
+				pt >> pbo;
+				_data->BgmFilesById[trackId].PlaybackOptions = pbo;
+				if (tokens.size() >= 6) {
+					stringstream pt(tokens[5]);
+					int16_t vol;
+					pt >> vol;
+					_data->BgmFilesById[trackId].Volume = vol;
+				}
+			}
 		}
 	}
 }

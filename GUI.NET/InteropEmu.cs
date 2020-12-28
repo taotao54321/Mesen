@@ -2548,9 +2548,10 @@ namespace Mesen.GUI
 		SortByUsageFrequency = 2,
 		GroupBlankTiles = 4,
 		IgnoreOverscan = 8,
-	}
+	   SaveFrame = 16,
+   }
 
-	[StructLayout(LayoutKind.Sequential)]
+   [StructLayout(LayoutKind.Sequential)]
 	public class AddressTypeInfo
 	{
 		public Int32 Address;

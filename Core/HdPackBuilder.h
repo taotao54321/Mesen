@@ -31,6 +31,11 @@ private:
 	string _saveFolder;
 	string _romName;
 	uint32_t _flags;
+	bool _hasNewTile;
+	uint32_t _frameID;
+	vector<HdScreenTileInfo> spritesOnScreen;
+	vector<HdScreenTileInfo> bgTilesOnScreen;
+
 
 	//Used to group blank tiles together
 	uint32_t _blankTileIndex = 0;
@@ -44,6 +49,7 @@ public:
 	HdPackBuilder(shared_ptr<Console> console, string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, bool isChrRam);
 	~HdPackBuilder();
 
+	void endFrame();
 	void ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpuTileInfo& tile, BaseMapper* mapper, bool isSprite, uint32_t chrBankHash, bool transparencyRequired);
 	void SaveHdPack();
 	
