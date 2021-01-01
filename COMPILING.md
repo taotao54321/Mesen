@@ -9,6 +9,7 @@
 
 Note: When loading the the solution in Visual Studio make sure all the projects are loaded successfully.
 Note: If you get an error about the project targeted .NET Framework 4.5 chose to download the missing packages then install ".NET Framework 4.5 targeting pack" from the Visual Studio Installer.
+Note: If you get a "compiler is out of heap space" error when building the project, then try running `set PreferredToolArchitecture=x64` and `devenv` in "x64 Native Tools Command Prompt for VS 2019"
 
 #### *Libretro*
 
