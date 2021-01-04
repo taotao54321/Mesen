@@ -633,6 +633,7 @@ namespace InteropEmu {
 		DllExport void __stdcall SetMasterVolume(double volume, double volumeReduction, ConsoleId consoleId) { GetConsoleById(consoleId)->GetSettings()->SetMasterVolume(volume, volumeReduction); }
 		DllExport void __stdcall SetSampleRate(uint32_t sampleRate) { _settings->SetSampleRate(sampleRate); }
 		DllExport void __stdcall SetAudioLatency(uint32_t msLatency) { _settings->SetAudioLatency(msLatency); }
+		DllExport void __stdcall SetEPSGClockFrequency(uint32_t clockFrequency) { _settings->SetEPSGClockFrequency(clockFrequency); }
 		DllExport void __stdcall SetAudioFilterSettings(AudioFilterSettings settings) { _settings->SetAudioFilterSettings(settings); }
 		DllExport void __stdcall SetRunAheadFrames(uint32_t frameCount) { _settings->SetRunAheadFrames(frameCount); }
 

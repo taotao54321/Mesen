@@ -3,11 +3,22 @@
 #include "BaseMapper.h"
 #include "CPU.h"
 #include "Sunsoft5bAudio.h"
+#include "EPSGAudio.h"
+
+#ifndef SUNSOFT_DEFAULT_AUDIO
+#define SUNSOFT_USE_EPSG
+#endif
+
+#ifdef SUNSOFT_USE_EPSG
+using AudioClass = EPSGAudio;
+#else
+using AudioClass = Sunsoft5bAudio;
+#endif
 
 class SunsoftFme7 : public BaseMapper
 {
 private:
-	unique_ptr<Sunsoft5bAudio> _audio;
+	unique_ptr<AudioClass> _audio;
 	uint8_t _command;
 	uint8_t _workRamValue;
 	bool _irqEnabled;
@@ -24,7 +35,7 @@ protected:
 
 	void InitMapper() override
 	{
-		_audio.reset(new Sunsoft5bAudio(_console));
+		_audio.reset(new AudioClass(_console));
 
 		_command = 0;
 		_workRamValue = 0;

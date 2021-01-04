@@ -43,6 +43,8 @@ namespace Mesen.GUI.Forms.Config
 			this.trkVrc7Vol = new Mesen.GUI.Controls.ctrlTrackbar();
 			this.trkNamco163Vol = new Mesen.GUI.Controls.ctrlTrackbar();
 			this.trkSunsoft5b = new Mesen.GUI.Controls.ctrlTrackbar();
+			this.trkEPSGVol_L = new Mesen.GUI.Controls.ctrlTrackbar();
+			this.trkEPSGVol_R = new Mesen.GUI.Controls.ctrlTrackbar();
 			this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
 			this.lblVolumeReductionSettings = new System.Windows.Forms.Label();
 			this.chkEnableAudio = new System.Windows.Forms.CheckBox();
@@ -78,6 +80,8 @@ namespace Mesen.GUI.Forms.Config
 			this.trkVrc7Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
 			this.trkNamcoPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
 			this.trkSunsoftPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+			this.trkEPSGPan_L = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+			this.trkEPSGPan_R = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
 			this.tpgEqualizer = new System.Windows.Forms.TabPage();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.chkEnableEqualizer = new System.Windows.Forms.CheckBox();
@@ -142,6 +146,8 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
 			this.chkDisableDynamicSampleRate = new Mesen.GUI.Controls.ctrlRiskyOption();
 			this.chkDisableNoiseModeFlag = new Mesen.GUI.Controls.ctrlRiskyOption();
+			this.nudEPSGClockFrequency = new Mesen.GUI.Controls.MesenNumericUpDown();
+			this.lblEPSGClockFrequency = new System.Windows.Forms.Label();
 			this.chkSilenceTriangleHighFreq = new System.Windows.Forms.CheckBox();
 			this.chkSwapDutyCycles = new Mesen.GUI.Controls.ctrlRiskyOption();
 			this.chkReduceDmcPopping = new System.Windows.Forms.CheckBox();
@@ -196,7 +202,7 @@ namespace Mesen.GUI.Forms.Config
 			// 
 			// tableLayoutPanel1
 			// 
-			this.tableLayoutPanel1.ColumnCount = 6;
+			this.tableLayoutPanel1.ColumnCount = 7;
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
@@ -214,8 +220,10 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel1.Controls.Add(this.trkVrc6Vol, 2, 1);
 			this.tableLayoutPanel1.Controls.Add(this.trkVrc7Vol, 3, 1);
 			this.tableLayoutPanel1.Controls.Add(this.trkNamco163Vol, 4, 1);
-			this.tableLayoutPanel1.Controls.Add(this.trkSunsoft5b, 5, 1);
-			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tableLayoutPanel1.Controls.Add(this.trkSunsoft5b, 6, 0);
+			this.tableLayoutPanel1.Controls.Add(this.trkEPSGVol_L, 5, 1);
+			this.tableLayoutPanel1.Controls.Add(this.trkEPSGVol_R, 6, 1);
+		 this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 16);
 			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
 			this.tableLayoutPanel1.RowCount = 3;
@@ -404,10 +412,40 @@ namespace Mesen.GUI.Forms.Config
 			this.trkSunsoft5b.TabIndex = 22;
 			this.trkSunsoft5b.Text = "Sunsoft";
 			this.trkSunsoft5b.Value = 50;
-			// 
-			// tableLayoutPanel2
-			// 
-			this.tableLayoutPanel2.ColumnCount = 2;
+		 // 
+		 // trkEPSGVol_L
+		 // 
+		 this.trkEPSGVol_L.Anchor = System.Windows.Forms.AnchorStyles.Top;
+		 this.trkEPSGVol_L.Location = new System.Drawing.Point(387, 160);
+		 this.trkEPSGVol_L.Margin = new System.Windows.Forms.Padding(0);
+		 this.trkEPSGVol_L.Maximum = 100;
+		 this.trkEPSGVol_L.MaximumSize = new System.Drawing.Size(63, 160);
+		 this.trkEPSGVol_L.Minimum = 0;
+		 this.trkEPSGVol_L.MinimumSize = new System.Drawing.Size(63, 160);
+		 this.trkEPSGVol_L.Name = "trkEPSGVol_L";
+		 this.trkEPSGVol_L.Size = new System.Drawing.Size(63, 160);
+		 this.trkEPSGVol_L.TabIndex = 22;
+		 this.trkEPSGVol_L.Text = "EPSG Left";
+		 this.trkEPSGVol_L.Value = 100;
+		 // 
+		 // trkEPSGVol_R
+		 // 
+		 this.trkEPSGVol_R.Anchor = System.Windows.Forms.AnchorStyles.Top;
+		 this.trkEPSGVol_R.Location = new System.Drawing.Point(387, 160);
+		 this.trkEPSGVol_R.Margin = new System.Windows.Forms.Padding(0);
+		 this.trkEPSGVol_R.Maximum = 100;
+		 this.trkEPSGVol_R.MaximumSize = new System.Drawing.Size(63, 160);
+		 this.trkEPSGVol_R.Minimum = 0;
+		 this.trkEPSGVol_R.MinimumSize = new System.Drawing.Size(63, 160);
+		 this.trkEPSGVol_R.Name = "trkEPSGVol_R";
+		 this.trkEPSGVol_R.Size = new System.Drawing.Size(63, 160);
+		 this.trkEPSGVol_R.TabIndex = 22;
+		 this.trkEPSGVol_R.Text = "EPSG Right";
+		 this.trkEPSGVol_R.Value = 100;
+		 // 
+		 // tableLayoutPanel2
+		 // 
+		 this.tableLayoutPanel2.ColumnCount = 2;
 			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
 			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
 			this.tableLayoutPanel2.Controls.Add(this.lblVolumeReductionSettings, 0, 4);
@@ -696,7 +734,7 @@ namespace Mesen.GUI.Forms.Config
 			this.tabMain.Location = new System.Drawing.Point(0, 0);
 			this.tabMain.Name = "tabMain";
 			this.tabMain.SelectedIndex = 0;
-			this.tabMain.Size = new System.Drawing.Size(477, 373);
+			this.tabMain.Size = new System.Drawing.Size(477, 389);
 			this.tabMain.TabIndex = 4;
 			// 
 			// tpgGeneral
@@ -727,7 +765,7 @@ namespace Mesen.GUI.Forms.Config
 			this.tpgPanning.Location = new System.Drawing.Point(4, 22);
 			this.tpgPanning.Name = "tpgPanning";
 			this.tpgPanning.Padding = new System.Windows.Forms.Padding(3);
-			this.tpgPanning.Size = new System.Drawing.Size(469, 347);
+			this.tpgPanning.Size = new System.Drawing.Size(469, 389);
 			this.tpgPanning.TabIndex = 4;
 			this.tpgPanning.Text = "Panning";
 			this.tpgPanning.UseVisualStyleBackColor = true;
@@ -747,11 +785,13 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel6.Controls.Add(this.trkVrc6Pan, 1, 2);
 			this.tableLayoutPanel6.Controls.Add(this.trkVrc7Pan, 1, 3);
 			this.tableLayoutPanel6.Controls.Add(this.trkNamcoPan, 1, 4);
-			this.tableLayoutPanel6.Controls.Add(this.trkSunsoftPan, 1, 5);
+			this.tableLayoutPanel6.Controls.Add(this.trkSunsoftPan, 0, 6);
+			this.tableLayoutPanel6.Controls.Add(this.trkEPSGPan_L, 0, 5);
+			this.tableLayoutPanel6.Controls.Add(this.trkEPSGPan_R, 1, 5);
 			this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
 			this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-			this.tableLayoutPanel6.RowCount = 7;
+			this.tableLayoutPanel6.RowCount = 8;
 			this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -760,7 +800,7 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
 			this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-			this.tableLayoutPanel6.Size = new System.Drawing.Size(463, 341);
+			this.tableLayoutPanel6.Size = new System.Drawing.Size(463, 389);
 			this.tableLayoutPanel6.TabIndex = 3;
 			// 
 			// trkSquare1Pan
@@ -927,6 +967,36 @@ namespace Mesen.GUI.Forms.Config
 			this.trkSunsoftPan.TabIndex = 22;
 			this.trkSunsoftPan.Text = "Sunsoft";
 			this.trkSunsoftPan.Value = 0;
+			// 
+			// trkEPSGPan_L
+			// 
+			this.trkEPSGPan_L.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.trkEPSGPan_L.Location = new System.Drawing.Point(244, 275);
+			this.trkEPSGPan_L.Margin = new System.Windows.Forms.Padding(0);
+			this.trkEPSGPan_L.Maximum = 100;
+			this.trkEPSGPan_L.MaximumSize = new System.Drawing.Size(63, 160);
+			this.trkEPSGPan_L.Minimum = -100;
+			this.trkEPSGPan_L.MinimumSize = new System.Drawing.Size(206, 55);
+			this.trkEPSGPan_L.Name = "trkEPSGPan_L";
+			this.trkEPSGPan_L.Size = new System.Drawing.Size(206, 55);
+			this.trkEPSGPan_L.TabIndex = 22;
+			this.trkEPSGPan_L.Text = "EPSG Left";
+			this.trkEPSGPan_L.Value = -100;
+			// 
+			// trkEPSGPan_R
+			// 
+			this.trkEPSGPan_R.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.trkEPSGPan_R.Location = new System.Drawing.Point(244, 275);
+			this.trkEPSGPan_R.Margin = new System.Windows.Forms.Padding(0);
+			this.trkEPSGPan_R.Maximum = 100;
+			this.trkEPSGPan_R.MaximumSize = new System.Drawing.Size(63, 160);
+			this.trkEPSGPan_R.Minimum = -100;
+			this.trkEPSGPan_R.MinimumSize = new System.Drawing.Size(206, 55);
+			this.trkEPSGPan_R.Name = "trkEPSGPan_R";
+			this.trkEPSGPan_R.Size = new System.Drawing.Size(206, 55);
+			this.trkEPSGPan_R.TabIndex = 22;
+			this.trkEPSGPan_R.Text = "EPSG Right";
+			this.trkEPSGPan_R.Value = 100;
 			// 
 			// tpgEqualizer
 			// 
@@ -1897,13 +1967,16 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
 			this.tableLayoutPanel3.Controls.Add(this.chkDisableDynamicSampleRate, 0, 2);
 			this.tableLayoutPanel3.Controls.Add(this.chkDisableNoiseModeFlag, 0, 4);
+			this.tableLayoutPanel3.Controls.Add(this.nudEPSGClockFrequency, 0, 5);
+			this.tableLayoutPanel3.Controls.Add(this.lblEPSGClockFrequency, 0, 5);
 			this.tableLayoutPanel3.Controls.Add(this.chkSilenceTriangleHighFreq, 0, 0);
 			this.tableLayoutPanel3.Controls.Add(this.chkSwapDutyCycles, 0, 3);
 			this.tableLayoutPanel3.Controls.Add(this.chkReduceDmcPopping, 0, 1);
 			this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 3);
 			this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-			this.tableLayoutPanel3.RowCount = 6;
+			this.tableLayoutPanel3.RowCount = 7;
+			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
 			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
@@ -1932,10 +2005,36 @@ namespace Mesen.GUI.Forms.Config
 			this.chkDisableNoiseModeFlag.Size = new System.Drawing.Size(463, 24);
 			this.chkDisableNoiseModeFlag.TabIndex = 3;
 			this.chkDisableNoiseModeFlag.Text = "Disable noise channel mode flag";
+			 // 
+			 // nudEPSGClockFrequency
+			 // 
+			 this.nudEPSGClockFrequency.Dock = System.Windows.Forms.DockStyle.Fill;
+			 this.nudEPSGClockFrequency.Location = new System.Drawing.Point(0, 96);
+			 this.nudEPSGClockFrequency.Size = new System.Drawing.Size(463, 24);
+			 this.nudEPSGClockFrequency.TabIndex = 3;
+			 this.nudEPSGClockFrequency.Text = "EPSG Clock Frquency";
+			 this.nudEPSGClockFrequency.Name = "nudEPSGClockFrequency";
+			 this.nudEPSGClockFrequency.Increment = new decimal(100000);
+			 this.nudEPSGClockFrequency.Minimum = new decimal(10000);
+			 this.nudEPSGClockFrequency.Maximum = new decimal(32000000);
+			 this.nudEPSGClockFrequency.Value = new decimal(0);
+			 this.nudEPSGClockFrequency.MaximumSize = new System.Drawing.Size(10000, 20);
+			 this.nudEPSGClockFrequency.MinimumSize = new System.Drawing.Size(200, 21);
+			 this.nudEPSGClockFrequency.DecimalPlaces = 0;
 			// 
-			// chkSilenceTriangleHighFreq
+			// lblEPSGClockFrequency
 			// 
-			this.chkSilenceTriangleHighFreq.AutoSize = true;
+			this.lblEPSGClockFrequency.Anchor = System.Windows.Forms.AnchorStyles.Left;
+			this.lblEPSGClockFrequency.AutoSize = true;
+			this.lblEPSGClockFrequency.Location = new System.Drawing.Point(163, 6);
+			this.lblEPSGClockFrequency.Name = "lblEPSGClockFrequency";
+			this.lblEPSGClockFrequency.Size = new System.Drawing.Size(15, 13);
+			this.lblEPSGClockFrequency.TabIndex = 3;
+			this.lblEPSGClockFrequency.Text = "EPSG Clock Frequency (default is 3579545Hz)";
+			 // 
+			 // chkSilenceTriangleHighFreq
+			 // 
+			 this.chkSilenceTriangleHighFreq.AutoSize = true;
 			this.chkSilenceTriangleHighFreq.Location = new System.Drawing.Point(3, 3);
 			this.chkSilenceTriangleHighFreq.Name = "chkSilenceTriangleHighFreq";
 			this.chkSilenceTriangleHighFreq.Size = new System.Drawing.Size(337, 17);
@@ -1968,7 +2067,7 @@ namespace Mesen.GUI.Forms.Config
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(477, 402);
+			this.ClientSize = new System.Drawing.Size(477, 450);
 			this.Controls.Add(this.tabMain);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.MaximizeBox = false;
@@ -2051,7 +2150,9 @@ namespace Mesen.GUI.Forms.Config
 		private Controls.ctrlTrackbar trkVrc7Vol;
 		private Controls.ctrlTrackbar trkNamco163Vol;
 		private Controls.ctrlTrackbar trkSunsoft5b;
-		private System.Windows.Forms.TabControl tabMain;
+		private Controls.ctrlTrackbar trkEPSGVol_L;
+		private Controls.ctrlTrackbar trkEPSGVol_R;
+	  private System.Windows.Forms.TabControl tabMain;
 		private System.Windows.Forms.TabPage tpgGeneral;
 		private System.Windows.Forms.TabPage tpgVolume;
 		private System.Windows.Forms.CheckBox chkReduceSoundInBackground;
@@ -2091,6 +2192,8 @@ namespace Mesen.GUI.Forms.Config
 		private Controls.ctrlHorizontalTrackbar trkVrc7Pan;
 		private Controls.ctrlHorizontalTrackbar trkNamcoPan;
 		private Controls.ctrlHorizontalTrackbar trkSunsoftPan;
+		private Controls.ctrlHorizontalTrackbar trkEPSGPan_L;
+		private Controls.ctrlHorizontalTrackbar trkEPSGPan_R;
 		private Controls.ctrlHorizontalTrackbar trkSquare1Pan;
 		private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel5;
 		private System.Windows.Forms.CheckBox chkCrossFeedEnabled;
@@ -2098,6 +2201,8 @@ namespace Mesen.GUI.Forms.Config
 		private System.Windows.Forms.Label lblCrossFeedRatio;
 		private Controls.ctrlHorizontalTrackbar trkTrianglePan;
 		private ctrlRiskyOption chkDisableNoiseModeFlag;
+		private MesenNumericUpDown nudEPSGClockFrequency;
+		private System.Windows.Forms.Label lblEPSGClockFrequency;
 		private System.Windows.Forms.TabPage tpgEqualizer;
 		private System.Windows.Forms.TableLayoutPanel tlpEqualizer;
 		private ctrlTrackbar trkBand6Gain;

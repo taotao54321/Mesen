@@ -558,6 +558,7 @@
     <ClInclude Include="DummyCpu.h" />
     <ClInclude Include="Eeprom24C01.h" />
     <ClInclude Include="Eeprom24C02.h" />
+    <ClInclude Include="EPSGAudio.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="FaridSlrom.h" />
     <ClInclude Include="FaridUnrom.h" />
@@ -982,6 +983,7 @@
     <ClInclude Include="Waixing178.h" />
     <ClInclude Include="Waixing252.h" />
     <ClInclude Include="WaveRecorder.h" />
+    <ClInclude Include="ym3438.h" />
     <ClInclude Include="Yoko.h" />
     <ClInclude Include="Zapper.h" />
     <ClInclude Include="PgoUtilities.h" />
@@ -1098,6 +1100,7 @@
     <ClCompile Include="VsControlManager.cpp" />
     <ClCompile Include="ScaleFilter.cpp" />
     <ClCompile Include="WaveRecorder.cpp" />
+    <ClCompile Include="ym3438.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

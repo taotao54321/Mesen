@@ -116,6 +116,9 @@
     <Filter Include="Nes\MemoryManager">
       <UniqueIdentifier>{13af8497-e820-43f1-9888-85797a29b551}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Nes\Mappers\EPSG">
+      <UniqueIdentifier>{c9c48ea8-7684-4959-9266-c0b4f0f86956}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IAudioDevice.h">
@@ -1502,6 +1505,12 @@
     <ClInclude Include="VbController.h">
       <Filter>Nes\Input\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="ym3438.h">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClInclude>
+    <ClInclude Include="EPSGAudio.h">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1803,6 +1812,9 @@
     </ClCompile>
     <ClCompile Include="StudyBoxLoader.cpp">
       <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="ym3438.cpp">
+      <Filter>Nes\Mappers\EPSG</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -264,9 +264,12 @@ int16_t SoundMixer::GetOutputVolume(bool forRightChannel)
 		GetChannelOutput(AudioChannel::FDS, forRightChannel) * 20 +
 		GetChannelOutput(AudioChannel::MMC5, forRightChannel) * 43 +
 		GetChannelOutput(AudioChannel::Namco163, forRightChannel) * 20 +
-		GetChannelOutput(AudioChannel::Sunsoft5B, forRightChannel) * 15 +
+		GetChannelOutput(AudioChannel::Sunsoft5B, forRightChannel) +
 		GetChannelOutput(AudioChannel::VRC6, forRightChannel) * 75 +
-		GetChannelOutput(AudioChannel::VRC7, forRightChannel));
+		GetChannelOutput(AudioChannel::VRC7, forRightChannel) +
+		GetChannelOutput(AudioChannel::EPSG_L, forRightChannel) +
+		GetChannelOutput(AudioChannel::EPSG_R, forRightChannel)
+	);
 }
 
 void SoundMixer::AddDelta(AudioChannel channel, uint32_t time, int16_t delta)
