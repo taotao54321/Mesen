@@ -10,15 +10,15 @@
 #endif
 
 #ifdef SUNSOFT_USE_EPSG
-using AudioClass = EPSGAudio;
+using SunsoftFme7AudioClass = EPSGAudio;
 #else
-using AudioClass = Sunsoft5bAudio;
+using SunsoftFme7AudioClass = Sunsoft5bAudio;
 #endif
 
 class SunsoftFme7 : public BaseMapper
 {
 private:
-	unique_ptr<AudioClass> _audio;
+	unique_ptr<SunsoftFme7AudioClass> _audio;
 	uint8_t _command;
 	uint8_t _workRamValue;
 	bool _irqEnabled;

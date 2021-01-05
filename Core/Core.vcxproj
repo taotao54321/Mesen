@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -593,6 +593,7 @@
     <ClInclude Include="Sachen9602.h" />
     <ClInclude Include="ServerInformationMessage.h" />
     <ClInclude Include="FamicomBox.h" />
+    <ClInclude Include="SSGAudio.h" />
     <ClInclude Include="StereoCombFilter.h" />
     <ClInclude Include="StudyBoxLoader.h" />
     <ClInclude Include="SystemActionManager.h" />

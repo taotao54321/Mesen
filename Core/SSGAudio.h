@@ -16,6 +16,7 @@ private:
 	int16_t _lastOutput;
 	int16_t _timer[3];
 	uint8_t _toneStep[3];
+	double _clock;
 	bool _processTick;
 
 	uint16_t GetPeriod(int channel)
@@ -71,7 +72,7 @@ private:
 			}
 		}
 
-		const auto delta = (summedOutput - _lastOutput) * 15;
+		const auto delta = (summedOutput - _lastOutput);
 		(_console->GetApu()->AddExpansionAudioDelta(channels, summedOutput - _lastOutput), ...);
 		_lastOutput = summedOutput;
 	}
@@ -84,18 +85,27 @@ protected:
 		ArrayInfo<int16_t> timer{ _timer, 3 };
 		ArrayInfo<uint8_t> registers{ _registers, 0x10 };
 		ArrayInfo<uint8_t> toneStep{ _toneStep, 3 };
-		Stream(timer, registers, toneStep, _currentRegister, _lastOutput, _processTick);
+		Stream(timer, registers, toneStep, _currentRegister, _lastOutput, _clock);
 	}
 
 	void ClockAudio() override
 	{
-		if(_processTick) {
-			for(int i = 0; i < 3; i++) {
+		_clock += GetSSGClockFrequency() / (double)_console->GetCpu()->GetClockRate(_console->GetModel());
+
+		while (_clock >= 1)
+		{
+			for (int i = 0; i < 3; i++) {
 				UpdateChannel(i);
 			}
+
+			_clock--;
 			UpdateOutputLevel();
 		}
-		_processTick = !_processTick;
+	}
+
+	virtual uint32_t GetSSGClockFrequency()
+	{
+		return _console->GetCpu()->GetClockRate(_console->GetModel()) / 2;
 	}
 
 public:
@@ -106,7 +116,7 @@ public:
 		memset(_toneStep, 0, sizeof(_toneStep));
 		_currentRegister = 0;
 		_lastOutput = 0;
-		_processTick = false;
+		_clock = 0;
 
 		double output = 1.0;
 		_volumeLut[0] = 0;

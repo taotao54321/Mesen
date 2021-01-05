@@ -56,7 +56,7 @@ private:
 
 		if (_inputBuffer[cycle].wrote)
 		{
-			std::cout << "DOUBLE WRITE" << std::endl;
+			std::cout << "EPSG CHIP DOUBLE WRITE" << std::endl;
 		}
 
 		_inputBuffer[cycle] = {
@@ -121,11 +121,16 @@ protected:
 
 			for (uint8_t x = 0; x < 2; x++)
 			{
-				_currentOutputs[x] *= 11;
+				_currentOutputs[x] /= 6;
 			}
 
 			UpdateOutputLevel();
 		}
+	}
+
+	virtual uint32_t GetSSGClockFrequency()
+	{
+		return EPSGSSGAudio::GetSSGClockFrequency() * (3579545.0 / _console->GetSettings()->GetEPSGClockFrequency());
 	}
 
 public:
@@ -138,8 +143,7 @@ public:
 		_clock = 0;
 
 		OPN2_Reset(&_chip);
-		OPN2_SetChipType(ym3438_mode_ym2612 | ym3438_mode_readmode);
-		//OPN2_SetChipType(0);
+		OPN2_SetChipType(0);
 	}
 
 	void WriteRegister(uint16_t addr, uint8_t value)
