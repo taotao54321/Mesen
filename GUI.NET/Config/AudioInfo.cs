@@ -23,8 +23,8 @@ namespace Mesen.GUI.Config
 		[MinMax(0, 100)] public UInt32 Vrc7Volume = 100;
 		[MinMax(0, 100)] public UInt32 Namco163Volume = 100;
 		[MinMax(0, 100)] public UInt32 Sunsoft5bVolume = 100;
-		[MinMax(0, 100)] public UInt32 EPSGVolume_L = 100;
-		[MinMax(0, 100)] public UInt32 EPSGVolume_R = 100;
+		[MinMax(0, 100)] public UInt32 EPSGVolume_L = 50;
+		[MinMax(0, 100)] public UInt32 EPSGVolume_R = 50;
 
 		[MinMax(10000, 32000000)] public UInt32 EPSGClockFrequency = 3579545;
 

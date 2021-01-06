@@ -121,7 +121,7 @@ protected:
 
 			for (uint8_t x = 0; x < 2; x++)
 			{
-				_currentOutputs[x] /= 6;
+				_currentOutputs[x] /= 12;
 			}
 
 			UpdateOutputLevel();
@@ -130,7 +130,7 @@ protected:
 
 	virtual uint32_t GetSSGClockFrequency()
 	{
-		return EPSGSSGAudio::GetSSGClockFrequency() * (3579545.0 / _console->GetSettings()->GetEPSGClockFrequency());
+		return EPSGSSGAudio::GetSSGClockFrequency() * (_console->GetSettings()->GetEPSGClockFrequency() / 3579545.0 );
 	}
 
 public:
