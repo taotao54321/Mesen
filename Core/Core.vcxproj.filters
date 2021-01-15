@@ -1514,6 +1514,9 @@
     <ClInclude Include="SSGAudio.h">
       <Filter>Nes\Mappers</Filter>
     </ClInclude>
+    <ClInclude Include="opll.h">
+      <Filter>Nes\Mappers\VRC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1818,6 +1821,9 @@
     </ClCompile>
     <ClCompile Include="ym3438.cpp">
       <Filter>Nes\Mappers\EPSG</Filter>
+    </ClCompile>
+    <ClCompile Include="opll.cpp">
+      <Filter>Nes\Mappers\VRC</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

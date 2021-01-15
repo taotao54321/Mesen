@@ -397,7 +397,7 @@ void NsfMapper::WriteRegister(uint16_t addr, uint8_t value)
 				break;
 
 			case 0x9010: case 0x9030:
-				_vrc7Audio->WriteReg(addr, value);
+				_vrc7Audio->WriteRegister(addr, value);
 				break;
 
 		}
