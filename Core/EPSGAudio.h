@@ -18,6 +18,8 @@ private:
 
 	int16_t _lastOutputs[2];
 	int16_t _currentOutputs[2];
+	uint8_t writeValue;
+	int16_t writeAddr;
 
 	double _clock;
 
@@ -149,6 +151,32 @@ public:
 	void WriteRegister(uint16_t addr, uint8_t value)
 	{
 		EPSGSSGAudio::WriteRegister(addr, value);
+
+		if (addr == 0x4016) {
+			if ((value & 0x0F) == 0x02) {
+				writeValue = value;
+				writeAddr = 0xC000;
+			}
+			if ((value & 0x0F) == 0x0A) {
+				writeValue = value;
+				writeAddr = 0xE000;
+			}
+			if ((value & 0x0F) == 0x06) {
+				writeValue = value;
+				writeAddr = 0xC002;
+			}
+			if ((value & 0x0F) == 0x0E) {
+				writeValue = value;
+				writeAddr = 0xE002;
+			}
+			if ((value & 0x0F) == 0x00) {
+				writeValue = (writeValue & 0xF0) | (value >> 4);
+
+				const uint8_t a04016 = (writeAddr & 0xF000) == 0xE000;
+				const uint8_t a14016 = !!(writeAddr & 0xF);
+				WriteToChip(a04016 | (a14016 << 1), writeValue);
+			}
+		}
 
 		switch(addr) {
 			case 0xC000:

@@ -285,6 +285,11 @@ public:
 					_audio->WriteRegister(addr, value);
 					break;
 			}
+			switch (addr & 0x4016) {
+					case 0x4016:
+					_audio->WriteRegister(addr, value);
+					break;
+			}
 		}
 
 		virtual void TriggerIrq()
