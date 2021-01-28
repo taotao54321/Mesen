@@ -3,22 +3,11 @@
 #include "BaseMapper.h"
 #include "CPU.h"
 #include "Sunsoft5bAudio.h"
-#include "EPSGAudio.h"
-
-#ifndef SUNSOFT_DEFAULT_AUDIO
-#define SUNSOFT_USE_EPSG
-#endif
-
-#ifdef SUNSOFT_USE_EPSG
-using SunsoftFme7AudioClass = EPSGAudio;
-#else
-using SunsoftFme7AudioClass = Sunsoft5bAudio;
-#endif
 
 class SunsoftFme7 : public BaseMapper
 {
 private:
-	unique_ptr<SunsoftFme7AudioClass> _audio;
+	unique_ptr<Sunsoft5bAudio> _audio;
 	uint8_t _command;
 	uint8_t _workRamValue;
 	bool _irqEnabled;
@@ -35,7 +24,7 @@ protected:
 
 	void InitMapper() override
 	{
-		_audio.reset(new AudioClass(_console));
+		_audio.reset(new Sunsoft5bAudio(_console));
 
 		_command = 0;
 		_workRamValue = 0;
@@ -79,15 +68,6 @@ protected:
 			SetCpuMemoryMapping(0x6000, 0x7FFF, _workRamValue & 0x3F, HasBattery() ? PrgMemoryType::SaveRam : PrgMemoryType::WorkRam, accessType);
 		} else {
 			SetCpuMemoryMapping(0x6000, 0x7FFF, _workRamValue & 0x3F, PrgMemoryType::PrgRom);
-		}
-	}
-	
-	void WriteEPSG(uint16_t addr, uint8_t value) override
-	{
-		switch (addr & 0x4016) {
-		case 0x4016:
-			_audio->WriteRegister(addr, value);
-			break;
 		}
 	}
 

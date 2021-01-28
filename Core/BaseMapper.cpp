@@ -13,7 +13,7 @@
 #include "EmulationSettings.h"
 
 void BaseMapper::WriteRegister(uint16_t addr, uint8_t value) { }
-void BaseMapper::WriteEPSG(uint16_t addr, uint8_t value) { }
+void BaseMapper::WriteEPSG(uint16_t addr, uint8_t value) { _epsgaudio->WriteRegister(addr, value); }
 uint8_t BaseMapper::ReadRegister(uint16_t addr) { return 0; }
 void BaseMapper::InitMapper(RomData &romData) { }
 void BaseMapper::Reset(bool softReset) { }
@@ -509,8 +509,9 @@ void BaseMapper::StreamState(bool saving)
 	ArrayInfo<ChrMemoryType> chrMemoryType = { _chrMemoryType, 0x40 };
 	ArrayInfo<MemoryAccessType> prgMemoryAccess = { _prgMemoryAccess, 0x100 };
 	ArrayInfo<MemoryAccessType> chrMemoryAccess = { _chrMemoryAccess, 0x40 };
+	SnapshotInfo epsgaudio{ _epsgaudio.get() };
 
-	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess);
+	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess, epsgaudio);
 
 	if(!saving) {
 		RestorePrgChrState();
@@ -637,6 +638,7 @@ void BaseMapper::Initialize(RomData &romData)
 
 	InitMapper();
 	InitMapper(romData);
+	_epsgaudio.reset(new EPSGAudio(_console));
 
 	//Load battery data if present
 	LoadBattery();

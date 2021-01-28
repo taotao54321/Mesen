@@ -5,28 +5,10 @@
 #include "CPU.h"
 #include "EmulationSettings.h"
 #include "A12Watcher.h"
-#include "EPSGAudio.h"
-#include "Sunsoft5bAudio.h"
 
-#ifndef MMC3_DEFAULT_AUDIO
-#define MMC3_USE_EPSG
-#endif
-
-#ifdef MMC3_USE_EPSG
-using AudioClass = EPSGAudio;
-#else
-using AudioClass = Sunsoft5bAudio;
-#endif
 
 class MMC3 : public BaseMapper
 {
-public:
-	unique_ptr<AudioClass> _audio;
-
-	void ProcessCpuClock() override
-	{
-		_audio->Clock();
-	}
 
 	private: 
 		enum class MMC3Registers
@@ -208,10 +190,9 @@ public:
 			BaseMapper::StreamState(saving);
 			ArrayInfo<uint8_t> registers = { _registers, 8 };
 			SnapshotInfo a12Watcher{ &_a12Watcher };
-			SnapshotInfo audio{ _audio.get() };
 			Stream(_state.Reg8000, _state.RegA000, _state.RegA001, _currentRegister, _chrMode, _prgMode,
 				_irqReloadValue, _irqCounter, _irqReload, _irqEnabled, a12Watcher,
-				_wramEnabled, _wramWriteProtected, registers, audio);
+				_wramEnabled, _wramWriteProtected, registers);
 		}
 
 		virtual uint16_t GetPRGPageSize() override { return 0x2000; }
@@ -221,7 +202,6 @@ public:
 
 		virtual void InitMapper() override 
 		{
-			_audio.reset(new AudioClass(_console));
 
 			//Force MMC3A irqs for boards that are known to use the A revision.
 			//Some MMC3B boards also have the A behavior, but currently no way to tell them apart.
@@ -277,22 +257,6 @@ public:
 				case MMC3Registers::RegE001:
 					_irqEnabled = true;
 					break;
-			}
-
-			switch (addr & 0xE000) {
-				case 0xC000:
-				case 0xE000:
-					_audio->WriteRegister(addr, value);
-					break;
-			}
-		}
-
-		void WriteEPSG(uint16_t addr, uint8_t value) override
-		{
-			switch (addr & 0x4016) {
-			case 0x4016:
-				_audio->WriteRegister(addr, value);
-				break;
 			}
 		}
 
