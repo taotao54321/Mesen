@@ -6,6 +6,7 @@ namespace Mesen.GUI.Config
 	{
 		public string AudioDevice = "";
 		public bool EnableAudio = true;
+		public bool EnableEPSG = true;
 
 		public bool DisableDynamicSampleRate = false;
 

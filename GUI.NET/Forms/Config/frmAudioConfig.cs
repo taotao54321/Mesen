@@ -31,6 +31,7 @@ namespace Mesen.GUI.Forms.Config
 			cboAudioDevice.Items.AddRange(InteropEmu.GetAudioDevices().ToArray());
 
 			AddBinding("EnableAudio", chkEnableAudio);
+			AddBinding("EnableEPSG", chkEnableEPSG);
 			AddBinding("MasterVolume", trkMaster);
 			AddBinding("Square1Volume", trkSquare1Vol);
 			AddBinding("Square2Volume", trkSquare2Vol);

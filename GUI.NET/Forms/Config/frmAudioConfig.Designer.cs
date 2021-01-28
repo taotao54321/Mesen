@@ -48,6 +48,7 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
 			this.lblVolumeReductionSettings = new System.Windows.Forms.Label();
 			this.chkEnableAudio = new System.Windows.Forms.CheckBox();
+			this.chkEnableEPSG = new System.Windows.Forms.CheckBox();
 			this.lblSampleRate = new System.Windows.Forms.Label();
 			this.lblAudioLatency = new System.Windows.Forms.Label();
 			this.cboSampleRate = new System.Windows.Forms.ComboBox();
@@ -450,6 +451,7 @@ namespace Mesen.GUI.Forms.Config
 			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
 			this.tableLayoutPanel2.Controls.Add(this.lblVolumeReductionSettings, 0, 4);
 			this.tableLayoutPanel2.Controls.Add(this.chkEnableAudio, 0, 0);
+			this.tableLayoutPanel2.Controls.Add(this.chkEnableEPSG, 0, 0);
 			this.tableLayoutPanel2.Controls.Add(this.lblSampleRate, 0, 2);
 			this.tableLayoutPanel2.Controls.Add(this.lblAudioLatency, 0, 3);
 			this.tableLayoutPanel2.Controls.Add(this.cboSampleRate, 1, 2);
@@ -491,13 +493,25 @@ namespace Mesen.GUI.Forms.Config
 			// 
 			this.chkEnableAudio.AutoSize = true;
 			this.tableLayoutPanel2.SetColumnSpan(this.chkEnableAudio, 2);
-			this.chkEnableAudio.Location = new System.Drawing.Point(6, 6);
+			this.chkEnableAudio.Location = new System.Drawing.Point(6, 32);
 			this.chkEnableAudio.Margin = new System.Windows.Forms.Padding(6, 6, 6, 3);
 			this.chkEnableAudio.Name = "chkEnableAudio";
 			this.chkEnableAudio.Size = new System.Drawing.Size(89, 17);
 			this.chkEnableAudio.TabIndex = 3;
 			this.chkEnableAudio.Text = "Enable Audio";
 			this.chkEnableAudio.UseVisualStyleBackColor = true;
+			// 
+			// chkEnableEPSG
+			// 
+			this.chkEnableEPSG.AutoSize = true;
+			this.tableLayoutPanel2.SetColumnSpan(this.chkEnableEPSG, 2);
+			this.chkEnableEPSG.Location = new System.Drawing.Point(6, 6);
+			this.chkEnableEPSG.Margin = new System.Windows.Forms.Padding(6, 6, 6, 3);
+			this.chkEnableEPSG.Name = "chkEnableEPSG";
+			this.chkEnableEPSG.Size = new System.Drawing.Size(91, 17);
+			this.chkEnableEPSG.TabIndex = 3;
+			this.chkEnableEPSG.Text = "Enable EPSG";
+			this.chkEnableEPSG.UseVisualStyleBackColor = true;
 			// 
 			// lblSampleRate
 			// 
@@ -2129,6 +2143,7 @@ namespace Mesen.GUI.Forms.Config
 		private System.Windows.Forms.GroupBox grpVolume;
 		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
 		private System.Windows.Forms.CheckBox chkEnableAudio;
+		private System.Windows.Forms.CheckBox chkEnableEPSG;
 		private System.Windows.Forms.Label lblAudioLatency;
 		private MesenNumericUpDown nudLatency;
 		private System.Windows.Forms.Label lblLatencyMs;

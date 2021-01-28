@@ -104,6 +104,7 @@ protected:
 	uint8_t InternalReadRam(uint16_t addr);
 
 	virtual void WriteRegister(uint16_t addr, uint8_t value);
+	virtual void WriteEPSG(uint16_t addr, uint8_t value);
 	virtual uint8_t ReadRegister(uint16_t addr);
 
 	void SelectPrgPage4x(uint16_t slot, uint16_t page, PrgMemoryType memoryType = PrgMemoryType::PrgRom);

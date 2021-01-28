@@ -81,6 +81,15 @@ protected:
 			SetCpuMemoryMapping(0x6000, 0x7FFF, _workRamValue & 0x3F, PrgMemoryType::PrgRom);
 		}
 	}
+	
+	void WriteEPSG(uint16_t addr, uint8_t value) override
+	{
+		switch (addr & 0x4016) {
+		case 0x4016:
+			_audio->WriteRegister(addr, value);
+			break;
+		}
+	}
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
 	{
