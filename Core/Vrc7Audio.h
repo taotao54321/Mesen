@@ -19,7 +19,7 @@ private:
 
 	double _clock;
 
-	static constexpr uint8_t cycleCount = 24;
+	static constexpr uint8_t cycleCount = 12;
 
 	struct InputEntry
 	{
