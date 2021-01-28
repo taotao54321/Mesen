@@ -266,7 +266,15 @@ int16_t SoundMixer::GetOutputVolume(bool forRightChannel)
 		GetChannelOutput(AudioChannel::Namco163, forRightChannel) * 20 +
 		GetChannelOutput(AudioChannel::Sunsoft5B, forRightChannel) * 15 +
 		GetChannelOutput(AudioChannel::VRC6, forRightChannel) * 75 +
+#ifndef VRC7_USE_OLD_EMU
+#define VRC7_USE_NUKED
+#endif
+
+#ifdef VRC7_USE_NUKED
 		GetChannelOutput(AudioChannel::VRC7, forRightChannel) * 12 +
+#else
+		GetChannelOutput(AudioChannel::VRC7, forRightChannel) +
+#endif
 		GetChannelOutput(AudioChannel::EPSG_L, forRightChannel) * 15 +
 		GetChannelOutput(AudioChannel::EPSG_R, forRightChannel) * 15
 	);
