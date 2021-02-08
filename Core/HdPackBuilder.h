@@ -31,6 +31,7 @@ private:
 	string _saveFolder;
 	string _romName;
 	uint32_t _flags;
+	uint32_t _outTileType;
 	bool _hasNewTile;
 	uint32_t _frameID;
 	vector<HdScreenTileInfo> spritesOnScreen;
@@ -46,11 +47,11 @@ private:
 	void DrawTile(HdPackTileInfo *tile, int tileIndex, uint32_t* pngBuffer, int pageNumber, bool containsSpritesOnly);
 
 public:
-	HdPackBuilder(shared_ptr<Console> console, string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, bool isChrRam);
+	HdPackBuilder(shared_ptr<Console> console, string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, uint32_t outTileType, bool isChrRam);
 	~HdPackBuilder();
 
 	void endFrame();
-	void ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpuTileInfo& tile, BaseMapper* mapper, bool isSprite, uint32_t chrBankHash, bool transparencyRequired);
+	void ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpuTileInfo& tile, BaseMapper* mapper, uint32_t chrBankHash, bool transparencyRequired);
 	void SaveHdPack();
 	
 	static void GetChrBankList(uint32_t *banks);

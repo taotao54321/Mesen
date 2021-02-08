@@ -678,7 +678,8 @@ namespace Mesen.GUI
 			ScaleFilterType filterType,
 			UInt32 scale,
 			HdPackRecordFlags flags,
-			UInt32 chrRamBankSize);
+			UInt32 chrRamBankSize,
+			HDPackOuputTileType tileType);
 
 		[DllImport(DLLPath)] public static extern void HdBuilderStopRecording();
 
@@ -2354,6 +2355,13 @@ namespace Mesen.GUI
 		Prescale6x = 22,
 		Prescale8x = 23,
 		Prescale10x = 24,
+	}
+
+	public enum HDPackOuputTileType
+	{
+		Both = 0,
+		BG = 1,
+		Sprite= 2
 	}
 
 	public enum VideoResizeFilter

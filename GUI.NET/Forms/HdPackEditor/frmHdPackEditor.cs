@@ -44,8 +44,14 @@ namespace Mesen.GUI.Forms.HdPackEditor
 			toolTip.SetToolTip(picLargeSpritesHelp, ResourceHelper.GetMessage("HdPackBuilderLargeSpritesHelp"));
 			toolTip.SetToolTip(picIgnoreOverscanHelp, ResourceHelper.GetMessage("HdPackBuilderIgnoreOverscanHelp"));
 		   toolTip.SetToolTip(picSaveFrameHelp, ResourceHelper.GetMessage("HdPackBuilderSaveFrameHelp"));
+			toolTip.SetToolTip(picTileTypeHelp, ResourceHelper.GetMessage("HdPackBuilderTileTypeHelp"));
 
-		 UpdateUI(false);
+			cboTileType.Items.Add(ResourceHelper.GetEnumText(HDPackOuputTileType.Both));
+			cboTileType.Items.Add(ResourceHelper.GetEnumText(HDPackOuputTileType.BG));
+			cboTileType.Items.Add(ResourceHelper.GetEnumText(HDPackOuputTileType.Sprite));
+			cboTileType.SelectedIndex = 0;
+
+			UpdateUI(false);
 		}
 
 		protected override void OnFormClosing(FormClosingEventArgs e)
@@ -126,6 +132,7 @@ namespace Mesen.GUI.Forms.HdPackEditor
 			chkGroupBlankTiles.Enabled = !isRecording;
 		   chkIgnoreOverscan.Enabled = !isRecording;
 			chkSaveFrame.Enabled = !isRecording;
+			cboTileType.Enabled = !isRecording;
 
 			cboChrBankSize.Enabled = !isRecording;
 			cboScale.Enabled = !isRecording;
@@ -162,7 +169,8 @@ namespace Mesen.GUI.Forms.HdPackEditor
 		   if(chkSaveFrame.Checked) {
 			   flags |= HdPackRecordFlags.SaveFrame;
 		   }
-		 InteropEmu.HdBuilderStartRecording(txtSaveFolder.Text, ((FilterInfo)cboScale.SelectedItem).FilterType, ((FilterInfo)cboScale.SelectedItem).Scale, flags, (UInt32)Math.Pow(2, cboChrBankSize.SelectedIndex) * 0x400);
+			HDPackOuputTileType tileType = (HDPackOuputTileType)cboTileType.SelectedIndex;
+		 InteropEmu.HdBuilderStartRecording(txtSaveFolder.Text, ((FilterInfo)cboScale.SelectedItem).FilterType, ((FilterInfo)cboScale.SelectedItem).Scale, flags, (UInt32)Math.Pow(2, cboChrBankSize.SelectedIndex) * 0x400, tileType);
 			tmrRefresh.Start();
 
 			UpdateUI(true);
