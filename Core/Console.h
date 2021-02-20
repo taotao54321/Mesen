@@ -227,7 +227,7 @@ public:
 	shared_ptr<HdPackData> GetHdData();
 	bool IsHdPpu();
 
-	void StartRecordingHdPack(string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize);
+	void StartRecordingHdPack(string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, uint32_t outTileType);
 	void StopRecordingHdPack();
 	
 	void CopyRewindData(shared_ptr<Console> sourceConsole);

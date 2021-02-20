@@ -769,7 +769,7 @@ namespace InteropEmu {
 
 		DllExport bool __stdcall IsHdPpu() { return _console->IsHdPpu(); }
 
-		DllExport void __stdcall HdBuilderStartRecording(char* saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize) { _console->StartRecordingHdPack(saveFolder, filterType, scale, flags, chrRamBankSize); }
+		DllExport void __stdcall HdBuilderStartRecording(char* saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, uint32_t outTileType) { _console->StartRecordingHdPack(saveFolder, filterType, scale, flags, chrRamBankSize, outTileType); }
 		DllExport void __stdcall HdBuilderStopRecording() { _console->StopRecordingHdPack(); }
 
 		DllExport void __stdcall HdBuilderGetChrBankList(uint32_t* bankBuffer) { HdPackBuilder::GetChrBankList(bankBuffer); }

@@ -77,7 +77,7 @@ protected:
 					}
 					_console->GetMapper()->CopyChrTile(_lastSprite->AbsoluteTileAddr & 0xFFFFFFF0, sprite.TileData);
 
-					_hdPackBuilder->ProcessTile(_cycle - 1, _scanline, _lastSprite->AbsoluteTileAddr, sprite, mapper, false, _bankHashes[_lastSprite->TileAddr / _chrRamBankSize], false);
+					_hdPackBuilder->ProcessTile(_cycle - 1, _scanline, _lastSprite->AbsoluteTileAddr, sprite, mapper, _bankHashes[_lastSprite->TileAddr / _chrRamBankSize], false);
 				}
 			}
 
@@ -91,7 +91,7 @@ protected:
 					tile.OffsetY = lastTile->OffsetY;
 					_console->GetMapper()->CopyChrTile(lastTile->AbsoluteTileAddr & 0xFFFFFFF0, tile.TileData);
 
-					_hdPackBuilder->ProcessTile(_cycle - 1, _scanline, lastTile->AbsoluteTileAddr, tile, mapper, false, _bankHashes[lastTile->TileAddr / _chrRamBankSize], hasBgSprite);
+					_hdPackBuilder->ProcessTile(_cycle - 1, _scanline, lastTile->AbsoluteTileAddr, tile, mapper, _bankHashes[lastTile->TileAddr / _chrRamBankSize], hasBgSprite);
 				}
 			}
 		} else {

@@ -332,9 +332,6 @@ HdPackTileInfo* HdNesPack::GetCachedMatchingTile(uint32_t x, uint32_t y, HdPpuTi
 HdPackTileInfo* HdNesPack::GetMatchingTile(uint32_t x, uint32_t y, HdPpuTileInfo* tile, bool* disableCache)
 {
 	auto hdTile = _hdData->TileByKey.find(*tile);
-	if(hdTile == _hdData->TileByKey.end()) {
-		hdTile = _hdData->TileByKey.find(tile->GetKey(true));
-	}
 
 	if(hdTile != _hdData->TileByKey.end()) {
 		for(HdPackTileInfo* hdPackTile : hdTile->second) {
@@ -343,6 +340,20 @@ HdPackTileInfo* HdNesPack::GetMatchingTile(uint32_t x, uint32_t y, HdPpuTileInfo
 			}
 
 			if(hdPackTile->MatchesCondition(_hdScreenInfo, x, y, tile)) {
+				return hdPackTile;
+			}
+		}
+	}
+
+	//repeat with default if not found
+	hdTile = _hdData->TileByKey.find(tile->GetKey(true));
+	if (hdTile != _hdData->TileByKey.end()) {
+		for (HdPackTileInfo* hdPackTile : hdTile->second) {
+			if (disableCache != nullptr && hdPackTile->ForceDisableCache) {
+				*disableCache = true;
+			}
+
+			if (hdPackTile->MatchesCondition(_hdScreenInfo, x, y, tile)) {
 				return hdPackTile;
 			}
 		}

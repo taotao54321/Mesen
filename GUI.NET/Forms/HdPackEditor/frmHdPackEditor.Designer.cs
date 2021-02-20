@@ -62,6 +62,10 @@
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.chkSaveFrame = new System.Windows.Forms.CheckBox();
             this.picSaveFrameHelp = new System.Windows.Forms.PictureBox();
+            this.flowLayoutPanel7 = new System.Windows.Forms.FlowLayoutPanel();
+            this.cboTileType = new System.Windows.Forms.ComboBox();
+            this.picTileTypeHelp = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.btnSelectFolder = new System.Windows.Forms.Button();
             this.txtSaveFolder = new System.Windows.Forms.TextBox();
@@ -87,6 +91,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.picScaleHelp)).BeginInit();
             this.flowLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSaveFrameHelp)).BeginInit();
+            this.flowLayoutPanel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picTileTypeHelp)).BeginInit();
             this.tableLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -240,10 +246,12 @@
             this.tableLayoutPanel2.Controls.Add(this.flpBankSize, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel6, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel2, 0, 7);
+            this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel7, 1, 8);
+            this.tableLayoutPanel2.Controls.Add(this.label1, 0, 8);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 18);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 9;
+            this.tableLayoutPanel2.RowCount = 10;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -252,7 +260,8 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 18F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 18F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(325, 265);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
@@ -285,7 +294,7 @@
             this.picIgnoreOverscanHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.picIgnoreOverscanHelp.Location = new System.Drawing.Point(256, 3);
             this.picIgnoreOverscanHelp.Name = "picIgnoreOverscanHelp";
-            this.picIgnoreOverscanHelp.Size = new System.Drawing.Size(16, 15);
+            this.picIgnoreOverscanHelp.Size = new System.Drawing.Size(16, 16);
             this.picIgnoreOverscanHelp.TabIndex = 18;
             this.picIgnoreOverscanHelp.TabStop = false;
             // 
@@ -340,7 +349,7 @@
             this.picGroupBlankHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.picGroupBlankHelp.Location = new System.Drawing.Point(113, 3);
             this.picGroupBlankHelp.Name = "picGroupBlankHelp";
-            this.picGroupBlankHelp.Size = new System.Drawing.Size(16, 15);
+            this.picGroupBlankHelp.Size = new System.Drawing.Size(16, 16);
             this.picGroupBlankHelp.TabIndex = 12;
             this.picGroupBlankHelp.TabStop = false;
             // 
@@ -375,7 +384,7 @@
             this.picFrequencyHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.picFrequencyHelp.Location = new System.Drawing.Point(175, 3);
             this.picFrequencyHelp.Name = "picFrequencyHelp";
-            this.picFrequencyHelp.Size = new System.Drawing.Size(16, 15);
+            this.picFrequencyHelp.Size = new System.Drawing.Size(16, 16);
             this.picFrequencyHelp.TabIndex = 12;
             this.picFrequencyHelp.TabStop = false;
             // 
@@ -408,7 +417,7 @@
             this.picLargeSpritesHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.picLargeSpritesHelp.Location = new System.Drawing.Point(170, 3);
             this.picLargeSpritesHelp.Name = "picLargeSpritesHelp";
-            this.picLargeSpritesHelp.Size = new System.Drawing.Size(16, 15);
+            this.picLargeSpritesHelp.Size = new System.Drawing.Size(16, 16);
             this.picLargeSpritesHelp.TabIndex = 12;
             this.picLargeSpritesHelp.TabStop = false;
             // 
@@ -444,7 +453,7 @@
             this.picBankSizeHelp.Location = new System.Drawing.Point(114, 6);
             this.picBankSizeHelp.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.picBankSizeHelp.Name = "picBankSizeHelp";
-            this.picBankSizeHelp.Size = new System.Drawing.Size(16, 15);
+            this.picBankSizeHelp.Size = new System.Drawing.Size(16, 16);
             this.picBankSizeHelp.TabIndex = 12;
             this.picBankSizeHelp.TabStop = false;
             // 
@@ -476,7 +485,7 @@
             this.picScaleHelp.Location = new System.Drawing.Point(114, 6);
             this.picScaleHelp.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.picScaleHelp.Name = "picScaleHelp";
-            this.picScaleHelp.Size = new System.Drawing.Size(16, 15);
+            this.picScaleHelp.Size = new System.Drawing.Size(16, 16);
             this.picScaleHelp.TabIndex = 12;
             this.picScaleHelp.TabStop = false;
             // 
@@ -509,9 +518,51 @@
             this.picSaveFrameHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.picSaveFrameHelp.Location = new System.Drawing.Point(229, 3);
             this.picSaveFrameHelp.Name = "picSaveFrameHelp";
-            this.picSaveFrameHelp.Size = new System.Drawing.Size(16, 15);
+            this.picSaveFrameHelp.Size = new System.Drawing.Size(16, 16);
             this.picSaveFrameHelp.TabIndex = 19;
             this.picSaveFrameHelp.TabStop = false;
+            // 
+            // flowLayoutPanel7
+            // 
+            this.flowLayoutPanel7.Controls.Add(this.cboTileType);
+            this.flowLayoutPanel7.Controls.Add(this.picTileTypeHelp);
+            this.flowLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel7.Location = new System.Drawing.Point(88, 140);
+            this.flowLayoutPanel7.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel7.Name = "flowLayoutPanel7";
+            this.flowLayoutPanel7.Size = new System.Drawing.Size(237, 22);
+            this.flowLayoutPanel7.TabIndex = 22;
+            // 
+            // cboTileType
+            // 
+            this.cboTileType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboTileType.DropDownWidth = 105;
+            this.cboTileType.FormattingEnabled = true;
+            this.cboTileType.Location = new System.Drawing.Point(3, 3);
+            this.cboTileType.Name = "cboTileType";
+            this.cboTileType.Size = new System.Drawing.Size(105, 20);
+            this.cboTileType.TabIndex = 0;
+            // 
+            // picTileTypeHelp
+            // 
+            this.picTileTypeHelp.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.picTileTypeHelp.BackgroundImage = global::Mesen.GUI.Properties.Resources.Help;
+            this.picTileTypeHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.picTileTypeHelp.Location = new System.Drawing.Point(114, 5);
+            this.picTileTypeHelp.Name = "picTileTypeHelp";
+            this.picTileTypeHelp.Size = new System.Drawing.Size(16, 16);
+            this.picTileTypeHelp.TabIndex = 20;
+            this.picTileTypeHelp.TabStop = false;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 145);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(53, 12);
+            this.label1.TabIndex = 21;
+            this.label1.Text = "Tile Type:";
             // 
             // tableLayoutPanel4
             // 
@@ -608,6 +659,8 @@
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSaveFrameHelp)).EndInit();
+            this.flowLayoutPanel7.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picTileTypeHelp)).EndInit();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
             this.ResumeLayout(false);
@@ -655,5 +708,9 @@
 	  private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
 	  private System.Windows.Forms.CheckBox chkSaveFrame;
 	  private System.Windows.Forms.PictureBox picSaveFrameHelp;
-   }
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel7;
+        private System.Windows.Forms.ComboBox cboTileType;
+        private System.Windows.Forms.PictureBox picTileTypeHelp;
+        private System.Windows.Forms.Label label1;
+    }
 }

@@ -22,7 +22,8 @@ private:
 	
 	uint8_t _prgMode;
 	bool _enablePrgAt6000;
-	
+	uint8_t _prgBlock;
+
 	uint8_t _chrMode;
 	bool _chrBlockMode;
 	uint8_t _chrBlock;
@@ -71,6 +72,7 @@ protected:
 
 		_prgMode = 0;
 		_enablePrgAt6000 = false;
+		_prgBlock = 0;
 
 		_chrMode = 0;
 		_chrBlockMode = false;
@@ -113,7 +115,7 @@ protected:
 		ArrayInfo<uint8_t> ntLowRegs{ _ntLowRegs, 4 };
 		ArrayInfo<uint8_t> ntHighRegs{ _ntHighRegs, 4 };
 
-		Stream(_chrLatch[0], _chrLatch[1], _prgMode, _enablePrgAt6000, _chrMode, _chrBlockMode, _chrBlock, _mirrorChr, _mirroringReg, _advancedNtControl,
+		Stream(_chrLatch[0], _chrLatch[1], _prgMode, _enablePrgAt6000, _prgBlock, _chrMode, _chrBlockMode, _chrBlock, _mirrorChr, _mirroringReg, _advancedNtControl,
 			_disableNtRam, _ntRamSelectBit, _irqEnabled, _irqSource, _lastPpuAddr, _irqCountDirection, _irqFunkyMode, _irqFunkyModeReg, _irqSmallPrescaler,
 			_irqPrescaler, _irqCounter, _irqXorReg, _multiplyValue1, _multiplyValue2, _regRamValue, prgRegs, chrLowRegs, chrHighRegs, ntLowRegs, ntHighRegs);
 
@@ -132,7 +134,7 @@ protected:
 	uint8_t InvertPrgBits(uint8_t prgReg, bool needInvert)
 	{
 		if(needInvert) {
-			return (prgReg & 0x01) << 6 | (prgReg & 0x02) << 4 | (prgReg & 0x04) << 2 | (prgReg & 0x10) >> 2 | (prgReg & 0x20) >> 4 | (prgReg & 0x40) >> 6;
+			return (prgReg & 0x01) << 6 | (prgReg & 0x02) << 4 | (prgReg & 0x04) << 2 | (prgReg & 0x08) | (prgReg & 0x10) >> 2 | (prgReg & 0x20) >> 4 | (prgReg & 0x40) >> 6;
 		} else {
 			return prgReg;
 		}
@@ -162,10 +164,10 @@ protected:
 
 			case 2:
 			case 3:
-				SelectPRGPage(0, prgRegs[0]);
-				SelectPRGPage(1, prgRegs[1]);
-				SelectPRGPage(2, prgRegs[2]);
-				SelectPRGPage(3, (_prgMode & 0x04) ? prgRegs[3] : 0x3F);
+				SelectPRGPage(0, prgRegs[0] | (_prgBlock << 5));
+				SelectPRGPage(1, prgRegs[1] | (_prgBlock << 5));
+				SelectPRGPage(2, prgRegs[2] | (_prgBlock << 5));
+				SelectPRGPage(3, (_prgMode & 0x04) ? prgRegs[3] | (_prgBlock << 5) : 0x3F);
 				if(_enablePrgAt6000) {
 					SetCpuMemoryMapping(0x6000, 0x7FFF, prgRegs[3], PrgMemoryType::PrgRom);
 				}
@@ -332,6 +334,11 @@ protected:
 					_mirrorChr = (value & 0x80) == 0x80;
 					_chrBlockMode = (value & 0x20) == 0x00;
 					_chrBlock = ((value & 0x18) >> 2) | (value & 0x01);
+
+					if (_romInfo.MapperID == 35 || _romInfo.MapperID == 90 || _romInfo.MapperID == 209 || _romInfo.MapperID == 211) {
+						_prgBlock = value & 0x06;
+					}
+
 					break;
 
 			}

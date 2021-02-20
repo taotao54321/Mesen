@@ -9,6 +9,13 @@
 
 HdPackBuilder* HdPackBuilder::_instance = nullptr;
 
+enum HDPackOuputTileType
+{
+	Both = 0,
+	BG = 1,
+	Sprite = 2
+};
+
 enum HdPackRecordFlags
 {
 	None = 0,
@@ -19,7 +26,7 @@ enum HdPackRecordFlags
 	SaveFrame = 16,
 };
 
-HdPackBuilder::HdPackBuilder(shared_ptr<Console> console, string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, bool isChrRam)
+HdPackBuilder::HdPackBuilder(shared_ptr<Console> console, string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize, uint32_t outTileType, bool isChrRam)
 {
 	_console = console;
 	_saveFolder = saveFolder;
@@ -27,6 +34,7 @@ HdPackBuilder::HdPackBuilder(shared_ptr<Console> console, string saveFolder, Sca
 	_chrRamBankSize = chrRamBankSize;
 	_flags = flags;
 	_isChrRam = isChrRam;
+	_outTileType = outTileType;
 	_hasNewTile = false;
 	_frameID = 0;
 	string existingPackDefinition = FolderUtilities::CombinePath(saveFolder, "hires.txt");
@@ -211,7 +219,7 @@ void HdPackBuilder::AddTile(HdPackTileInfo *tile, uint32_t usageCount)
 	_hasNewTile = true;
 }
 
-void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpuTileInfo &tile, BaseMapper *mapper, bool isSprite, uint32_t chrBankHash, bool transparencyRequired)
+void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpuTileInfo &tile, BaseMapper *mapper, uint32_t chrBankHash, bool transparencyRequired)
 {
 	if(_flags & HdPackRecordFlags::IgnoreOverscan) {
 		OverscanDimensions overscan = _console->GetSettings()->GetOverscanDimensions();
@@ -219,6 +227,14 @@ void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpu
 			//Ignore tiles inside overscan
 			return;
 		}
+	}
+
+	if(_outTileType == HDPackOuputTileType::BG && tile.IsSpriteTile()) {
+		return;
+	}
+
+	if (_outTileType == HDPackOuputTileType::Sprite && !tile.IsSpriteTile()) {
+		return;
 	}
 
 	auto result = _tileUsageCount.find(tile.GetKey(false));
