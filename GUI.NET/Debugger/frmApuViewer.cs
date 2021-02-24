@@ -54,7 +54,9 @@ namespace Mesen.GUI.Debugger
 		}
 
 		private void chkSoundChannel_CheckedChanged(object sender, EventArgs e)
-		{
+	  {
+			AudioInfo audioInfo = ConfigManager.Config.AudioInfo;
+
 			InteropEmu.SetChannelVolume(AudioChannel.Square1, chkSquare1.Checked ? 1 : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.Square2, chkSquare2.Checked ? 1 : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.Triangle, chkTriangle.Checked ? 1 : 0);
@@ -66,6 +68,8 @@ namespace Mesen.GUI.Debugger
 			InteropEmu.SetChannelVolume(AudioChannel.VRC7, chkVrc7.Checked ? 1 : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.MMC5, chkMmc5.Checked ? 1 : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.Sunsoft5B, chkSunsoft.Checked ? 1 : 0);
-		}
+			InteropEmu.SetChannelVolume(AudioChannel.EPSG_L, chkEPSG.Checked ? AudioInfo.ConvertVolume(audioInfo.EPSGVolume_L) : 0);
+			InteropEmu.SetChannelVolume(AudioChannel.EPSG_R, chkEPSG.Checked ? AudioInfo.ConvertVolume(audioInfo.EPSGVolume_R) : 0);
+	  }
 	}
 }

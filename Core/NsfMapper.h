@@ -6,6 +6,7 @@
 #include "FdsAudio.h"
 #include "Namco163Audio.h"
 #include "Sunsoft5bAudio.h"
+#include "EPSGAudio.h"
 
 enum class NsfIrqType
 {
@@ -25,7 +26,8 @@ private:
 		FDS = 0x04,
 		MMC5 = 0x08,
 		Namco = 0x10,
-		Sunsoft = 0x20
+		Sunsoft = 0x20,
+		EPSG = 0x40
 	};
 
 	NesModel _model;
@@ -37,6 +39,7 @@ private:
 	unique_ptr<FdsAudio> _fdsAudio;
 	unique_ptr<Namco163Audio> _namcoAudio;
 	unique_ptr<Sunsoft5bAudio> _sunsoftAudio;
+	unique_ptr<EPSGAudio> _epsgAudio;
 	
 	bool _needInit = false;
 	bool _irqEnabled = false;

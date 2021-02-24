@@ -41,6 +41,7 @@
 			this.chkVrc7 = new System.Windows.Forms.CheckBox();
 			this.chkDmc = new System.Windows.Forms.CheckBox();
 			this.chkSunsoft = new System.Windows.Forms.CheckBox();
+			this.chkEPSG = new System.Windows.Forms.CheckBox();
 			this.chkVrc6 = new System.Windows.Forms.CheckBox();
 			this.grpSquare1 = new System.Windows.Forms.GroupBox();
 			this.ctrlSquareInfo1 = new Mesen.GUI.Debugger.Controls.ctrlSquareInfo();
@@ -118,6 +119,7 @@
 			this.tableLayoutPanel2.Controls.Add(this.chkVrc7, 2, 1);
 			this.tableLayoutPanel2.Controls.Add(this.chkDmc, 0, 4);
 			this.tableLayoutPanel2.Controls.Add(this.chkSunsoft, 1, 3);
+			this.tableLayoutPanel2.Controls.Add(this.chkEPSG, 1, 4);
 			this.tableLayoutPanel2.Controls.Add(this.chkVrc6, 2, 0);
 			this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 16);
@@ -270,6 +272,20 @@
 			this.chkSunsoft.Text = "Sunsoft 5B";
 			this.chkSunsoft.UseVisualStyleBackColor = true;
 			this.chkSunsoft.CheckedChanged += new System.EventHandler(this.chkSoundChannel_CheckedChanged);
+			// 
+			// chkEPSG
+			// 
+			this.chkEPSG.AutoSize = true;
+			this.chkEPSG.Checked = true;
+			this.chkEPSG.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkEPSG.Location = new System.Drawing.Point(99, 80);
+			this.chkEPSG.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
+			this.chkEPSG.Name = "chkEPSG";
+			this.chkEPSG.Size = new System.Drawing.Size(78, 17);
+			this.chkEPSG.TabIndex = 10;
+			this.chkEPSG.Text = "EPSG";
+			this.chkEPSG.UseVisualStyleBackColor = true;
+			this.chkEPSG.CheckedChanged += new System.EventHandler(this.chkSoundChannel_CheckedChanged);
 			// 
 			// chkVrc6
 			// 
@@ -459,5 +475,6 @@
 		private System.Windows.Forms.CheckBox chkVrc7;
 		private System.Windows.Forms.CheckBox chkVrc6;
 		private System.Windows.Forms.CheckBox chkSunsoft;
+		private System.Windows.Forms.CheckBox chkEPSG;
 	}
 }

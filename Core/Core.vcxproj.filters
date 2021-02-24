@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Debugger">
@@ -115,6 +115,9 @@
     </Filter>
     <Filter Include="Nes\MemoryManager">
       <UniqueIdentifier>{13af8497-e820-43f1-9888-85797a29b551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Nes\Mappers\EPSG">
+      <UniqueIdentifier>{c9c48ea8-7684-4959-9266-c0b4f0f86956}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1502,6 +1505,21 @@
     <ClInclude Include="VbController.h">
       <Filter>Nes\Input\Controllers</Filter>
     </ClInclude>
+    <ClInclude Include="ym3438.h">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClInclude>
+    <ClInclude Include="EPSGAudio.h">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClInclude>
+    <ClInclude Include="SSGAudio.h">
+      <Filter>Nes\Mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="opll.h">
+      <Filter>Nes\Mappers\VRC</Filter>
+    </ClInclude>
+    <ClInclude Include="emu2149.h">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1803,6 +1821,15 @@
     </ClCompile>
     <ClCompile Include="StudyBoxLoader.cpp">
       <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="ym3438.cpp">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClCompile>
+    <ClCompile Include="opll.cpp">
+      <Filter>Nes\Mappers\VRC</Filter>
+    </ClCompile>
+    <ClCompile Include="emu2149.cpp">
+      <Filter>Nes\Mappers\EPSG</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

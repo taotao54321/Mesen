@@ -6,8 +6,10 @@
 #include "EmulationSettings.h"
 #include "A12Watcher.h"
 
+
 class MMC3 : public BaseMapper
 {
+
 	private: 
 		enum class MMC3Registers
 		{
@@ -200,6 +202,7 @@ class MMC3 : public BaseMapper
 
 		virtual void InitMapper() override 
 		{
+
 			//Force MMC3A irqs for boards that are known to use the A revision.
 			//Some MMC3B boards also have the A behavior, but currently no way to tell them apart.
 			_forceMmc3RevAIrqs = _romInfo.DatabaseInfo.Chip.substr(0, 5).compare("MMC3A") == 0;

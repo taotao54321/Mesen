@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -558,6 +558,8 @@
     <ClInclude Include="DummyCpu.h" />
     <ClInclude Include="Eeprom24C01.h" />
     <ClInclude Include="Eeprom24C02.h" />
+    <ClInclude Include="emu2149.h" />
+    <ClInclude Include="EPSGAudio.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="FaridSlrom.h" />
     <ClInclude Include="FaridUnrom.h" />
@@ -586,12 +588,14 @@
     <ClInclude Include="NESHeader.h" />
     <ClInclude Include="NotificationManager.h" />
     <ClInclude Include="OpenBusHandler.h" />
+    <ClInclude Include="opll.h" />
     <ClInclude Include="PerformanceTracker.h" />
     <ClInclude Include="RawVideoFilter.h" />
     <ClInclude Include="ResetTxrom.h" />
     <ClInclude Include="Sachen9602.h" />
     <ClInclude Include="ServerInformationMessage.h" />
     <ClInclude Include="FamicomBox.h" />
+    <ClInclude Include="SSGAudio.h" />
     <ClInclude Include="StereoCombFilter.h" />
     <ClInclude Include="StudyBoxLoader.h" />
     <ClInclude Include="SystemActionManager.h" />
@@ -982,6 +986,7 @@
     <ClInclude Include="Waixing178.h" />
     <ClInclude Include="Waixing252.h" />
     <ClInclude Include="WaveRecorder.h" />
+    <ClInclude Include="ym3438.h" />
     <ClInclude Include="Yoko.h" />
     <ClInclude Include="Zapper.h" />
     <ClInclude Include="PgoUtilities.h" />
@@ -996,6 +1001,7 @@
     <ClCompile Include="BatteryManager.cpp" />
     <ClCompile Include="DebugHud.cpp" />
     <ClCompile Include="DrawRectangleCommand.h" />
+    <ClCompile Include="emu2149.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="FceuxMovie.cpp" />
     <ClCompile Include="FdsLoader.cpp" />
@@ -1016,6 +1022,7 @@
     <ClCompile Include="NsfPpu.cpp" />
     <ClCompile Include="OggMixer.cpp" />
     <ClCompile Include="OggReader.cpp" />
+    <ClCompile Include="opll.cpp" />
     <ClCompile Include="PerformanceTracker.cpp" />
     <ClCompile Include="PgoUtilities.cpp" />
     <ClCompile Include="RawVideoFilter.cpp" />
@@ -1098,6 +1105,7 @@
     <ClCompile Include="VsControlManager.cpp" />
     <ClCompile Include="ScaleFilter.cpp" />
     <ClCompile Include="WaveRecorder.cpp" />
+    <ClCompile Include="ym3438.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
