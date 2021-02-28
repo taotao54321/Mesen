@@ -150,7 +150,6 @@ public:
 
 	void WriteRegister(uint16_t addr, uint8_t value)
 	{
-		EPSGSSGAudio::WriteRegister(addr, value);
 
 		if (addr == 0x4016) {
 			if ((value & 0x0F) == 0x02) {
@@ -174,6 +173,7 @@ public:
 
 				const uint8_t a04016 = (writeAddr & 0xF000) == 0xE000;
 				const uint8_t a14016 = !!(writeAddr & 0xF);
+				EPSGSSGAudio::WriteRegister(writeAddr, writeValue);
 				WriteToChip(a04016 | (a14016 << 1), writeValue);
 			}
 		}
@@ -186,7 +186,7 @@ public:
 
 				const uint8_t a0 = (addr & 0xF000) == 0xE000;
 				const uint8_t a1 = !!(addr & 0xF);
-
+				EPSGSSGAudio::WriteRegister(addr, value);
 				WriteToChip(a0 | (a1 << 1), value);
 
 				break;
