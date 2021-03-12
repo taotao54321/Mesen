@@ -63,7 +63,7 @@ protected:
 
 		UpdatePrgRamAccess();
 
-		_audio->SetMuteAudio((_controlFlags & 0x40) != 0);
+		//_audio->SetMuteAudio((_controlFlags & 0x40) != 0);
 	}
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
@@ -78,7 +78,7 @@ protected:
 			case 0x8008: SelectPRGPage(1, value & 0x3F); break;
 			case 0x9000: SelectPRGPage(2, value & 0x3F); break;
 				
-			case 0x9010: case 0x9030: _audio->WriteReg(addr, value); break;
+			case 0x9010: case 0x9030: _audio->WriteRegister(addr, value); break;
 			 
 			case 0xA000: SelectCHRPage(0, value);  break;
 			case 0xA008: SelectCHRPage(1, value);  break;

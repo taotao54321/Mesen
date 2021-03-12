@@ -9,6 +9,8 @@
 #include "IBattery.h"
 #include "RomData.h"
 #include "Console.h"
+#include "CPU.h"
+#include "EPSGAudio.h"
 
 class BaseControlDevice;
 
@@ -104,6 +106,7 @@ protected:
 	uint8_t InternalReadRam(uint16_t addr);
 
 	virtual void WriteRegister(uint16_t addr, uint8_t value);
+	virtual void WriteEPSG(uint16_t addr, uint8_t value);
 	virtual uint8_t ReadRegister(uint16_t addr);
 
 	void SelectPrgPage4x(uint16_t slot, uint16_t page, PrgMemoryType memoryType = PrgMemoryType::PrgRom);
@@ -155,7 +158,7 @@ protected:
 public:
 	static constexpr uint32_t NametableCount = 0x10;
 	static constexpr uint32_t NametableSize = 0x400;
-	
+	unique_ptr<EPSGAudio> _epsgaudio;
 	void Initialize(RomData &romData);
 
 	virtual ~BaseMapper();
@@ -165,6 +168,7 @@ public:
 
 	virtual void SetNesModel(NesModel model) { }
 	virtual void ProcessCpuClock() { }
+	virtual void ProcessEPSGClock() { _epsgaudio->Clock(); }
 	virtual void NotifyVRAMAddressChange(uint16_t addr);
 	virtual void GetMemoryRanges(MemoryRanges &ranges) override;
 	

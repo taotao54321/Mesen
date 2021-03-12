@@ -27,6 +27,7 @@ void NsfMapper::InitMapper()
 	_fdsAudio.reset(new FdsAudio(_console));
 	_namcoAudio.reset(new Namco163Audio(_console));
 	_sunsoftAudio.reset(new Sunsoft5bAudio(_console));
+	_epsgAudio.reset(new EPSGAudio(_console));
 
 	SetCpuMemoryMapping(0x3F00, 0x3FFF, PrgMemoryType::WorkRam, 0x2000, MemoryAccessType::Read);
 	memcpy(GetWorkRam() + 0x2000, _nsfBios, 0x100);
@@ -106,6 +107,10 @@ void NsfMapper::InitMapper(RomData& romData)
 
 	if(_nsfHeader.SoundChips & NsfSoundChips::FDS) {
 		AddRegisterRange(0x4040, 0x4092, MemoryOperation::Any);
+	}
+
+	if(_nsfHeader.SoundChips & NsfSoundChips::EPSG) {
+		AddRegisterRange(0x4016, 0x4016, MemoryOperation::Write);
 	}
 }
 
@@ -272,6 +277,9 @@ void NsfMapper::ProcessCpuClock()
 	if(_nsfHeader.SoundChips & NsfSoundChips::FDS) {
 		_fdsAudio->Clock();
 	}
+	if (_nsfHeader.SoundChips & NsfSoundChips::EPSG) {
+		_epsgAudio->Clock();
+	}
 }
 
 uint8_t NsfMapper::ReadRegister(uint16_t addr)
@@ -397,7 +405,11 @@ void NsfMapper::WriteRegister(uint16_t addr, uint8_t value)
 				break;
 
 			case 0x9010: case 0x9030:
-				_vrc7Audio->WriteReg(addr, value);
+				_vrc7Audio->WriteRegister(addr, value);
+				break;
+
+			case 0x4016:
+				_epsgAudio->WriteRegister(addr, value);
 				break;
 
 		}
@@ -478,10 +490,11 @@ void NsfMapper::StreamState(bool saving)
 	SnapshotInfo fdsAudio { _fdsAudio.get() };
 	SnapshotInfo namcoAudio { _namcoAudio.get() };
 	SnapshotInfo sunsoftAudio { _sunsoftAudio.get() };
+	SnapshotInfo epsgAudio{ _epsgAudio.get() };
 
 	Stream(
 		_model, _needInit, _irqEnabled, _irqReloadValue, _irqCounter, _irqStatus, _debugIrqStatus, _mmc5MultiplierValues[0], _mmc5MultiplierValues[1],
 		_trackEndCounter, _trackFadeCounter, _fadeLength, _silenceDetectDelay, _trackEnded, _allowSilenceDetection, _hasBankSwitching, _ntscSpeed,
-		_palSpeed, _dendySpeed, _songNumber, mmc5Audio, vrc6Audio, vrc7Audio, fdsAudio, namcoAudio, sunsoftAudio
+		_palSpeed, _dendySpeed, _songNumber, mmc5Audio, vrc6Audio, vrc7Audio, fdsAudio, namcoAudio, sunsoftAudio, epsgAudio
 	);
 }
