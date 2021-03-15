@@ -278,7 +278,7 @@ class MMC3 : public BaseMapper
 
 				if(ForceMmc3RevAIrqs() || _console->GetSettings()->CheckFlag(EmulationFlags::Mmc3IrqAltBehavior)) {
 					//MMC3 Revision A behavior
-					if((count > 0 || _irqReload) && _irqCounter == 0 && _irqEnabled) {
+					if(((count > 0 && _irqReloadValue > 0) || _irqReload) && _irqCounter == 0 && _irqEnabled) {
 						TriggerIrq();
 					}
 				} else {
