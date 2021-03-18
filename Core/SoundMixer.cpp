@@ -275,8 +275,8 @@ int16_t SoundMixer::GetOutputVolume(bool forRightChannel)
 #else
 		GetChannelOutput(AudioChannel::VRC7, forRightChannel) +
 #endif
-		GetChannelOutput(AudioChannel::EPSG_L, forRightChannel) * 15 +
-		GetChannelOutput(AudioChannel::EPSG_R, forRightChannel) * 15
+		GetChannelOutput(AudioChannel::EPSG_L, forRightChannel) * 4 +
+		GetChannelOutput(AudioChannel::EPSG_R, forRightChannel) * 4
 	);
 }
 
