@@ -11,6 +11,7 @@
 #include "BatteryManager.h"
 #include "MessageManager.h"
 #include "EmulationSettings.h"
+#include "CPU.h"
 
 void BaseMapper::WriteRegister(uint16_t addr, uint8_t value) { }
 void BaseMapper::WriteEPSG(uint16_t addr, uint8_t value) { _epsgaudio->WriteRegister(addr, value); }
@@ -781,7 +782,7 @@ uint8_t BaseMapper::DebugReadRAM(uint16_t addr)
 
 void BaseMapper::WriteRAM(uint16_t addr, uint8_t value)
 {
-	if(addr == 0x4016){ WriteEPSG(addr, value); }
+	if((addr == 0x4016) & (_console->GetCpu()->GetCycleCount() % 2 == 1)){ WriteEPSG(addr, value); }
 	if(_isWriteRegisterAddr[addr]) {
 		if(_hasBusConflicts) {
 			uint8_t prgValue = _prgPages[addr >> 8][(uint8_t)addr];

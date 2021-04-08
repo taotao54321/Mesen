@@ -123,6 +123,8 @@ namespace Mesen.GUI.Config
 			InteropEmu.SetChannelVolume(AudioChannel.Sunsoft5B, ConvertVolume(audioInfo.Sunsoft5bVolume));
 			InteropEmu.SetChannelVolume(AudioChannel.EPSG_L, ConvertVolume(audioInfo.EPSGVolume_L));
 			InteropEmu.SetChannelVolume(AudioChannel.EPSG_R, ConvertVolume(audioInfo.EPSGVolume_R));
+			InteropEmu.SetChannelVolume(AudioChannel.EPSG_L, audioInfo.EnableEPSG ? AudioInfo.ConvertVolume(audioInfo.EPSGVolume_L) : 0);
+			InteropEmu.SetChannelVolume(AudioChannel.EPSG_R, audioInfo.EnableEPSG ? AudioInfo.ConvertVolume(audioInfo.EPSGVolume_R) : 0);
 
 			InteropEmu.SetChannelPanning(AudioChannel.Square1, ConvertPanning(audioInfo.Square1Panning));
 			InteropEmu.SetChannelPanning(AudioChannel.Square2, ConvertPanning(audioInfo.Square2Panning));

@@ -123,7 +123,7 @@ protected:
 
 			for (uint8_t x = 0; x < 2; x++)
 			{
-				_currentOutputs[x] /= 12;
+				_currentOutputs[x] /= 5;
 			}
 
 			UpdateOutputLevel();
