@@ -90,6 +90,8 @@ struct HdPpuTileInfo : public HdTileKey
 	uint8_t BgColor;
 	uint8_t SpriteColor;
 	uint8_t PpuBackgroundColor;
+
+	uint8_t OAMIndex;
 };
 
 struct HdPpuPixelInfo
@@ -111,11 +113,36 @@ struct HdPpuPixelInfo
 	}
 };
 
+struct HdScreenTileInfo : public HdTileKey
+{
+	int16_t ScreenX;
+	int16_t ScreenY;
+	bool HorizontalMirroring;
+	bool VerticalMirroring;
+	bool BackgroundPriority;
+	bool IsNew;
+};
+
+struct HdSpriteFrameRangeInfo
+{
+	bool lastUpdated;
+	bool updated;
+	HdScreenTileInfo last;
+	HdScreenTileInfo current;
+	uint32_t lastStartFrameNumber;
+	uint32_t startFrameNumber;
+
+	HdSpriteFrameRangeInfo() {
+		updated = false;
+	}
+};
+
 struct HdScreenInfo
 {
 	HdPpuPixelInfo* ScreenTiles;
 	std::unordered_map<uint32_t, uint8_t> WatchedAddressValues;
 	uint32_t FrameNumber;
+	HdSpriteFrameRangeInfo* spriteFrameRanges;
 
 	HdScreenInfo(const HdScreenInfo& that) = delete;
 
@@ -390,12 +417,4 @@ enum class HdPackOptions
 	DontRenderOriginalTiles = 16
 };
 
-struct HdScreenTileInfo : public HdTileKey
-{
-	int16_t ScreenX;
-	int16_t ScreenY;
-	bool HorizontalMirroring;
-	bool VerticalMirroring;
-	bool BackgroundPriority;
-	bool IsNew;
-};
+

@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "PPU.h"
+#include "HdData.h"
 
 struct HdScreenInfo;
 struct HdPackData;
@@ -13,6 +14,7 @@ private:
 	HdScreenInfo *_screenInfo[2];
 	HdScreenInfo *_info;
 	uint32_t _version;
+	HdSpriteFrameRangeInfo _spriteFrameRanges[128];
 
 protected:
 	HdPackData *_hdData = nullptr;

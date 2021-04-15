@@ -298,3 +298,32 @@ struct HdPackSpriteNearbyCondition : public HdPackBaseTileCondition
 		return false;
 	}
 };
+
+struct HdPackSpriteFrameRangeCondition : public HdPackCondition
+{
+	uint32_t OperandA;
+	uint32_t OperandB;
+
+	string GetConditionName() override { return "spriteFrameRange"; }
+
+	void Initialize(uint32_t operandA, uint32_t operandB)
+	{
+		OperandA = operandA;
+		OperandB = operandB;
+	}
+
+	string ToString() override
+	{
+		stringstream out;
+		out << "<condition>" << Name << "," << GetConditionName() << ",";
+		out << OperandA << ",";
+		out << OperandB;
+
+		return out.str();
+	}
+
+	bool InternalCheckCondition(HdScreenInfo* screenInfo, int x, int y, HdPpuTileInfo* tile) override
+	{
+		return (screenInfo->FrameNumber - screenInfo->spriteFrameRanges[tile->OAMIndex].startFrameNumber) % OperandA >= OperandB;
+	}
+};

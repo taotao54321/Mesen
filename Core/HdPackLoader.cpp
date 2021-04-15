@@ -424,6 +424,8 @@ void HdPackLoader::ProcessConditionTag(vector<string> &tokens, bool createInvert
 		condition.reset(new HdPackMemoryCheckConstantCondition());
 	} else if(tokens[1] == "frameRange") {
 		condition.reset(new HdPackFrameRangeCondition());
+	} else if(tokens[1] == "spriteFrameRange") {
+		condition.reset(new HdPackSpriteFrameRangeCondition());
 	} else {
 		MessageManager::Log("[HDPack] Invalid condition type: " + tokens[1]);
 		return;
@@ -529,6 +531,27 @@ void HdPackLoader::ProcessConditionTag(vector<string> &tokens, bool createInvert
 		checkConstraint(operandB >= 0 && operandB <= 0xFFFF, "[HDPack] Out of range frameRange operand");
 
 		((HdPackFrameRangeCondition*)condition.get())->Initialize(operandA, operandB);
+	}
+	else if (dynamic_cast<HdPackSpriteFrameRangeCondition*>(condition.get())) {
+		checkConstraint(_data->Version >= 101, "[HDPack] This feature requires version 101+ of HD Packs");
+		checkConstraint(tokens.size() >= 4, "[HDPack] Condition tag should contain at least 4 parameters");
+
+		int32_t operandA;
+		int32_t operandB;
+		if (_data->Version == 101) {
+			operandA = HexUtilities::FromHex(tokens[index++]);
+			operandB = HexUtilities::FromHex(tokens[index++]);
+		}
+		else {
+			//Version 102+
+			operandA = std::stoi(tokens[index++]);
+			operandB = std::stoi(tokens[index++]);
+		}
+
+		checkConstraint(operandA >= 0 && operandA <= 0xFFFF, "[HDPack] Out of range spriteFrameRange operand");
+		checkConstraint(operandB >= 0 && operandB <= 0xFFFF, "[HDPack] Out of range spriteFrameRange operand");
+
+		((HdPackSpriteFrameRangeCondition*)condition.get())->Initialize(operandA, operandB);
 	}
 	
 	HdPackCondition *cond = condition.get();
