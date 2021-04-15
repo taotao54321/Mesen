@@ -16,6 +16,20 @@ void HdPpu::DrawPixel()
 	uint16_t &pixel = _currentOutputBuffer[bufferOffset];
 	_lastSprite = nullptr;
 
+	//init sprite frame ranges at screen start
+	if (bufferOffset == 0) {
+		uint8_t spriteCnt = (_flags.LargeSprites ? 128 : 64);
+		for (int i = 0; i < spriteCnt; i++) {
+			_spriteFrameRanges[i].lastUpdated = _spriteFrameRanges[i].updated;
+			if (_spriteFrameRanges[i].updated) {
+				//copy last frame sprite data
+				memcpy(&(_spriteFrameRanges[i].last), &(_spriteFrameRanges[i].current), sizeof(_spriteFrameRanges[i].current));
+				_spriteFrameRanges[i].updated = false;
+				_spriteFrameRanges[i].lastStartFrameNumber = _spriteFrameRanges[i].startFrameNumber;
+			}
+		}
+	}
+	
 	if(IsRenderingEnabled() || ((_state.VideoRamAddr & 0x3F00) != 0x3F00)) {
 		bool isChrRam = !_console->GetMapper()->HasChrRom();
 		BaseMapper *mapper = _console->GetMapper();
@@ -85,7 +99,25 @@ void HdPpu::DrawPixel()
 
 					tileInfo.Sprite[j].PpuBackgroundColor = tileInfo.Tile.PpuBackgroundColor;
 					tileInfo.Sprite[j].BgColorIndex = tileInfo.Tile.BgColorIndex;
-
+					tileInfo.Sprite[j].OAMIndex = (sprite.OffsetY >= 8 ? sprite.OAMIndex + 64 : sprite.OAMIndex);
+					
+					if (!_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].updated) {
+						//fill the current frame sprite
+						if (isChrRam) {
+							memcpy(_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.TileData, tileInfo.Sprite[j].TileData, 16);
+						}
+						else {
+							_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.TileIndex = tileInfo.Sprite[j].TileIndex;
+						}
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.PaletteColors = tileInfo.Sprite[j].PaletteColors;
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.HorizontalMirroring = tileInfo.Sprite[j].HorizontalMirroring;
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.VerticalMirroring = tileInfo.Sprite[j].VerticalMirroring;
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.BackgroundPriority = tileInfo.Sprite[j].BackgroundPriority;
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.ScreenX = sprite.SpriteX;
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].current.ScreenY = _scanline - tileInfo.Sprite[j].OffsetY;
+						_spriteFrameRanges[tileInfo.Sprite[j].OAMIndex].updated = true;
+					}
+					
 					j++;
 					if(j >= 4) {
 						break;
@@ -111,6 +143,49 @@ void HdPpu::DrawPixel()
 			tileInfo.Tile.OffsetX = (_state.XScroll + ((_cycle - 1) & 0x07)) & 0x07;
 		} else {
 			tileInfo.Tile.TileIndex = HdPpuTileInfo::NoTile;
+		}
+		
+		//match sprite frame range at screen end
+		if (bufferOffset == PixelCount - 1) {
+			uint16_t distance;
+			uint16_t newDistance;
+			uint16_t newDistanceX;
+			uint16_t newDistanceY;
+			uint8_t spriteCnt = (_flags.LargeSprites ? 128 : 64);
+
+			for (int i = 0; i < spriteCnt; i++) {
+				if (_spriteFrameRanges[i].updated) {
+					distance = 13;
+					_spriteFrameRanges[i].startFrameNumber = _frameCount;
+					for (int j = 0; j < spriteCnt; j++) {
+						if (_spriteFrameRanges[j].lastUpdated) {
+							newDistanceX = abs(_spriteFrameRanges[i].current.ScreenX - _spriteFrameRanges[j].last.ScreenX);
+							newDistanceY = abs(_spriteFrameRanges[i].current.ScreenY - _spriteFrameRanges[j].last.ScreenY);
+							newDistance = newDistanceX + newDistanceY;
+							if (newDistance < distance && newDistanceX <= 6 && newDistanceY <= 6) {
+								//check for matches
+								bool compareResult = false;
+								if (_spriteFrameRanges[i].current.BackgroundPriority == _spriteFrameRanges[j].last.BackgroundPriority
+									&& _spriteFrameRanges[i].current.HorizontalMirroring == _spriteFrameRanges[j].last.HorizontalMirroring
+									&& _spriteFrameRanges[i].current.VerticalMirroring == _spriteFrameRanges[j].last.VerticalMirroring
+									&& _spriteFrameRanges[i].current.PaletteColors == _spriteFrameRanges[j].last.PaletteColors
+									) {
+									if (isChrRam) {
+										compareResult = (memcmp(_spriteFrameRanges[i].current.TileData, _spriteFrameRanges[j].last.TileData, 16) == 0);
+									}
+									else {
+										compareResult = (_spriteFrameRanges[i].current.TileIndex == _spriteFrameRanges[j].last.TileIndex);
+									}
+								}
+								if (compareResult) {
+									_spriteFrameRanges[i].startFrameNumber = _spriteFrameRanges[j].lastStartFrameNumber;
+								}
+								distance = newDistance;
+							}							
+						}
+					}
+				}
+			}
 		}
 	} else {
 		//"If the current VRAM address points in the range $3F00-$3FFF during forced blanking, the color indicated by this palette location will be shown on screen instead of the backdrop color."
@@ -147,6 +222,7 @@ void HdPpu::SendFrame()
 	_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::PpuFrameDone, _currentOutputBuffer);
 
 	_info->FrameNumber = _frameCount;
+	_info->spriteFrameRanges = _spriteFrameRanges;
 	_info->WatchedAddressValues.clear();
 	for(uint32_t address : _hdData->WatchedMemoryAddresses) {
 		if(address & HdPackBaseMemoryCondition::PpuMemoryMarker) {
