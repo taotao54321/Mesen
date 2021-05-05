@@ -153,6 +153,9 @@ namespace Mesen.GUI.Forms
 		
 		public static void ApplyResources(Form form)
 		{
+			if (GetCurrentLanguage() == Language.English){
+				form.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25f);
+			}
 			ApplyResources(form, form.Name);
 		}
 
@@ -201,21 +204,6 @@ namespace Mesen.GUI.Forms
 				} else if(ctrl is DataGridViewColumn) {
 					name = ((DataGridViewColumn)ctrl).Name;
 				}
-
-				if (ctrl is Debugger.ctrlTextbox) { 
-				}
-				else if (ctrl is Control){
-					if (GetCurrentLanguage() == Language.English){
-						((Control)ctrl).Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25f);
-					}
-				}
-				else if (ctrl is ToolStripItem){
-					if (GetCurrentLanguage() == Language.English){
-						((ToolStripItem)ctrl).Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25f);
-					}
-				}
-
-
 
 				var controlNode = baseNode.SelectSingleNode("Control[@ID='" + name + "']");
 				if(controlNode != null) {
