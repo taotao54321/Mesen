@@ -761,6 +761,73 @@
 		</Form>
 		<Form ID="frmBandaiMicrophone">
 		</Form>
+		<Form ID="frmApuViewer">
+		</Form>
+		<Form ID="frmAssembler">
+		</Form>
+		<Form ID="frmBreakIn">
+		</Form>
+		<Form ID="frmBreakOn">
+		</Form>
+		<Form ID="frmBreakpoint">
+		</Form>
+		<Form ID="frmCodePreviewTooltip">
+		</Form>
+		<Form ID="frmCodeTooltip">
+		</Form>
+		<Form ID="frmDbgPreferences">
+		</Form>
+		<Form ID="frmDbgShortcutGetKey">
+		</Form>
+		<Form ID="frmDebugger">
+		</Form>
+		<Form ID="frmDebuggerColors">
+		</Form>
+		<Form ID="frmEditComment">
+		</Form>
+		<Form ID="frmEditHeader">
+		</Form>
+		<Form ID="frmEditLabel">
+		</Form>
+		<Form ID="frmEventViewer">
+		</Form>
+		<Form ID="frmExternalEditorConfig">
+		</Form>
+		<Form ID="frmFadeSpeed">
+		</Form>
+		<Form ID="frmFindOccurrences">
+		</Form>
+		<Form ID="frmGoToAll">
+		</Form>
+		<Form ID="frmGoToLine">
+		</Form>
+		<Form ID="frmImportSettings">
+		</Form>
+		<Form ID="frmMemoryViewer">
+		</Form>
+		<Form ID="frmMemoryViewerColors">
+		</Form>
+		<Form ID="frmOpCodeTooltip">
+		</Form>
+		<Form ID="frmPpuViewer">
+		</Form>
+		<Form ID="frmProfiler">
+		</Form>
+		<Form ID="frmScript">
+		</Form>
+		<Form ID="frmSelectColor">
+		</Form>
+		<Form ID="frmSetScriptTimeout">
+		</Form>
+		<Form ID="frmTextHooker">
+		</Form>
+		<Form ID="frmTraceLogger">
+		</Form>
+		<Form ID="frmWatchWindow">
+		</Form>
+		<Form ID="TooltipForm">
+		</Form>
+
 	</Forms>
 	<UserControls>
 		<UserControl ID="ctrlExcitingBoxingConfig">
