@@ -11,13 +11,15 @@ If you want to support this project, please consider making a donation:
 
 ## Development Builds
 
-Development builds of the latest commit are available from Appveyor. For stable release builds, see the **Releases** section below.
+Development builds of the latest commit are available from GitHub actions. For stable release builds, see the **Releases** section below.
 
 **Warning:** These are development builds and may be ***unstable***. Using them may also increase the chances of your settings being corrupted, or having issues when upgrading to the next official release. Additionally, these builds are currently not optimized via PGO and will typically run 20-30% slower than the official release builds.
 
-Windows: [![Build status](https://ci.appveyor.com/api/projects/status/d4i7rqbfi386wdyw/branch/master?svg=true)](https://ci.appveyor.com/project/Sour/mesen/build/artifacts)
+Follow either of these, select the top-most entry in the list, and then click the link under "Artifacts" near the bottom.
 
-Linux: [![Build status](https://ci.appveyor.com/api/projects/status/uuoxwu7o5kkqjp4e/branch/master?svg=true)](https://ci.appveyor.com/project/Sour/mesen-nyf7v/build/artifacts)
+Windows: [![Build status](https://github.com/NovaSquirrel/Mesen/actions/workflows/win-build.yml/badge.svg)](https://github.com/NovaSquirrel/Mesen/actions/workflows/win-build.yml)
+
+Linux: [![Build status](https://github.com/NovaSquirrel/Mesen/actions/workflows/linux-build.yml/badge.svg)](https://github.com/NovaSquirrel/Mesen/actions/workflows/linux-build.yml)
 
 ## Releases
 
