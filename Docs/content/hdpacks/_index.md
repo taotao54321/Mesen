@@ -51,6 +51,11 @@ A number of options exist to control the way the PNG files are generated:
 
 **Ignore tiles at the edges of the screen (overscan)**: When enabled, this will make the builder ignore any pixels in the overscan area. This is useful in games that contain glitches on the outer edge of the screen. Incorrect palette combinations due to these glitches will be ignored and won't be shown in the PNG files.
 
+**Save frames which the tiles are first shown**: When enabled, the builder will save a screenshot and the composition of the screen in the pack folder when it encounters new tile in a frame. This is useful for checking where that tile is used. These files are not needed in the pack and should be deleted when sharing the pack.
+
+**Tile Type**: This option controls whether only BG tiles or sprite tiles or both are added to the HD Pack.
+
+
 Before you start recording, select the options you want to use and the location to which you want to save the HD Pack, then press the `Start Recording` button.
 
 ## File Format (hires.txt) ##
@@ -228,8 +233,14 @@ Backgrounds can use a PNG's alpha channel to allow the graphics below to show th
 
 ### &lt;bgm&gt; tag ###
 
-**Syntax**: `<bgm>[album - integer],[track - integer],[filename - ogg]`  
-**Example**: `<bgm>0,0,myBgm.ogg`
+**Syntax**: `<bgm>[album - integer],[track - integer],[filename - ogg],[loop point (optional) - integer],[playback option (optional) - integer],[volume (optional) - integer]`  
+**Example**: `<bgm>0,0,myBgm.ogg`  
+**Example (with optional values)**: `<bgm>0,0,myBgm.ogg,40000,1,-1`
+
+`Loop point`: The sample number in the ogg file where the track will loop back to.
+`Playback option`: Use 1 for looping playback, 0 for single playback, -1 for keeping the current value.
+`Volume`: Use 0 to 128 for changing the volume, -1 for keeping the current volume.
+ 
 
 Used to assign a background music track (`.ogg` audio file) to a specific album and track number.
 Album and track numbers are used to form a unique ID for each bgm, allowing up to 64k different bgm tracks.
@@ -331,6 +342,7 @@ These registers return the ASCII string `NEA` (NES Enhanced Audio) - this can be
 * Brightness values above 1.0 are now allowed.
 * Added `disableOriginalTiles` option
 * Background tags can now specify `left` and `top` values.
+* Added `loopback point`, `playback option`, `volume` to `<bgm>` tag.
 
 ### Version 104 ###
 
