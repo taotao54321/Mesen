@@ -155,7 +155,7 @@ namespace Mesen.GUI.Debugger
 
 			_colors.BackColor = Color.Transparent;
 			if(_cdlData != null) {
-				if((_cdlData[index] & (byte)CdlPrgFlags.Code) != 0 && _highlightCodeBytes) {
+				if((_cdlData[index] & (byte)CdlPrgFlags.CodeFirst) != 0 && _highlightCodeBytes) {
 					//Code
 					_colors.BackColor = ConfigManager.Config.DebugInfo.RamCodeByteColor;
 				} else if((_cdlData[index] & (byte)CdlPrgFlags.PcmData) != 0 && _highlightDmcDataBytes) {

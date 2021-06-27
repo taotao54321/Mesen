@@ -769,7 +769,7 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 	int32_t absoluteAddr = addressInfo.Type == AddressType::PrgRom ? addressInfo.Address : -1;
 	if(addressInfo.Type == AddressType::PrgRom && addressInfo.Address >= 0 && type != MemoryOperationType::DummyRead && type != MemoryOperationType::DummyWrite && _runToCycle == -1) {
 		if(type == MemoryOperationType::ExecOperand) {
-			_codeDataLogger->SetFlag(absoluteAddr, CdlPrgFlags::Code);
+			_codeDataLogger->SetFlag(absoluteAddr, CdlPrgFlags::CodeOperand);
 		} else if(type == MemoryOperationType::Read) {
 			_codeDataLogger->SetFlag(absoluteAddr, CdlPrgFlags::Data);
 			if(isDmcRead) {
@@ -784,7 +784,7 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 		_curInstructionCycle = (int64_t)_cpu->GetCycleCount();
 
 		if(absoluteAddr >= 0) {
-			_codeDataLogger->SetFlag(absoluteAddr, CdlPrgFlags::Code);
+			_codeDataLogger->SetFlag(absoluteAddr, CdlPrgFlags::CodeFirst);
 		}
 
 		if(addressInfo.Address >= 0) {
