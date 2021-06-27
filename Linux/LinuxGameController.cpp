@@ -136,16 +136,16 @@ bool LinuxGameController::CheckAxis(unsigned int code, bool forPositive)
 bool LinuxGameController::IsButtonPressed(int buttonNumber)
 {
 	switch(buttonNumber) {
-		case 0: return libevdev_get_event_value(_device, EV_KEY, BTN_A) == 1;
-		case 1: return libevdev_get_event_value(_device, EV_KEY, BTN_B) == 1;
-		case 2: return libevdev_get_event_value(_device, EV_KEY, BTN_C) == 1;
-		case 3: return libevdev_get_event_value(_device, EV_KEY, BTN_X) == 1;
-		case 4: return libevdev_get_event_value(_device, EV_KEY, BTN_Y) == 1;
-		case 5: return libevdev_get_event_value(_device, EV_KEY, BTN_Z) == 1;
-		case 6: return libevdev_get_event_value(_device, EV_KEY, BTN_TL) == 1;
-		case 7: return libevdev_get_event_value(_device, EV_KEY, BTN_TR) == 1;
-		case 8: return libevdev_get_event_value(_device, EV_KEY, BTN_TL2) == 1;
-		case 9: return libevdev_get_event_value(_device, EV_KEY, BTN_TR2) == 1;
+		case 0: return libevdev_get_event_value(_device, EV_KEY, BTN_0) == 1;
+		case 1: return libevdev_get_event_value(_device, EV_KEY, BTN_1) == 1;
+		case 2: return libevdev_get_event_value(_device, EV_KEY, BTN_2) == 1;
+		case 3: return libevdev_get_event_value(_device, EV_KEY, BTN_3) == 1;
+		case 4: return libevdev_get_event_value(_device, EV_KEY, BTN_4) == 1;
+		case 5: return libevdev_get_event_value(_device, EV_KEY, BTN_5) == 1;
+		case 6: return libevdev_get_event_value(_device, EV_KEY, BTN_6) == 1;
+		case 7: return libevdev_get_event_value(_device, EV_KEY, BTN_7) == 1;
+		case 8: return libevdev_get_event_value(_device, EV_KEY, BTN_8) == 1;
+		case 9: return libevdev_get_event_value(_device, EV_KEY, BTN_9) == 1;
 		case 10: return libevdev_get_event_value(_device, EV_KEY, BTN_SELECT) == 1;
 		case 11: return libevdev_get_event_value(_device, EV_KEY, BTN_START) == 1;
 		case 12: return libevdev_get_event_value(_device, EV_KEY, BTN_THUMBL) == 1;
