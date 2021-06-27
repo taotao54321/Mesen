@@ -92,14 +92,15 @@ void CodeDataLogger::SetFlag(int32_t absoluteAddr, CdlPrgFlags flag)
 {
 	if(absoluteAddr >= 0 && absoluteAddr < (int32_t)_prgSize) {
 		if((_cdlData[absoluteAddr] & (uint8_t)flag) != (uint8_t)flag) {
-			if(flag == CdlPrgFlags::Code) {
+			if(flag == CdlPrgFlags::CodeFirst || flag == CdlPrgFlags::CodeOperand) {
 				if(IsData(absoluteAddr)) {
 					//Remove the data flag from bytes that we are flagging as code
 					_cdlData[absoluteAddr] &= ~(uint8_t)CdlPrgFlags::Data;
 					_dataSize--;
 				}
+				if(!IsCode(absoluteAddr))
+					_codeSize++;
 				_cdlData[absoluteAddr] |= (uint8_t)flag;
-				_codeSize++;
 			} else if(flag == CdlPrgFlags::Data) {
 				if(!IsCode(absoluteAddr)) {
 					_cdlData[absoluteAddr] |= (uint8_t)flag;
@@ -148,7 +149,9 @@ CdlRatios CodeDataLogger::GetRatios()
 
 bool CodeDataLogger::IsCode(uint32_t absoluteAddr)
 {
-	return (_cdlData[absoluteAddr] & (uint8_t)CdlPrgFlags::Code) == (uint8_t)CdlPrgFlags::Code;
+	const auto b = _cdlData[absoluteAddr];
+	return (b & (uint8_t)CdlPrgFlags::CodeFirst) == (uint8_t)CdlPrgFlags::CodeFirst ||
+		(b & (uint8_t)CdlPrgFlags::CodeOperand) == (uint8_t)CdlPrgFlags::CodeOperand;
 }
 
 bool CodeDataLogger::IsJumpTarget(uint32_t absoluteAddr)

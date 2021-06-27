@@ -198,7 +198,7 @@ namespace Mesen.GUI.Debugger.Controls
 		
 		private void mnuMarkAsCode_Click(object sender, EventArgs e)
 		{
-			this.MarkSelectionAs(CdlPrgFlags.Code);
+			this.MarkSelectionAs(CdlPrgFlags.CodeFirst);
 		}
 
 		private void mnuMarkAsData_Click(object sender, EventArgs e)

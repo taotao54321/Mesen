@@ -9,8 +9,9 @@ class Debugger;
 enum class CdlPrgFlags
 {
 	None = 0x00,
-	Code = 0x01,
+	CodeFirst = 0x01,
 	Data = 0x02,
+	CodeOperand = 0x04,
 	
 	//Bit 0x10 is used for "indirectly accessed as code" in FCEUX
 	//Repurposed to mean the address is the target of a jump instruction

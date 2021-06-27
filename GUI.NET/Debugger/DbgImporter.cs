@@ -730,7 +730,7 @@ namespace Mesen.GUI.Debugger
 				if(prgAddress >= 0 && prgAddress < prgSize) {
 					for(int i = 0; i < span.Size; i++) {
 						if(cdlFile[prgAddress + i] != (byte)CdlPrgFlags.Data && !span.IsData && span.Size <= 3) {
-							cdlFile[prgAddress + i] = (byte)CdlPrgFlags.Code;
+							cdlFile[prgAddress + i] = i == 0 ? (byte)CdlPrgFlags.CodeFirst : (byte)CdlPrgFlags.CodeOperand;
 						} else if(span.IsData) {
 							cdlFile[prgAddress + i] = (byte)CdlPrgFlags.Data;
 						} else if(cdlFile[prgAddress + i] == 0) {

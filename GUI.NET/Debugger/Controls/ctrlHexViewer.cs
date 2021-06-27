@@ -557,7 +557,7 @@ namespace Mesen.GUI.Debugger.Controls
 
 		private void mnuMarkAsCode_Click(object sender, EventArgs e)
 		{
-			this.MarkSelectionAs(SelectionStartAddress, SelectionEndAddress, CdlPrgFlags.Code);
+			this.MarkSelectionAs(SelectionStartAddress, SelectionEndAddress, CdlPrgFlags.CodeFirst);
 		}
 
 		private void mnuMarkAsData_Click(object sender, EventArgs e)
