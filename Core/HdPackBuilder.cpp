@@ -273,22 +273,24 @@ void HdPackBuilder::ProcessTile(uint32_t x, uint32_t y, uint16_t tileAddr, HdPpu
 		}
 	}
 
-	if ((x == 0 || ((tile.OffsetX & 0x07) == 0)) && (y == 0 || ((tile.OffsetY & 0x07) == 0))) {
+	if ((x == 0 || ((tile.OffsetX & 0x07) == 0)) && (y == 0 || (((tile.OffsetY & 0x07) == 0) && !tile.VerticalMirroring) || (((tile.OffsetY & 0x07) == 0x07) && tile.VerticalMirroring))) {
 		HdScreenTileInfo t;
 		t.IsChrRamTile = tile.IsChrRamTile;
 		t.PaletteColors = tile.PaletteColors;
-		t.ScreenX = x - tile.OffsetX;
-		t.ScreenY = y - tile.OffsetY - (tile.IsSpriteTile() ? 1 : 0);
 		memcpy(t.TileData, tile.TileData, 16);
 		t.TileIndex = tile.TileIndex;
 		t.IsNew = isNew;
 		if (tile.IsSpriteTile()) {
+			t.ScreenX = x;
+			t.ScreenY = y;
 			t.BackgroundPriority = tile.BackgroundPriority;
 			t.HorizontalMirroring = tile.HorizontalMirroring;
 			t.VerticalMirroring = tile.VerticalMirroring;
 			spritesOnScreen.push_back(t);
 		}
 		else {
+			t.ScreenX = x - tile.OffsetX;
+			t.ScreenY = y - tile.OffsetY;
 			bgTilesOnScreen.push_back(t);
 		}
 	}
