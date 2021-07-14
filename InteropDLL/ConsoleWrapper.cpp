@@ -654,6 +654,7 @@ namespace InteropEmu {
 		DllExport void __stdcall SetVideoScale(double scale, ConsoleId consoleId) { GetConsoleById(consoleId)->GetSettings()->SetVideoScale(scale); }
 		DllExport void __stdcall SetScreenRotation(uint32_t angle) { _settings->SetScreenRotation(angle); }
 		DllExport void __stdcall SetExclusiveRefreshRate(uint32_t angle) { _settings->SetExclusiveRefreshRate(angle); }
+		DllExport void __stdcall SetExclusiveRefreshRate2(uint32_t angle) { _settings->SetExclusiveRefreshRate2(angle); }
 		DllExport void __stdcall SetVideoAspectRatio(VideoAspectRatio aspectRatio, double customRatio) { _settings->SetVideoAspectRatio(aspectRatio, customRatio); }
 		DllExport void __stdcall SetVideoFilter(VideoFilterType filter) { _settings->SetVideoFilterType(filter); }
 		DllExport void __stdcall SetVideoResizeFilter(VideoResizeFilter filter) { _settings->SetVideoResizeFilter(filter); }

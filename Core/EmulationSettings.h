@@ -698,6 +698,7 @@ private:
 	bool _spritesEnabled = true;
 	uint32_t _screenRotation = 0;
 	uint32_t _exclusiveRefreshRate = 60;
+	uint32_t _exclusiveRefreshRate2 = 50;
 
 	ConsoleType _consoleType = ConsoleType::Nes;
 	ExpansionPortDevice _expansionDevice = ExpansionPortDevice::None;
@@ -1278,6 +1279,30 @@ public:
 
 	uint32_t GetExclusiveRefreshRate()
 	{
+		return _exclusiveRefreshRate;
+	}
+
+	void SetExclusiveRefreshRate2(uint32_t refreshRate)
+	{
+		_exclusiveRefreshRate2 = refreshRate;
+	}
+
+	uint32_t GetExclusiveRefreshRate2()
+	{
+		return _exclusiveRefreshRate2;
+	}
+
+	uint32_t GetExclusiveRefreshRateByModel(NesModel m)
+	{
+		switch (m) {
+		case NesModel::NTSC:
+			return _exclusiveRefreshRate;
+			break;
+		case NesModel::PAL:
+		case NesModel::Dendy:
+			return _exclusiveRefreshRate2;
+			break;
+		}
 		return _exclusiveRefreshRate;
 	}
 
