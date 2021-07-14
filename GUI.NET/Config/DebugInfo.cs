@@ -354,6 +354,7 @@ namespace Mesen.GUI.Config
 		public bool BreakOnInit = true;
 		public bool BreakOnPlay = false;
 		public bool BreakOnFirstCycle = true;
+		public bool BreakOnUnlogged = false;
 
 		public bool BringToFrontOnPause = false;
 		public bool BringToFrontOnBreak = true;

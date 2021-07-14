@@ -1734,6 +1734,7 @@ namespace Mesen.GUI
 
 		BreakOnPpu2006ScrollGlitch = 0x20000,
 		BreakOnBusConflict = 0x40000,
+		BreakOnUnlogged = 0x80000,
 	}
 
 	public struct InteropRomInfo

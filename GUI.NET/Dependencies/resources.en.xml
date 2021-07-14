@@ -1362,6 +1362,7 @@
 			<Value ID="PpuStep">PPU Step</Value>
 			<Value ID="BreakOnBrk">BRK</Value>
 			<Value ID="BreakOnUnofficialOpCode">Unofficial OP code</Value>
+			<Value ID="BreakOnUnlogged">Unlogged code</Value>
 			<Value ID="BreakOnReset">Reset event</Value>
 			<Value ID="BreakOnFocus">Debugger focused</Value>
 			<Value ID="BreakOnUninitMemoryRead">Uninitialized memory read</Value>

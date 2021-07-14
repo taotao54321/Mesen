@@ -108,6 +108,7 @@ namespace Mesen.GUI.Debugger
 			this.mnuBreakOnPlay.Checked = ConfigManager.Config.DebugInfo.BreakOnPlay;
 			this.mnuBreakOnOpen.Checked = ConfigManager.Config.DebugInfo.BreakOnOpen;
 			this.mnuBreakOnUnofficialOpcodes.Checked = ConfigManager.Config.DebugInfo.BreakOnUnofficialOpcodes;
+			this.mnuBreakOnUnlogged.Checked = ConfigManager.Config.DebugInfo.BreakOnUnlogged;
 			this.mnuBreakOnBrk.Checked = ConfigManager.Config.DebugInfo.BreakOnBrk;
 			this.mnuBreakOnUninitMemoryRead.Checked = ConfigManager.Config.DebugInfo.BreakOnUninitMemoryRead;
 			this.mnuBreakOnBusConflict.Checked = ConfigManager.Config.DebugInfo.BreakOnBusConflict;
@@ -426,6 +427,7 @@ namespace Mesen.GUI.Debugger
 			SetFlag(DebuggerFlags.ShowVerifiedData, config.ShowVerifiedData);
 			SetFlag(DebuggerFlags.ShowUnidentifiedData, config.ShowUnidentifiedData);
 			SetFlag(DebuggerFlags.BreakOnUnofficialOpCode, config.BreakOnUnofficialOpcodes);
+			SetFlag(DebuggerFlags.BreakOnUnlogged, config.BreakOnUnlogged);
 			SetFlag(DebuggerFlags.BreakOnBrk, config.BreakOnBrk);
 			SetFlag(DebuggerFlags.BreakOnUninitMemoryRead, config.BreakOnUninitMemoryRead);
 			SetFlag(DebuggerFlags.BreakOnDecayedOamRead, config.BreakOnDecayedOamRead);
@@ -1174,6 +1176,13 @@ namespace Mesen.GUI.Debugger
 		private void mnuBreakOnUnofficialOpcodes_Click(object sender, EventArgs e)
 		{
 			ConfigManager.Config.DebugInfo.BreakOnUnofficialOpcodes = mnuBreakOnUnofficialOpcodes.Checked;
+			ConfigManager.ApplyChanges();
+			UpdateDebuggerFlags();
+		}
+
+		private void mnuBreakOnUnlogged_Click(object sender, EventArgs e)
+		{
+			ConfigManager.Config.DebugInfo.BreakOnUnlogged = mnuBreakOnUnlogged.Checked;
 			ConfigManager.ApplyChanges();
 			UpdateDebuggerFlags();
 		}
