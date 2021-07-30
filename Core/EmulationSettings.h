@@ -117,8 +117,8 @@ enum class AudioChannel
 	VRC7 = 8,
 	Namco163 = 9,
 	Sunsoft5B = 10,
-	EPSG_L = 11,
-	EPSG_R = 12,
+	EPSM_L = 11,
+	EPSM_R = 12,
 };
 
 enum class EqualizerFilterType
@@ -659,7 +659,7 @@ private:
 	
 	bool _audioSettingsChanged = false;
 	uint32_t _audioLatency = 50;
-	uint32_t _EPSGClockFrequency = 3579545;
+	uint32_t _EPSMClockFrequency = 3579545;
 	double _channelVolume[13] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
 	double _channelPanning[13] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 2.0 };
 	EqualizerFilterType _equalizerFilterType = EqualizerFilterType::None;
@@ -990,9 +990,9 @@ public:
 		_audioSettingsChanged = true;
 	}
 
-	void SetEPSGClockFrequency(uint32_t clockFrequency)
+	void SetEPSMClockFrequency(uint32_t clockFrequency)
 	{
-		_EPSGClockFrequency = clockFrequency;
+		_EPSMClockFrequency = clockFrequency;
 		_audioSettingsChanged = true;
 	}
 
@@ -1167,9 +1167,9 @@ public:
 		return _audioLatency;
 	}
 
-	uint32_t GetEPSGClockFrequency()
+	uint32_t GetEPSMClockFrequency()
 	{
-		return _EPSGClockFrequency;
+		return _EPSMClockFrequency;
 	}
 
 	void SetVideoFilterType(VideoFilterType videoFilterType)

@@ -46,7 +46,7 @@
 			this.lblSunsoft = new System.Windows.Forms.Label();
 			this.lblVrc6 = new System.Windows.Forms.Label();
 			this.lblVrc7 = new System.Windows.Forms.Label();
-			this.lblEpsg = new System.Windows.Forms.Label();
+			this.lblEpsm = new System.Windows.Forms.Label();
 			this.lblSoundChips = new System.Windows.Forms.Label();
 			this.trkVolume = new System.Windows.Forms.TrackBar();
 			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -268,7 +268,7 @@
 			this.tableLayoutPanel3.Controls.Add(this.lblSunsoft, 3, 0);
 			this.tableLayoutPanel3.Controls.Add(this.lblVrc6, 4, 0);
 			this.tableLayoutPanel3.Controls.Add(this.lblVrc7, 5, 0);
-			this.tableLayoutPanel3.Controls.Add(this.lblEpsg, 6, 0);
+			this.tableLayoutPanel3.Controls.Add(this.lblEpsm, 6, 0);
 			this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel3.Location = new System.Drawing.Point(101, 66);
 			this.tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -357,18 +357,18 @@
 			this.lblVrc7.TabIndex = 3;
 			this.lblVrc7.Text = "VRC7";
 			// 
-			// lblEpsg
+			// lblEpsm
 			// 
-			this.lblEpsg.AutoSize = true;
-			this.lblEpsg.BackColor = System.Drawing.Color.Transparent;
-			this.lblEpsg.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.lblEpsg.ForeColor = System.Drawing.Color.White;
-			this.lblEpsg.Location = new System.Drawing.Point(220, 0);
-			this.lblEpsg.Margin = new System.Windows.Forms.Padding(0);
-			this.lblEpsg.Name = "lblEpsg";
-			this.lblEpsg.Size = new System.Drawing.Size(35, 13);
-			this.lblEpsg.TabIndex = 3;
-			this.lblEpsg.Text = "EPSG";
+			this.lblEpsm.AutoSize = true;
+			this.lblEpsm.BackColor = System.Drawing.Color.Transparent;
+			this.lblEpsm.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.lblEpsm.ForeColor = System.Drawing.Color.White;
+			this.lblEpsm.Location = new System.Drawing.Point(220, 0);
+			this.lblEpsm.Margin = new System.Windows.Forms.Padding(0);
+			this.lblEpsm.Name = "lblEpsm";
+			this.lblEpsm.Size = new System.Drawing.Size(35, 13);
+			this.lblEpsm.TabIndex = 3;
+			this.lblEpsm.Text = "EPSM";
 			// 
 			// lblSoundChips
 			// 
@@ -743,7 +743,7 @@
 		private System.Windows.Forms.Label lblSunsoft;
 		private System.Windows.Forms.Label lblVrc6;
 		private System.Windows.Forms.Label lblVrc7;
-		private System.Windows.Forms.Label lblEpsg;
+		private System.Windows.Forms.Label lblEpsm;
 		private System.Windows.Forms.Label lblMmc5;
 		private System.Windows.Forms.Label lblNamco;
 		private System.Windows.Forms.Label lblFds;
