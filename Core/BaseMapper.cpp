@@ -14,7 +14,7 @@
 #include "CPU.h"
 
 void BaseMapper::WriteRegister(uint16_t addr, uint8_t value) { }
-void BaseMapper::WriteEPSG(uint16_t addr, uint8_t value) { _epsgaudio->WriteRegister(addr, value); }
+void BaseMapper::WriteEPSM(uint16_t addr, uint8_t value) { _epsmaudio->WriteRegister(addr, value); }
 uint8_t BaseMapper::ReadRegister(uint16_t addr) { return 0; }
 void BaseMapper::InitMapper(RomData &romData) { }
 void BaseMapper::Reset(bool softReset) { }
@@ -510,9 +510,9 @@ void BaseMapper::StreamState(bool saving)
 	ArrayInfo<ChrMemoryType> chrMemoryType = { _chrMemoryType, 0x40 };
 	ArrayInfo<MemoryAccessType> prgMemoryAccess = { _prgMemoryAccess, 0x100 };
 	ArrayInfo<MemoryAccessType> chrMemoryAccess = { _chrMemoryAccess, 0x40 };
-	SnapshotInfo epsgaudio{ _epsgaudio.get() };
+	SnapshotInfo epsmaudio{ _epsmaudio.get() };
 
-	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess, epsgaudio);
+	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess, epsmaudio);
 
 	if(!saving) {
 		RestorePrgChrState();
@@ -639,7 +639,7 @@ void BaseMapper::Initialize(RomData &romData)
 
 	InitMapper();
 	InitMapper(romData);
-	_epsgaudio.reset(new EPSGAudio(_console));
+	_epsmaudio.reset(new EPSMAudio(_console));
 
 	//Load battery data if present
 	LoadBattery();
@@ -782,7 +782,7 @@ uint8_t BaseMapper::DebugReadRAM(uint16_t addr)
 
 void BaseMapper::WriteRAM(uint16_t addr, uint8_t value)
 {
-	if((addr == 0x4016) & (_console->GetCpu()->GetCycleCount() % 2 == 1)){ WriteEPSG(addr, value); }
+	if((addr == 0x4016) & (_console->GetCpu()->GetCycleCount() % 2 == 1)){ WriteEPSM(addr, value); }
 	if(_isWriteRegisterAddr[addr]) {
 		if(_hasBusConflicts) {
 			uint8_t prgValue = _prgPages[addr >> 8][(uint8_t)addr];

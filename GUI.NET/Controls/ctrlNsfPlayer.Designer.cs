@@ -368,7 +368,7 @@
 			this.lblEpsg.Name = "lblEpsg";
 			this.lblEpsg.Size = new System.Drawing.Size(35, 13);
 			this.lblEpsg.TabIndex = 3;
-			this.lblEpsg.Text = "EPSG";
+			this.lblEpsg.Text = "EPSM";
 			// 
 			// lblSoundChips
 			// 

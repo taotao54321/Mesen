@@ -27,7 +27,7 @@ void NsfMapper::InitMapper()
 	_fdsAudio.reset(new FdsAudio(_console));
 	_namcoAudio.reset(new Namco163Audio(_console));
 	_sunsoftAudio.reset(new Sunsoft5bAudio(_console));
-	_epsgAudio.reset(new EPSGAudio(_console));
+	_epsmAudio.reset(new EPSMAudio(_console));
 
 	SetCpuMemoryMapping(0x3F00, 0x3FFF, PrgMemoryType::WorkRam, 0x2000, MemoryAccessType::Read);
 	memcpy(GetWorkRam() + 0x2000, _nsfBios, 0x100);
@@ -109,8 +109,9 @@ void NsfMapper::InitMapper(RomData& romData)
 		AddRegisterRange(0x4040, 0x4092, MemoryOperation::Any);
 	}
 
-	if(_nsfHeader.SoundChips & NsfSoundChips::EPSG) {
+	if(_nsfHeader.SoundChips & NsfSoundChips::EPSM) {
 		AddRegisterRange(0x4016, 0x4016, MemoryOperation::Write);
+		AddRegisterRange(0xC000, 0xFFFF, MemoryOperation::Write);
 	}
 }
 
@@ -277,8 +278,8 @@ void NsfMapper::ProcessCpuClock()
 	if(_nsfHeader.SoundChips & NsfSoundChips::FDS) {
 		_fdsAudio->Clock();
 	}
-	if (_nsfHeader.SoundChips & NsfSoundChips::EPSG) {
-		_epsgAudio->Clock();
+	if (_nsfHeader.SoundChips & NsfSoundChips::EPSM) {
+		_epsmAudio->Clock();
 	}
 }
 
@@ -358,7 +359,11 @@ void NsfMapper::WriteRegister(uint16_t addr, uint8_t value)
 		}*/
 	} else if((_nsfHeader.SoundChips & NsfSoundChips::Sunsoft) && addr >= 0xC000 && addr <= 0xFFFF) {
 		_sunsoftAudio->WriteRegister(addr, value);
-	} else {
+	}
+		else if ((_nsfHeader.SoundChips & NsfSoundChips::EPSM) && addr >= 0xC000 && addr <= 0xFFFF) {
+		_epsmAudio->WriteRegister(addr, value);
+	}
+	else {
 		switch(addr) {
 			case 0x3E10: _irqReloadValue = (_irqReloadValue & 0xFF00) | value; break;
 			case 0x3E11: _irqReloadValue = (_irqReloadValue & 0xFF) | (value << 8); break;
@@ -409,7 +414,7 @@ void NsfMapper::WriteRegister(uint16_t addr, uint8_t value)
 				break;
 
 			case 0x4016:
-				_epsgAudio->WriteRegister(addr, value);
+				_epsmAudio->WriteRegister(addr, value);
 				break;
 
 		}
@@ -490,11 +495,11 @@ void NsfMapper::StreamState(bool saving)
 	SnapshotInfo fdsAudio { _fdsAudio.get() };
 	SnapshotInfo namcoAudio { _namcoAudio.get() };
 	SnapshotInfo sunsoftAudio { _sunsoftAudio.get() };
-	SnapshotInfo epsgAudio{ _epsgAudio.get() };
+	SnapshotInfo epsmAudio{ _epsmAudio.get() };
 
 	Stream(
 		_model, _needInit, _irqEnabled, _irqReloadValue, _irqCounter, _irqStatus, _debugIrqStatus, _mmc5MultiplierValues[0], _mmc5MultiplierValues[1],
 		_trackEndCounter, _trackFadeCounter, _fadeLength, _silenceDetectDelay, _trackEnded, _allowSilenceDetection, _hasBankSwitching, _ntscSpeed,
-		_palSpeed, _dendySpeed, _songNumber, mmc5Audio, vrc6Audio, vrc7Audio, fdsAudio, namcoAudio, sunsoftAudio, epsgAudio
+		_palSpeed, _dendySpeed, _songNumber, mmc5Audio, vrc6Audio, vrc7Audio, fdsAudio, namcoAudio, sunsoftAudio, epsmAudio
 	);
 }
