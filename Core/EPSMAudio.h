@@ -177,6 +177,10 @@ public:
 				WriteToChip(a04016 | (a14016 << 1), writeValue);
 			}
 		}
+		if (addr == 0x401c) { addr = 0xC000; }
+		if (addr == 0x401d) { addr = 0xE000; }
+		if (addr == 0x401e) { addr = 0xC002; }
+		if (addr == 0x401f) { addr = 0xE002; }
 
 		switch(addr) {
 			case 0xC000:

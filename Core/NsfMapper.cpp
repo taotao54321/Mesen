@@ -111,7 +111,7 @@ void NsfMapper::InitMapper(RomData& romData)
 
 	if(_nsfHeader.SoundChips & NsfSoundChips::EPSM) {
 		AddRegisterRange(0x4016, 0x4016, MemoryOperation::Write);
-		AddRegisterRange(0xC000, 0xFFFF, MemoryOperation::Write);
+		AddRegisterRange(0x401c, 0x401f, MemoryOperation::Write);
 	}
 }
 
@@ -360,7 +360,7 @@ void NsfMapper::WriteRegister(uint16_t addr, uint8_t value)
 	} else if((_nsfHeader.SoundChips & NsfSoundChips::Sunsoft) && addr >= 0xC000 && addr <= 0xFFFF) {
 		_sunsoftAudio->WriteRegister(addr, value);
 	}
-		else if ((_nsfHeader.SoundChips & NsfSoundChips::EPSM) && addr >= 0xC000 && addr <= 0xFFFF) {
+		else if ((_nsfHeader.SoundChips & NsfSoundChips::EPSM) && addr >= 0x401C && addr <= 0x401F) {
 		_epsmAudio->WriteRegister(addr, value);
 	}
 	else {
@@ -495,11 +495,11 @@ void NsfMapper::StreamState(bool saving)
 	SnapshotInfo fdsAudio { _fdsAudio.get() };
 	SnapshotInfo namcoAudio { _namcoAudio.get() };
 	SnapshotInfo sunsoftAudio { _sunsoftAudio.get() };
-	SnapshotInfo epsmAudio{ _epsmAudio.get() };
+	SnapshotInfo epsgAudio{ _epsmAudio.get() };
 
 	Stream(
 		_model, _needInit, _irqEnabled, _irqReloadValue, _irqCounter, _irqStatus, _debugIrqStatus, _mmc5MultiplierValues[0], _mmc5MultiplierValues[1],
 		_trackEndCounter, _trackFadeCounter, _fadeLength, _silenceDetectDelay, _trackEnded, _allowSilenceDetection, _hasBankSwitching, _ntscSpeed,
-		_palSpeed, _dendySpeed, _songNumber, mmc5Audio, vrc6Audio, vrc7Audio, fdsAudio, namcoAudio, sunsoftAudio, epsmAudio
+		_palSpeed, _dendySpeed, _songNumber, mmc5Audio, vrc6Audio, vrc7Audio, fdsAudio, namcoAudio, sunsoftAudio, epsgAudio
 	);
 }

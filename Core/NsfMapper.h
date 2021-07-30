@@ -27,6 +27,7 @@ private:
 		MMC5 = 0x08,
 		Namco = 0x10,
 		Sunsoft = 0x20,
+		VT02 = 0x40,
 		EPSM = 0x80
 	};
 
