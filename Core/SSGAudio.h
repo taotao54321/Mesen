@@ -4,8 +4,89 @@
 #include "APU.h"
 #include "BaseExpansionAudio.h"
 #include "Console.h"
+#include "emu2149.h"
 
+//#define SSG_USE_OLD_EMU
+#ifndef SSG_USE_OLD_EMU
+#define SSG_USE_EMU2149
+#endif
 
+#ifdef SSG_USE_EMU2149
+template<AudioChannel...channels>
+class SSGAudio : public BaseExpansionAudio
+{
+private:
+	std::unique_ptr<PSG, void(*)(PSG*)> _psg;
+	uint8_t _currentRegister;
+	int16_t _lastOutput;
+	int16_t _currentOutput;
+	double _clock;
+	bool _processTick;
+	static constexpr uint8_t cycleCount = 1;
+
+	void UpdateOutputLevel()
+	{
+		(_console->GetApu()->AddExpansionAudioDelta(channels, _currentOutput - _lastOutput), ...);
+		_lastOutput = _currentOutput;
+	}
+
+protected:
+	void StreamState(bool saving) override
+	{
+		BaseExpansionAudio::StreamState(saving);
+		ValueInfo<PSG> psg{ _psg.get() };
+		Stream( _currentRegister, _lastOutput, _clock, psg);
+	}
+
+	void ClockAudio() override
+	{
+		_clock += GetSSGClockFrequency() / (double)_console->GetCpu()->GetClockRate(_console->GetModel());
+
+		while (_clock >= cycleCount)
+		{
+				_currentOutput = 0;
+
+			for (uint8_t cycle = 0; cycle < cycleCount; cycle++)
+			{
+				_clock--;
+				_currentOutput = PSG_calc(_psg.get());
+			}
+
+				_currentOutput /= 26;
+
+			UpdateOutputLevel();
+		}
+	}
+
+	virtual uint32_t GetSSGClockFrequency()
+	{
+		return _console->GetCpu()->GetClockRate(_console->GetModel()) / 2;
+	}
+
+public:
+	SSGAudio(shared_ptr<Console> console) : BaseExpansionAudio(console), _psg{ PSG_new(1 , 1), &PSG_delete }
+	{
+		_currentRegister = 0;
+		_lastOutput = 0;
+		_clock = 0;
+		PSG_reset(_psg.get());
+	}
+
+	void WriteRegister(uint16_t addr, uint8_t value)
+	{
+		switch (addr) {
+		case 0xC000:
+			_currentRegister = value;
+			break;
+
+		case 0xE000:
+			if (_currentRegister <= 0xF)
+				PSG_writeReg(_psg.get(), _currentRegister, value);
+			break;
+		}
+	}
+};
+#else
 template<AudioChannel...channels>
 class SSGAudio : public BaseExpansionAudio
 {
@@ -143,3 +224,4 @@ public:
 		}
 	}
 };
+#endif
