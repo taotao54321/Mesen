@@ -68,8 +68,8 @@ namespace Mesen.GUI.Debugger
 			InteropEmu.SetChannelVolume(AudioChannel.VRC7, chkVrc7.Checked ? 1 : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.MMC5, chkMmc5.Checked ? 1 : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.Sunsoft5B, chkSunsoft.Checked ? 1 : 0);
-			InteropEmu.SetChannelVolume(AudioChannel.EPSG_L, chkEPSG.Checked ? AudioInfo.ConvertVolume(audioInfo.EPSGVolume_L) : 0);
-			InteropEmu.SetChannelVolume(AudioChannel.EPSG_R, chkEPSG.Checked ? AudioInfo.ConvertVolume(audioInfo.EPSGVolume_R) : 0);
+			InteropEmu.SetChannelVolume(AudioChannel.EPSM_L, chkEPSM.Checked ? AudioInfo.ConvertVolume(audioInfo.EPSMVolume_L) : 0);
+			InteropEmu.SetChannelVolume(AudioChannel.EPSM_R, chkEPSM.Checked ? AudioInfo.ConvertVolume(audioInfo.EPSMVolume_R) : 0);
 	  }
 	}
 }

@@ -465,7 +465,7 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 void Console::ProcessCpuClock()
 {
-	_mapper->ProcessEPSGClock();
+	_mapper->ProcessEPSMClock();
 	_mapper->ProcessCpuClock();
 	_apu->ProcessCpuClock();
 }

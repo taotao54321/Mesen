@@ -133,7 +133,7 @@ void MemoryManager::Write(uint16_t addr, uint8_t value, MemoryOperationType oper
 {
 	if(_console->DebugProcessRamOperation(operationType, addr, value)) {
 		_ramWriteHandlers[addr]->WriteRAM(addr, value);
-		if (addr == 0x4016) {
+		if ((addr == 0x4016) | (addr >= 0x401c && addr <= 0x401f)) {
 			_ramWriteHandlers[0xE000]->WriteRAM(addr, value);
 		}
 	}

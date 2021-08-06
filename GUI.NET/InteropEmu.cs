@@ -208,7 +208,7 @@ namespace Mesen.GUI
 		[DllImport(DLLPath)] public static extern void SetBandGain(int band, double gain);
 		[DllImport(DLLPath)] public static extern void SetSampleRate(UInt32 sampleRate);
 		[DllImport(DLLPath)] public static extern void SetAudioLatency(UInt32 msLatency);
-		[DllImport(DLLPath)] public static extern void SetEPSGClockFrequency(UInt32 clockFrequency);
+		[DllImport(DLLPath)] public static extern void SetEPSMClockFrequency(UInt32 clockFrequency);
 		[DllImport(DLLPath)] public static extern void SetAudioFilterSettings(AudioFilterSettings settings);
 		[DllImport(DLLPath)] public static extern void SetRunAheadFrames(UInt32 frameCount);
 
@@ -2302,8 +2302,8 @@ namespace Mesen.GUI
 		VRC7 = 8,
 		Namco163 = 9,
 		Sunsoft5B = 10,
-		EPSG_L = 11,
-		EPSG_R= 12
+		EPSM_L = 11,
+		EPSM_R= 12
    }
 
 	public enum EqualizerFilterType

@@ -559,7 +559,7 @@
     <ClInclude Include="Eeprom24C01.h" />
     <ClInclude Include="Eeprom24C02.h" />
     <ClInclude Include="emu2149.h" />
-    <ClInclude Include="EPSGAudio.h" />
+    <ClInclude Include="EPSMAudio.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="FaridSlrom.h" />
     <ClInclude Include="FaridUnrom.h" />
