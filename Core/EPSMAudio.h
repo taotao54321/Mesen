@@ -17,7 +17,7 @@ private:
 	ym3438_t _chip;
 
 	int16_t _lastOutputs[2];
-	int16_t _currentOutputs[2];
+	int32_t _currentOutputs[2];
 	uint8_t writeValue;
 	int16_t writeAddr;
 
@@ -80,7 +80,7 @@ protected:
 		EPSMSSGAudio::StreamState(saving);
 
 		ArrayInfo<int16_t> lastOutputs{ _lastOutputs, 2 };
-		ArrayInfo<int16_t> currentOutputs{ _currentOutputs, 2 };
+		ArrayInfo<int32_t> currentOutputs{ _currentOutputs, 2 };
 		ArrayInfo<InputBuffer> inputBuffer{ &_inputBuffer };
 		ValueInfo<ym3438_t> chip{ &_chip };
 		ValueInfo<double> clock { &_clock };
@@ -110,6 +110,7 @@ protected:
 				for (uint8_t x = 0; x < 2; x++)
 				{
 					_currentOutputs[x] += samples[x];
+					_currentOutputs[x] += samples[x+2]/2;
 				}
 
 				auto& input = _inputBuffer[cycle];

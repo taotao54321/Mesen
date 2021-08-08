@@ -1520,6 +1520,9 @@
     <ClInclude Include="EPSMAudio.h">
       <Filter>Nes\Mappers\EPSG</Filter>
     </ClInclude>
+    <ClInclude Include="fmopn_2608rom.h">
+      <Filter>Nes\Mappers\EPSG</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
