@@ -113,6 +113,10 @@ A number of built-in conditions can be used to check the value of some flags:
 * `hmirror`: True if the current pixel is a sprite pixel, and the sprite is mirrored horizontally.
 * `vmirror`: True if the current pixel is a sprite pixel, and the sprite is mirrored vertically.
 * `bgpriority`: True if the current pixel is a sprite pixel, and the sprite is marked as a background priority sprite.
+* `sppalette0`: True if the current pixel is a sprite pixel, and the sprite is using the palette at address $3F10.
+* `sppalette1`: True if the current pixel is a sprite pixel, and the sprite is using the palette at address $3F14.
+* `sppalette2`: True if the current pixel is a sprite pixel, and the sprite is using the palette at address $3F18.
+* `sppalette3`: True if the current pixel is a sprite pixel, and the sprite is using the palette at address $3F1C.
 
 **Example:** `[hmirror]<tile>...`
 
