@@ -110,6 +110,7 @@ protected:
 				for (uint8_t x = 0; x < 2; x++)
 				{
 					_currentOutputs[x] += samples[x];
+					_currentOutputs[x] += samples[x+2]/8;
 				}
 
 				auto& input = _inputBuffer[cycle];
