@@ -11,6 +11,8 @@
 #include "Console.h"
 #include "CPU.h"
 #include "EPSMAudio.h"
+#include "InvA13Audio.h"
+#include "InvOE1Audio.h"
 
 class BaseControlDevice;
 
@@ -159,6 +161,8 @@ public:
 	static constexpr uint32_t NametableCount = 0x10;
 	static constexpr uint32_t NametableSize = 0x400;
 	unique_ptr<EPSMAudio> _epsmaudio;
+	unique_ptr<InvA13Audio> _invA13Audio;
+	unique_ptr<InvOE1Audio> _invOE1Audio;
 	void Initialize(RomData &romData);
 
 	virtual ~BaseMapper();
@@ -168,7 +172,13 @@ public:
 
 	virtual void SetNesModel(NesModel model) { }
 	virtual void ProcessCpuClock() { }
-	virtual void ProcessEPSMClock() { _epsmaudio->Clock(); }
+	void ProcessMiscClock()
+	{
+		_epsmaudio->Clock();
+		_invA13Audio->Clock();
+		_invOE1Audio->Clock();
+	}
+
 	virtual void NotifyVRAMAddressChange(uint16_t addr);
 	virtual void GetMemoryRanges(MemoryRanges &ranges) override;
 	

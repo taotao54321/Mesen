@@ -2301,8 +2301,10 @@ namespace Mesen.GUI
 		Namco163 = 9,
 		Sunsoft5B = 10,
 		EPSM_L = 11,
-		EPSM_R= 12
-   }
+		EPSM_R = 12,
+		InvA13 = 13,
+		InvOE1 = 14
+	}
 
 	public enum EqualizerFilterType
 	{
@@ -2559,10 +2561,10 @@ namespace Mesen.GUI
 		SortByUsageFrequency = 2,
 		GroupBlankTiles = 4,
 		IgnoreOverscan = 8,
-	   SaveFrame = 16,
-   }
+		SaveFrame = 16,
+	}
 
-   [StructLayout(LayoutKind.Sequential)]
+	[StructLayout(LayoutKind.Sequential)]
 	public class AddressTypeInfo
 	{
 		public Int32 Address;

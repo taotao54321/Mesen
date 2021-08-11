@@ -574,6 +574,8 @@
     <ClInclude Include="IInputProvider.h" />
     <ClInclude Include="IInputRecorder.h" />
     <ClInclude Include="InternalRamHandler.h" />
+    <ClInclude Include="InvA13Audio.h" />
+    <ClInclude Include="InvOE1Audio.h" />
     <ClInclude Include="Kaiser7017.h" />
     <ClInclude Include="Kaiser7031.h" />
     <ClInclude Include="KeyManager.h" />

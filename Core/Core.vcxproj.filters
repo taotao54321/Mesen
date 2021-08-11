@@ -1523,6 +1523,8 @@
     <ClInclude Include="fmopn_2608rom.h">
       <Filter>Nes\Mappers\EPSG</Filter>
     </ClInclude>
+    <ClInclude Include="InvA13Audio.h" />
+    <ClInclude Include="InvOE1Audio.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
