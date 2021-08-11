@@ -119,6 +119,9 @@ enum class AudioChannel
 	Sunsoft5B = 10,
 	EPSM_L = 11,
 	EPSM_R = 12,
+	InvA13 = 13,
+	InvOE1 = 14,
+	MaxChannelCount
 };
 
 enum class EqualizerFilterType
@@ -660,8 +663,40 @@ private:
 	bool _audioSettingsChanged = false;
 	uint32_t _audioLatency = 50;
 	uint32_t _EPSMClockFrequency = 3579545;
-	double _channelVolume[13] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-	double _channelPanning[13] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 2.0 };
+	double _channelVolume[15] = {
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0
+	};
+	double _channelPanning[15] = {
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		1.0,
+		0.0,
+		2.0,
+		1.0,
+		1.0
+	};
 	EqualizerFilterType _equalizerFilterType = EqualizerFilterType::None;
 	vector<double> _bandGains = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	vector<double> _bands = { { 40,56,80,113,160,225,320,450,600,750,1000,2000,3000,4000,5000,6000,7000,10000,12500,15000 } };
