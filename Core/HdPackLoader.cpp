@@ -273,6 +273,38 @@ void HdPackLoader::InitializeGlobalConditions()
 	HdPackCondition* invBgpriority = new HdPackBgPriorityCondition();
 	invBgpriority->Name = "!bgpriority";
 	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invBgpriority));
+
+	HdPackCondition* sppalette0 = new HdPackSpPalette0Condition();
+	sppalette0->Name = "sppalette0";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette0));
+
+	HdPackCondition* invSppalette0 = new HdPackSpPalette0Condition();
+	invSppalette0->Name = "!sppalette0";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette0));
+
+	HdPackCondition* sppalette1 = new HdPackSpPalette1Condition();
+	sppalette1->Name = "sppalette1";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette1));
+
+	HdPackCondition* invSppalette1 = new HdPackSpPalette1Condition();
+	invSppalette1->Name = "!sppalette1";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette1));
+
+	HdPackCondition* sppalette2 = new HdPackSpPalette2Condition();
+	sppalette2->Name = "sppalette2";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette2));
+
+	HdPackCondition* invSppalette2 = new HdPackSpPalette2Condition();
+	invSppalette2->Name = "!sppalette2";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette2));
+
+	HdPackCondition* sppalette3 = new HdPackSpPalette3Condition();
+	sppalette3->Name = "sppalette3";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette3));
+
+	HdPackCondition* invSppalette3 = new HdPackSpPalette3Condition();
+	invSppalette3->Name = "!sppalette3";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette3));
 }
 
 void HdPackLoader::ProcessOverscanTag(vector<string> &tokens)

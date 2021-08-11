@@ -90,6 +90,7 @@ struct HdPpuTileInfo : public HdTileKey
 	uint8_t BgColor;
 	uint8_t SpriteColor;
 	uint8_t PpuBackgroundColor;
+	uint32_t PaletteOffset;
 
 	uint8_t OAMIndex;
 };

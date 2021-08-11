@@ -96,6 +96,7 @@ void HdPpu::DrawPixel()
 					} else {
 						tileInfo.Sprite[j].SpriteColor = ReadPaletteRAM(sprite.PaletteOffset + tileInfo.Sprite[j].SpriteColorIndex);
 					}
+					tileInfo.Sprite[j].PaletteOffset = sprite.PaletteOffset;
 
 					tileInfo.Sprite[j].PpuBackgroundColor = tileInfo.Tile.PpuBackgroundColor;
 					tileInfo.Sprite[j].BgColorIndex = tileInfo.Tile.BgColorIndex;
