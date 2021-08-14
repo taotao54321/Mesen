@@ -473,7 +473,8 @@ void Console::ProcessCpuClock()
 
 void Console::ProcessInterferenceAudio()
 {
-	_InvA13 = (_ppu->_A13pinLow == 1) ? 0 : 1; // invert relative to 2A03
+	_InvA13 = _ppu->_A13pinLowSum;
+	_ppu->_A13pinLowSum = 0;
 
 	_controlManager->GetInvOE1(_controlManager->_address);
 	_InvOE1 = (_controlManager->_OE1pinLow == 1) ? 0 : 1; // invert relative to 2A03
