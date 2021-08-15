@@ -13,6 +13,15 @@
 
 #define checkConstraint(x, y) if(!(x)) { MessageManager::Log(y); return; }
 
+static const char windowsSlash = '\\';
+static const char unixSlash    = '/';
+#if defined(_WIN32)
+#define convertPathToNative(filepath) std::replace(filepath.begin(), filepath.end(), unixSlash, windowsSlash)
+#else
+#define convertPathToNative(filepath) std::replace(filepath.begin(), filepath.end(), windowsSlash, unixSlash)
+#endif
+#define convertPathToNativeVector(vector, idx) if (vector.size() > idx) { convertPathToNative(vector[idx]); }
+
 HdPackLoader::HdPackLoader()
 {
 }
@@ -165,14 +174,17 @@ bool HdPackLoader::LoadPack()
 				ProcessOverscanTag(tokens);
 			} else if(lineContent.substr(0, 5) == "<img>") {
 				lineContent = lineContent.substr(5);
+				convertPathToNative(lineContent);
 				if(!ProcessImgTag(lineContent)) {
 					return false;
 				}
 			} else if(lineContent.substr(0, 7) == "<patch>") {
 				tokens = StringUtilities::Split(lineContent.substr(7), ',');
+				convertPathToNativeVector(tokens, 0);
 				ProcessPatchTag(tokens);
 			} else if(lineContent.substr(0, 12) == "<background>") {
 				tokens = StringUtilities::Split(lineContent.substr(12), ',');
+				convertPathToNativeVector(tokens, 0);
 				ProcessBackgroundTag(tokens, conditions);
 			} else if(lineContent.substr(0, 11) == "<condition>") {
 				tokens = StringUtilities::Split(lineContent.substr(11), ',');
@@ -186,9 +198,11 @@ bool HdPackLoader::LoadPack()
 				ProcessOptionTag(tokens);
 			} else if(lineContent.substr(0, 5) == "<bgm>") {
 				tokens = StringUtilities::Split(lineContent.substr(5), ',');
+				convertPathToNativeVector(tokens, 2);
 				ProcessBgmTag(tokens);
 			} else if(lineContent.substr(0, 5) == "<sfx>") {
 				tokens = StringUtilities::Split(lineContent.substr(5), ',');
+				convertPathToNativeVector(tokens, 2);
 				ProcessSfxTag(tokens);
 			}
 		}
@@ -259,6 +273,38 @@ void HdPackLoader::InitializeGlobalConditions()
 	HdPackCondition* invBgpriority = new HdPackBgPriorityCondition();
 	invBgpriority->Name = "!bgpriority";
 	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invBgpriority));
+
+	HdPackCondition* sppalette0 = new HdPackSpPalette0Condition();
+	sppalette0->Name = "sppalette0";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette0));
+
+	HdPackCondition* invSppalette0 = new HdPackSpPalette0Condition();
+	invSppalette0->Name = "!sppalette0";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette0));
+
+	HdPackCondition* sppalette1 = new HdPackSpPalette1Condition();
+	sppalette1->Name = "sppalette1";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette1));
+
+	HdPackCondition* invSppalette1 = new HdPackSpPalette1Condition();
+	invSppalette1->Name = "!sppalette1";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette1));
+
+	HdPackCondition* sppalette2 = new HdPackSpPalette2Condition();
+	sppalette2->Name = "sppalette2";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette2));
+
+	HdPackCondition* invSppalette2 = new HdPackSpPalette2Condition();
+	invSppalette2->Name = "!sppalette2";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette2));
+
+	HdPackCondition* sppalette3 = new HdPackSpPalette3Condition();
+	sppalette3->Name = "sppalette3";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(sppalette3));
+
+	HdPackCondition* invSppalette3 = new HdPackSpPalette3Condition();
+	invSppalette3->Name = "!sppalette3";
+	_data->Conditions.push_back(unique_ptr<HdPackCondition>(invSppalette3));
 }
 
 void HdPackLoader::ProcessOverscanTag(vector<string> &tokens)

@@ -226,6 +226,7 @@ namespace Mesen.GUI
 		[DllImport(DLLPath)] public static extern void SetVideoScale(double scale, ConsoleId consoleId = ConsoleId.Master);
 		[DllImport(DLLPath)] public static extern void SetScreenRotation(UInt32 angle);
 		[DllImport(DLLPath)] public static extern void SetExclusiveRefreshRate(UInt32 refreshRate);
+		[DllImport(DLLPath)] public static extern void SetExclusiveRefreshRate2(UInt32 refreshRate);
 		[DllImport(DLLPath)] public static extern void SetVideoAspectRatio(VideoAspectRatio aspectRatio, double customRatio);
 		[DllImport(DLLPath)] public static extern void SetVideoFilter(VideoFilterType filter);
 		[DllImport(DLLPath)] public static extern void SetVideoResizeFilter(VideoResizeFilter filter);
@@ -1733,6 +1734,7 @@ namespace Mesen.GUI
 
 		BreakOnPpu2006ScrollGlitch = 0x20000,
 		BreakOnBusConflict = 0x40000,
+		BreakOnUnlogged = 0x80000,
 	}
 
 	public struct InteropRomInfo

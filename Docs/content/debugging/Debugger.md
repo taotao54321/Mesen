@@ -392,6 +392,7 @@ The `Break Options` submenu contains a number of options to configure under whic
 * **Break on unofficial opcodes**: Break the emulation whenever an unofficial opcode is about to execute.
 * **Break on BRK**: Break the emulation whenever a BRK instruction is about to execute.
 * **Break on CPU crash**: Break the emulation whenever an instruction that will cause the CPU to freeze is about to execute.
+* **Break on unlogged code**: Break the emulation whenever an instruction that haven't been logged is about to execute.
 
 <div></div>
    

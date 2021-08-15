@@ -319,7 +319,7 @@ namespace Mesen.GUI.Debugger.Controls
 			_forceRefresh = false;
 			_selectedSprite = ramAddr / 4;
 
-			int spriteY = _spriteRam[ramAddr];
+			int spriteY = _spriteRam[ramAddr] + 1;
 			int tileIndex = _spriteRam[ramAddr + 1];
 			int attributes = _spriteRam[ramAddr + 2];
 			int spriteX = _spriteRam[ramAddr + 3];

@@ -36,6 +36,7 @@ namespace Mesen.GUI.Forms.Config
 			AddBinding("FullscreenForceIntegerScale", chkFullscreenForceIntegerScale);
 			AddBinding("UseExclusiveFullscreen", chkUseExclusiveFullscreen);
 			AddBinding("ExclusiveFullscreenRefreshRate", cboRefreshRate);
+			AddBinding("ExclusiveFullscreenRefreshRate2", cboRefreshRate2);
 
 			AddBinding("VideoScale", nudScale);
 			AddBinding("AspectRatio", cboAspectRatio);

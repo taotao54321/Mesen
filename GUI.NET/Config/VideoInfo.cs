@@ -57,6 +57,7 @@ namespace Mesen.GUI.Config
 		public bool UseExclusiveFullscreen = false;
 		public string FullscreenResolution = "";
 		public VideoRefreshRates ExclusiveFullscreenRefreshRate = VideoRefreshRates._60;
+		public VideoRefreshRates ExclusiveFullscreenRefreshRate2 = VideoRefreshRates._50;
 
 		public bool UseCustomVsPalette = false;
 		public bool ShowColorIndexes = true;
@@ -100,6 +101,7 @@ namespace Mesen.GUI.Config
 			InteropEmu.SetScreenRotation((UInt32)videoInfo.ScreenRotation);
 
 			InteropEmu.SetExclusiveRefreshRate((UInt32)videoInfo.ExclusiveFullscreenRefreshRate);
+			InteropEmu.SetExclusiveRefreshRate2((UInt32)videoInfo.ExclusiveFullscreenRefreshRate2);
 
 			InteropEmu.SetVideoFilter(videoInfo.VideoFilter);
 			InteropEmu.SetVideoResizeFilter(videoInfo.UseBilinearInterpolation ? VideoResizeFilter.Bilinear : VideoResizeFilter.NearestNeighbor);
