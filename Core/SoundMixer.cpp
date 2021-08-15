@@ -277,8 +277,8 @@ int16_t SoundMixer::GetOutputVolume(bool forRightChannel)
 #endif
 		GetChannelOutput(AudioChannel::EPSM_L, forRightChannel) * 4 +
 		GetChannelOutput(AudioChannel::EPSM_R, forRightChannel) * 4 +
-		GetChannelOutput(AudioChannel::InvA13, forRightChannel) * 20 +
-		GetChannelOutput(AudioChannel::InvOE1, forRightChannel) * 1000
+		(GetChannelOutput(AudioChannel::InvA13, forRightChannel) * 20) / 3.0 + // 3 PPU samples per CPU clock
+		GetChannelOutput(AudioChannel::InvOE1, forRightChannel) * 100
 	);
 }
 
