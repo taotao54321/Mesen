@@ -37,16 +37,17 @@ namespace Mesen.GUI.Forms.Config
             this.trkSquare2Vol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkSquare1Vol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkMaster = new Mesen.GUI.Controls.ctrlTrackbar();
+            this.trkSunsoft5b = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkFdsVol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkMmc5Vol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkVrc6Vol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkVrc7Vol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkNamco163Vol = new Mesen.GUI.Controls.ctrlTrackbar();
-            this.trkSunsoft5b = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkEPSMVol_L = new Mesen.GUI.Controls.ctrlTrackbar();
             this.trkEPSMVol_R = new Mesen.GUI.Controls.ctrlTrackbar();
+            this.trkInvA13Vol = new Mesen.GUI.Controls.ctrlTrackbar();
+            this.trkInvOE1Vol = new Mesen.GUI.Controls.ctrlTrackbar();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.lblVolumeReductionSettings = new System.Windows.Forms.Label();
             this.chkEnableAudio = new System.Windows.Forms.CheckBox();
             this.chkEnableEPSM = new System.Windows.Forms.CheckBox();
             this.lblSampleRate = new System.Windows.Forms.Label();
@@ -64,6 +65,7 @@ namespace Mesen.GUI.Forms.Config
             this.chkReduceSoundInFastForward = new System.Windows.Forms.CheckBox();
             this.trkVolumeReduction = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.chkMuteSoundInBackground = new System.Windows.Forms.CheckBox();
+            this.lblVolumeReductionSettings = new System.Windows.Forms.Label();
             this.btnReset = new System.Windows.Forms.Button();
             this.tabMain = new System.Windows.Forms.TabControl();
             this.tpgGeneral = new System.Windows.Forms.TabPage();
@@ -71,18 +73,20 @@ namespace Mesen.GUI.Forms.Config
             this.tpgPanning = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.trkSquare1Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
-            this.trkFdsPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkSquare2Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
-            this.trkMmc5Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkTrianglePan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkNoisePan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkDmcPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+            this.trkSunsoftPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+            this.trkFdsPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+            this.trkMmc5Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkVrc6Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkVrc7Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkNamcoPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
-            this.trkSunsoftPan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkEPSMPan_L = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.trkEPSMPan_R = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+            this.trkInvA13Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
+            this.trkInvOE1Pan = new Mesen.GUI.Controls.ctrlHorizontalTrackbar();
             this.tpgEqualizer = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.chkEnableEqualizer = new System.Windows.Forms.CheckBox();
@@ -186,7 +190,7 @@ namespace Mesen.GUI.Forms.Config
             // baseConfigPanel
             // 
             this.baseConfigPanel.Controls.Add(this.btnReset);
-            this.baseConfigPanel.Location = new System.Drawing.Point(0, 421);
+            this.baseConfigPanel.Location = new System.Drawing.Point(0, 427);
             this.baseConfigPanel.Size = new System.Drawing.Size(477, 29);
             this.baseConfigPanel.Controls.SetChildIndex(this.btnReset, 0);
             // 
@@ -196,56 +200,60 @@ namespace Mesen.GUI.Forms.Config
             this.grpVolume.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpVolume.Location = new System.Drawing.Point(3, 3);
             this.grpVolume.Name = "grpVolume";
-            this.grpVolume.Size = new System.Drawing.Size(463, 357);
+            this.grpVolume.Size = new System.Drawing.Size(463, 389);
             this.grpVolume.TabIndex = 2;
             this.grpVolume.TabStop = false;
             this.grpVolume.Text = "Volume";
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 7;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.ColumnCount = 8;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
             this.tableLayoutPanel1.Controls.Add(this.trkDmcVol, 5, 0);
             this.tableLayoutPanel1.Controls.Add(this.trkNoiseVol, 4, 0);
             this.tableLayoutPanel1.Controls.Add(this.trkTriangleVol, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.trkSquare2Vol, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.trkSquare1Vol, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.trkMaster, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.trkFdsVol, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.trkMmc5Vol, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.trkVrc6Vol, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.trkVrc7Vol, 3, 1);
-            this.tableLayoutPanel1.Controls.Add(this.trkNamco163Vol, 4, 1);
             this.tableLayoutPanel1.Controls.Add(this.trkSunsoft5b, 6, 0);
-            this.tableLayoutPanel1.Controls.Add(this.trkEPSMVol_L, 5, 1);
-            this.tableLayoutPanel1.Controls.Add(this.trkEPSMVol_R, 6, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkFdsVol, 7, 0);
+            this.tableLayoutPanel1.Controls.Add(this.trkMmc5Vol, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkVrc6Vol, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkVrc7Vol, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkNamco163Vol, 3, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkEPSMVol_L, 4, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkEPSMVol_R, 5, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkInvA13Vol, 6, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trkInvOE1Vol, 7, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(457, 338);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(457, 370);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // trkDmcVol
             // 
             this.trkDmcVol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkDmcVol.Location = new System.Drawing.Point(364, 0);
+            this.trkDmcVol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkDmcVol.Location = new System.Drawing.Point(285, 0);
             this.trkDmcVol.Margin = new System.Windows.Forms.Padding(0);
             this.trkDmcVol.Maximum = 100;
-            this.trkDmcVol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkDmcVol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkDmcVol.Minimum = 0;
-            this.trkDmcVol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkDmcVol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkDmcVol.Name = "trkDmcVol";
-            this.trkDmcVol.Size = new System.Drawing.Size(63, 160);
+            this.trkDmcVol.Size = new System.Drawing.Size(57, 185);
             this.trkDmcVol.TabIndex = 16;
             this.trkDmcVol.Text = "DMC";
             this.trkDmcVol.Value = 50;
@@ -253,14 +261,15 @@ namespace Mesen.GUI.Forms.Config
             // trkNoiseVol
             // 
             this.trkNoiseVol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkNoiseVol.Location = new System.Drawing.Point(292, 0);
+            this.trkNoiseVol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkNoiseVol.Location = new System.Drawing.Point(228, 0);
             this.trkNoiseVol.Margin = new System.Windows.Forms.Padding(0);
             this.trkNoiseVol.Maximum = 100;
-            this.trkNoiseVol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkNoiseVol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkNoiseVol.Minimum = 0;
-            this.trkNoiseVol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkNoiseVol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkNoiseVol.Name = "trkNoiseVol";
-            this.trkNoiseVol.Size = new System.Drawing.Size(63, 160);
+            this.trkNoiseVol.Size = new System.Drawing.Size(57, 185);
             this.trkNoiseVol.TabIndex = 15;
             this.trkNoiseVol.Text = "Noise";
             this.trkNoiseVol.Value = 50;
@@ -268,14 +277,15 @@ namespace Mesen.GUI.Forms.Config
             // trkTriangleVol
             // 
             this.trkTriangleVol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkTriangleVol.Location = new System.Drawing.Point(220, 0);
+            this.trkTriangleVol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkTriangleVol.Location = new System.Drawing.Point(171, 0);
             this.trkTriangleVol.Margin = new System.Windows.Forms.Padding(0);
             this.trkTriangleVol.Maximum = 100;
-            this.trkTriangleVol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkTriangleVol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkTriangleVol.Minimum = 0;
-            this.trkTriangleVol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkTriangleVol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkTriangleVol.Name = "trkTriangleVol";
-            this.trkTriangleVol.Size = new System.Drawing.Size(63, 160);
+            this.trkTriangleVol.Size = new System.Drawing.Size(57, 185);
             this.trkTriangleVol.TabIndex = 14;
             this.trkTriangleVol.Text = "Triangle";
             this.trkTriangleVol.Value = 50;
@@ -283,14 +293,15 @@ namespace Mesen.GUI.Forms.Config
             // trkSquare2Vol
             // 
             this.trkSquare2Vol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkSquare2Vol.Location = new System.Drawing.Point(148, 0);
+            this.trkSquare2Vol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkSquare2Vol.Location = new System.Drawing.Point(114, 0);
             this.trkSquare2Vol.Margin = new System.Windows.Forms.Padding(0);
             this.trkSquare2Vol.Maximum = 100;
-            this.trkSquare2Vol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkSquare2Vol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkSquare2Vol.Minimum = 0;
-            this.trkSquare2Vol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkSquare2Vol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkSquare2Vol.Name = "trkSquare2Vol";
-            this.trkSquare2Vol.Size = new System.Drawing.Size(63, 160);
+            this.trkSquare2Vol.Size = new System.Drawing.Size(57, 185);
             this.trkSquare2Vol.TabIndex = 13;
             this.trkSquare2Vol.Text = "Square 2";
             this.trkSquare2Vol.Value = 50;
@@ -298,14 +309,15 @@ namespace Mesen.GUI.Forms.Config
             // trkSquare1Vol
             // 
             this.trkSquare1Vol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkSquare1Vol.Location = new System.Drawing.Point(76, 0);
+            this.trkSquare1Vol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkSquare1Vol.Location = new System.Drawing.Point(57, 0);
             this.trkSquare1Vol.Margin = new System.Windows.Forms.Padding(0);
             this.trkSquare1Vol.Maximum = 100;
-            this.trkSquare1Vol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkSquare1Vol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkSquare1Vol.Minimum = 0;
-            this.trkSquare1Vol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkSquare1Vol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkSquare1Vol.Name = "trkSquare1Vol";
-            this.trkSquare1Vol.Size = new System.Drawing.Size(63, 160);
+            this.trkSquare1Vol.Size = new System.Drawing.Size(57, 185);
             this.trkSquare1Vol.TabIndex = 12;
             this.trkSquare1Vol.Text = "Square 1";
             this.trkSquare1Vol.Value = 50;
@@ -313,29 +325,47 @@ namespace Mesen.GUI.Forms.Config
             // trkMaster
             // 
             this.trkMaster.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkMaster.Location = new System.Drawing.Point(4, 0);
+            this.trkMaster.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkMaster.Location = new System.Drawing.Point(0, 0);
             this.trkMaster.Margin = new System.Windows.Forms.Padding(0);
             this.trkMaster.Maximum = 100;
-            this.trkMaster.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkMaster.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkMaster.Minimum = 0;
-            this.trkMaster.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkMaster.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkMaster.Name = "trkMaster";
-            this.trkMaster.Size = new System.Drawing.Size(63, 160);
+            this.trkMaster.Size = new System.Drawing.Size(57, 185);
             this.trkMaster.TabIndex = 11;
             this.trkMaster.Text = "Master";
             this.trkMaster.Value = 50;
             // 
+            // trkSunsoft5b
+            // 
+            this.trkSunsoft5b.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.trkSunsoft5b.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkSunsoft5b.Location = new System.Drawing.Point(342, 0);
+            this.trkSunsoft5b.Margin = new System.Windows.Forms.Padding(0);
+            this.trkSunsoft5b.Maximum = 100;
+            this.trkSunsoft5b.MaximumSize = new System.Drawing.Size(63, 0);
+            this.trkSunsoft5b.Minimum = 0;
+            this.trkSunsoft5b.MinimumSize = new System.Drawing.Size(40, 185);
+            this.trkSunsoft5b.Name = "trkSunsoft5b";
+            this.trkSunsoft5b.Size = new System.Drawing.Size(57, 185);
+            this.trkSunsoft5b.TabIndex = 22;
+            this.trkSunsoft5b.Text = "Sunsoft";
+            this.trkSunsoft5b.Value = 50;
+            // 
             // trkFdsVol
             // 
             this.trkFdsVol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkFdsVol.Location = new System.Drawing.Point(4, 160);
+            this.trkFdsVol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkFdsVol.Location = new System.Drawing.Point(399, 0);
             this.trkFdsVol.Margin = new System.Windows.Forms.Padding(0);
             this.trkFdsVol.Maximum = 100;
-            this.trkFdsVol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkFdsVol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkFdsVol.Minimum = 0;
-            this.trkFdsVol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkFdsVol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkFdsVol.Name = "trkFdsVol";
-            this.trkFdsVol.Size = new System.Drawing.Size(63, 160);
+            this.trkFdsVol.Size = new System.Drawing.Size(57, 185);
             this.trkFdsVol.TabIndex = 17;
             this.trkFdsVol.Text = "FDS";
             this.trkFdsVol.Value = 50;
@@ -343,14 +373,15 @@ namespace Mesen.GUI.Forms.Config
             // trkMmc5Vol
             // 
             this.trkMmc5Vol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkMmc5Vol.Location = new System.Drawing.Point(76, 160);
+            this.trkMmc5Vol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkMmc5Vol.Location = new System.Drawing.Point(0, 185);
             this.trkMmc5Vol.Margin = new System.Windows.Forms.Padding(0);
             this.trkMmc5Vol.Maximum = 100;
-            this.trkMmc5Vol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkMmc5Vol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkMmc5Vol.Minimum = 0;
-            this.trkMmc5Vol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkMmc5Vol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkMmc5Vol.Name = "trkMmc5Vol";
-            this.trkMmc5Vol.Size = new System.Drawing.Size(63, 160);
+            this.trkMmc5Vol.Size = new System.Drawing.Size(57, 185);
             this.trkMmc5Vol.TabIndex = 18;
             this.trkMmc5Vol.Text = "MMC5";
             this.trkMmc5Vol.Value = 50;
@@ -358,14 +389,15 @@ namespace Mesen.GUI.Forms.Config
             // trkVrc6Vol
             // 
             this.trkVrc6Vol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkVrc6Vol.Location = new System.Drawing.Point(148, 160);
+            this.trkVrc6Vol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkVrc6Vol.Location = new System.Drawing.Point(57, 185);
             this.trkVrc6Vol.Margin = new System.Windows.Forms.Padding(0);
             this.trkVrc6Vol.Maximum = 100;
-            this.trkVrc6Vol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkVrc6Vol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkVrc6Vol.Minimum = 0;
-            this.trkVrc6Vol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkVrc6Vol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkVrc6Vol.Name = "trkVrc6Vol";
-            this.trkVrc6Vol.Size = new System.Drawing.Size(63, 160);
+            this.trkVrc6Vol.Size = new System.Drawing.Size(57, 185);
             this.trkVrc6Vol.TabIndex = 19;
             this.trkVrc6Vol.Text = "VRC6";
             this.trkVrc6Vol.Value = 50;
@@ -373,14 +405,15 @@ namespace Mesen.GUI.Forms.Config
             // trkVrc7Vol
             // 
             this.trkVrc7Vol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkVrc7Vol.Location = new System.Drawing.Point(220, 160);
+            this.trkVrc7Vol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkVrc7Vol.Location = new System.Drawing.Point(114, 185);
             this.trkVrc7Vol.Margin = new System.Windows.Forms.Padding(0);
             this.trkVrc7Vol.Maximum = 100;
-            this.trkVrc7Vol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkVrc7Vol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkVrc7Vol.Minimum = 0;
-            this.trkVrc7Vol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkVrc7Vol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkVrc7Vol.Name = "trkVrc7Vol";
-            this.trkVrc7Vol.Size = new System.Drawing.Size(63, 160);
+            this.trkVrc7Vol.Size = new System.Drawing.Size(57, 185);
             this.trkVrc7Vol.TabIndex = 20;
             this.trkVrc7Vol.Text = "VRC7";
             this.trkVrc7Vol.Value = 50;
@@ -388,44 +421,31 @@ namespace Mesen.GUI.Forms.Config
             // trkNamco163Vol
             // 
             this.trkNamco163Vol.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkNamco163Vol.Location = new System.Drawing.Point(292, 160);
+            this.trkNamco163Vol.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkNamco163Vol.Location = new System.Drawing.Point(171, 185);
             this.trkNamco163Vol.Margin = new System.Windows.Forms.Padding(0);
             this.trkNamco163Vol.Maximum = 100;
-            this.trkNamco163Vol.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkNamco163Vol.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkNamco163Vol.Minimum = 0;
-            this.trkNamco163Vol.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkNamco163Vol.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkNamco163Vol.Name = "trkNamco163Vol";
-            this.trkNamco163Vol.Size = new System.Drawing.Size(63, 160);
+            this.trkNamco163Vol.Size = new System.Drawing.Size(57, 185);
             this.trkNamco163Vol.TabIndex = 21;
             this.trkNamco163Vol.Text = "Namco";
             this.trkNamco163Vol.Value = 50;
             // 
-            // trkSunsoft5b
-            // 
-            this.trkSunsoft5b.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkSunsoft5b.Location = new System.Drawing.Point(432, 0);
-            this.trkSunsoft5b.Margin = new System.Windows.Forms.Padding(0);
-            this.trkSunsoft5b.Maximum = 100;
-            this.trkSunsoft5b.MaximumSize = new System.Drawing.Size(63, 160);
-            this.trkSunsoft5b.Minimum = 0;
-            this.trkSunsoft5b.MinimumSize = new System.Drawing.Size(63, 160);
-            this.trkSunsoft5b.Name = "trkSunsoft5b";
-            this.trkSunsoft5b.Size = new System.Drawing.Size(63, 160);
-            this.trkSunsoft5b.TabIndex = 22;
-            this.trkSunsoft5b.Text = "Sunsoft";
-            this.trkSunsoft5b.Value = 50;
-            // 
             // trkEPSMVol_L
             // 
             this.trkEPSMVol_L.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkEPSMVol_L.Location = new System.Drawing.Point(364, 160);
+            this.trkEPSMVol_L.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkEPSMVol_L.Location = new System.Drawing.Point(228, 185);
             this.trkEPSMVol_L.Margin = new System.Windows.Forms.Padding(0);
             this.trkEPSMVol_L.Maximum = 100;
-            this.trkEPSMVol_L.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkEPSMVol_L.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkEPSMVol_L.Minimum = 0;
-            this.trkEPSMVol_L.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkEPSMVol_L.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkEPSMVol_L.Name = "trkEPSMVol_L";
-            this.trkEPSMVol_L.Size = new System.Drawing.Size(63, 160);
+            this.trkEPSMVol_L.Size = new System.Drawing.Size(57, 185);
             this.trkEPSMVol_L.TabIndex = 22;
             this.trkEPSMVol_L.Text = "EPSM Left";
             this.trkEPSMVol_L.Value = 100;
@@ -433,17 +453,46 @@ namespace Mesen.GUI.Forms.Config
             // trkEPSMVol_R
             // 
             this.trkEPSMVol_R.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkEPSMVol_R.Location = new System.Drawing.Point(432, 160);
+            this.trkEPSMVol_R.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.trkEPSMVol_R.Location = new System.Drawing.Point(285, 185);
             this.trkEPSMVol_R.Margin = new System.Windows.Forms.Padding(0);
             this.trkEPSMVol_R.Maximum = 100;
-            this.trkEPSMVol_R.MaximumSize = new System.Drawing.Size(63, 160);
+            this.trkEPSMVol_R.MaximumSize = new System.Drawing.Size(63, 0);
             this.trkEPSMVol_R.Minimum = 0;
-            this.trkEPSMVol_R.MinimumSize = new System.Drawing.Size(63, 160);
+            this.trkEPSMVol_R.MinimumSize = new System.Drawing.Size(40, 185);
             this.trkEPSMVol_R.Name = "trkEPSMVol_R";
-            this.trkEPSMVol_R.Size = new System.Drawing.Size(63, 160);
+            this.trkEPSMVol_R.Size = new System.Drawing.Size(57, 185);
             this.trkEPSMVol_R.TabIndex = 22;
             this.trkEPSMVol_R.Text = "EPSM Right";
             this.trkEPSMVol_R.Value = 100;
+            // 
+            // trkInvA13Vol
+            // 
+            this.trkInvA13Vol.Location = new System.Drawing.Point(342, 185);
+            this.trkInvA13Vol.Margin = new System.Windows.Forms.Padding(0);
+            this.trkInvA13Vol.Maximum = 100;
+            this.trkInvA13Vol.MaximumSize = new System.Drawing.Size(63, 0);
+            this.trkInvA13Vol.Minimum = 0;
+            this.trkInvA13Vol.MinimumSize = new System.Drawing.Size(40, 185);
+            this.trkInvA13Vol.Name = "trkInvA13Vol";
+            this.trkInvA13Vol.Size = new System.Drawing.Size(57, 185);
+            this.trkInvA13Vol.TabIndex = 23;
+            this.trkInvA13Vol.Text = "/A13";
+            this.trkInvA13Vol.Value = 50;
+            // 
+            // trkInvOE1Vol
+            // 
+            this.trkInvOE1Vol.Location = new System.Drawing.Point(399, 185);
+            this.trkInvOE1Vol.Margin = new System.Windows.Forms.Padding(0);
+            this.trkInvOE1Vol.Maximum = 100;
+            this.trkInvOE1Vol.MaximumSize = new System.Drawing.Size(63, 0);
+            this.trkInvOE1Vol.Minimum = 0;
+            this.trkInvOE1Vol.MinimumSize = new System.Drawing.Size(40, 185);
+            this.trkInvOE1Vol.Name = "trkInvOE1Vol";
+            this.trkInvOE1Vol.Size = new System.Drawing.Size(58, 185);
+            this.trkInvOE1Vol.TabIndex = 24;
+            this.trkInvOE1Vol.Text = "/OE1";
+            this.trkInvOE1Vol.Value = 50;
             // 
             // tableLayoutPanel2
             // 
@@ -474,21 +523,8 @@ namespace Mesen.GUI.Forms.Config
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(463, 389);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(463, 395);
             this.tableLayoutPanel2.TabIndex = 3;
-            // 
-            // lblVolumeReductionSettings
-            // 
-            this.lblVolumeReductionSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblVolumeReductionSettings.AutoSize = true;
-            this.tableLayoutPanel2.SetColumnSpan(this.lblVolumeReductionSettings, 2);
-            this.lblVolumeReductionSettings.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblVolumeReductionSettings.Location = new System.Drawing.Point(0, 136);
-            this.lblVolumeReductionSettings.Margin = new System.Windows.Forms.Padding(0, 3, 3, 0);
-            this.lblVolumeReductionSettings.Name = "lblVolumeReductionSettings";
-            this.lblVolumeReductionSettings.Size = new System.Drawing.Size(94, 13);
-            this.lblVolumeReductionSettings.TabIndex = 24;
-            this.lblVolumeReductionSettings.Text = "Volume Reduction";
             // 
             // chkEnableAudio
             // 
@@ -509,7 +545,7 @@ namespace Mesen.GUI.Forms.Config
             this.chkEnableEPSM.Location = new System.Drawing.Point(6, 6);
             this.chkEnableEPSM.Margin = new System.Windows.Forms.Padding(6, 6, 6, 3);
             this.chkEnableEPSM.Name = "chkEnableEPSM";
-            this.chkEnableEPSM.Size = new System.Drawing.Size(91, 17);
+            this.chkEnableEPSM.Size = new System.Drawing.Size(92, 17);
             this.chkEnableEPSM.TabIndex = 3;
             this.chkEnableEPSM.Text = "Enable EPSM";
             this.chkEnableEPSM.UseVisualStyleBackColor = true;
@@ -674,7 +710,7 @@ namespace Mesen.GUI.Forms.Config
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel8.Size = new System.Drawing.Size(453, 81);
+            this.tableLayoutPanel8.Size = new System.Drawing.Size(453, 100);
             this.tableLayoutPanel8.TabIndex = 25;
             // 
             // chkReduceSoundInBackground
@@ -727,6 +763,19 @@ namespace Mesen.GUI.Forms.Config
             this.chkMuteSoundInBackground.UseVisualStyleBackColor = true;
             this.chkMuteSoundInBackground.CheckedChanged += new System.EventHandler(this.chkMuteWhenInBackground_CheckedChanged);
             // 
+            // lblVolumeReductionSettings
+            // 
+            this.lblVolumeReductionSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblVolumeReductionSettings.AutoSize = true;
+            this.tableLayoutPanel2.SetColumnSpan(this.lblVolumeReductionSettings, 2);
+            this.lblVolumeReductionSettings.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblVolumeReductionSettings.Location = new System.Drawing.Point(0, 136);
+            this.lblVolumeReductionSettings.Margin = new System.Windows.Forms.Padding(0, 3, 3, 0);
+            this.lblVolumeReductionSettings.Name = "lblVolumeReductionSettings";
+            this.lblVolumeReductionSettings.Size = new System.Drawing.Size(94, 13);
+            this.lblVolumeReductionSettings.TabIndex = 24;
+            this.lblVolumeReductionSettings.Text = "Volume Reduction";
+            // 
             // btnReset
             // 
             this.btnReset.AutoSize = true;
@@ -750,7 +799,7 @@ namespace Mesen.GUI.Forms.Config
             this.tabMain.Location = new System.Drawing.Point(0, 0);
             this.tabMain.Name = "tabMain";
             this.tabMain.SelectedIndex = 0;
-            this.tabMain.Size = new System.Drawing.Size(477, 421);
+            this.tabMain.Size = new System.Drawing.Size(477, 427);
             this.tabMain.TabIndex = 4;
             // 
             // tpgGeneral
@@ -759,7 +808,7 @@ namespace Mesen.GUI.Forms.Config
             this.tpgGeneral.Location = new System.Drawing.Point(4, 22);
             this.tpgGeneral.Name = "tpgGeneral";
             this.tpgGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgGeneral.Size = new System.Drawing.Size(469, 395);
+            this.tpgGeneral.Size = new System.Drawing.Size(469, 401);
             this.tpgGeneral.TabIndex = 0;
             this.tpgGeneral.Text = "General";
             this.tpgGeneral.UseVisualStyleBackColor = true;
@@ -770,7 +819,7 @@ namespace Mesen.GUI.Forms.Config
             this.tpgVolume.Location = new System.Drawing.Point(4, 22);
             this.tpgVolume.Name = "tpgVolume";
             this.tpgVolume.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgVolume.Size = new System.Drawing.Size(469, 363);
+            this.tpgVolume.Size = new System.Drawing.Size(469, 395);
             this.tpgVolume.TabIndex = 1;
             this.tpgVolume.Text = "Volume";
             this.tpgVolume.UseVisualStyleBackColor = true;
@@ -781,7 +830,7 @@ namespace Mesen.GUI.Forms.Config
             this.tpgPanning.Location = new System.Drawing.Point(4, 22);
             this.tpgPanning.Name = "tpgPanning";
             this.tpgPanning.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgPanning.Size = new System.Drawing.Size(469, 363);
+            this.tpgPanning.Size = new System.Drawing.Size(469, 395);
             this.tpgPanning.TabIndex = 4;
             this.tpgPanning.Text = "Panning";
             this.tpgPanning.UseVisualStyleBackColor = true;
@@ -792,104 +841,73 @@ namespace Mesen.GUI.Forms.Config
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.Controls.Add(this.trkSquare1Pan, 0, 0);
-            this.tableLayoutPanel6.Controls.Add(this.trkFdsPan, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.trkSquare2Pan, 0, 1);
-            this.tableLayoutPanel6.Controls.Add(this.trkMmc5Pan, 1, 1);
             this.tableLayoutPanel6.Controls.Add(this.trkTrianglePan, 0, 2);
             this.tableLayoutPanel6.Controls.Add(this.trkNoisePan, 0, 3);
             this.tableLayoutPanel6.Controls.Add(this.trkDmcPan, 0, 4);
-            this.tableLayoutPanel6.Controls.Add(this.trkVrc6Pan, 1, 2);
-            this.tableLayoutPanel6.Controls.Add(this.trkVrc7Pan, 1, 3);
-            this.tableLayoutPanel6.Controls.Add(this.trkNamcoPan, 1, 4);
-            this.tableLayoutPanel6.Controls.Add(this.trkSunsoftPan, 0, 6);
-            this.tableLayoutPanel6.Controls.Add(this.trkEPSMPan_L, 0, 5);
-            this.tableLayoutPanel6.Controls.Add(this.trkEPSMPan_R, 1, 5);
+            this.tableLayoutPanel6.Controls.Add(this.trkSunsoftPan, 0, 5);
+            this.tableLayoutPanel6.Controls.Add(this.trkFdsPan, 0, 6);
+            this.tableLayoutPanel6.Controls.Add(this.trkMmc5Pan, 0, 7);
+            this.tableLayoutPanel6.Controls.Add(this.trkVrc6Pan, 1, 0);
+            this.tableLayoutPanel6.Controls.Add(this.trkVrc7Pan, 1, 1);
+            this.tableLayoutPanel6.Controls.Add(this.trkNamcoPan, 1, 2);
+            this.tableLayoutPanel6.Controls.Add(this.trkEPSMPan_L, 1, 3);
+            this.tableLayoutPanel6.Controls.Add(this.trkEPSMPan_R, 1, 4);
+            this.tableLayoutPanel6.Controls.Add(this.trkInvA13Pan, 1, 5);
+            this.tableLayoutPanel6.Controls.Add(this.trkInvOE1Pan, 1, 6);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 8;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(463, 357);
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(463, 389);
             this.tableLayoutPanel6.TabIndex = 3;
             // 
             // trkSquare1Pan
             // 
             this.trkSquare1Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkSquare1Pan.Location = new System.Drawing.Point(12, 0);
+            this.trkSquare1Pan.Location = new System.Drawing.Point(0, 0);
             this.trkSquare1Pan.Margin = new System.Windows.Forms.Padding(0);
             this.trkSquare1Pan.Maximum = 100;
-            this.trkSquare1Pan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkSquare1Pan.Minimum = -100;
-            this.trkSquare1Pan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkSquare1Pan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkSquare1Pan.Name = "trkSquare1Pan";
-            this.trkSquare1Pan.Size = new System.Drawing.Size(206, 55);
+            this.trkSquare1Pan.Size = new System.Drawing.Size(231, 48);
             this.trkSquare1Pan.TabIndex = 12;
             this.trkSquare1Pan.Text = "Square 1";
             this.trkSquare1Pan.Value = 0;
             // 
-            // trkFdsPan
-            // 
-            this.trkFdsPan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkFdsPan.Location = new System.Drawing.Point(244, 0);
-            this.trkFdsPan.Margin = new System.Windows.Forms.Padding(0);
-            this.trkFdsPan.Maximum = 100;
-            this.trkFdsPan.MaximumSize = new System.Drawing.Size(63, 160);
-            this.trkFdsPan.Minimum = -100;
-            this.trkFdsPan.MinimumSize = new System.Drawing.Size(206, 55);
-            this.trkFdsPan.Name = "trkFdsPan";
-            this.trkFdsPan.Size = new System.Drawing.Size(206, 55);
-            this.trkFdsPan.TabIndex = 17;
-            this.trkFdsPan.Text = "FDS";
-            this.trkFdsPan.Value = 0;
-            // 
             // trkSquare2Pan
             // 
             this.trkSquare2Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkSquare2Pan.Location = new System.Drawing.Point(12, 55);
+            this.trkSquare2Pan.Location = new System.Drawing.Point(0, 48);
             this.trkSquare2Pan.Margin = new System.Windows.Forms.Padding(0);
             this.trkSquare2Pan.Maximum = 100;
-            this.trkSquare2Pan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkSquare2Pan.Minimum = -100;
-            this.trkSquare2Pan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkSquare2Pan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkSquare2Pan.Name = "trkSquare2Pan";
-            this.trkSquare2Pan.Size = new System.Drawing.Size(206, 55);
+            this.trkSquare2Pan.Size = new System.Drawing.Size(231, 48);
             this.trkSquare2Pan.TabIndex = 13;
             this.trkSquare2Pan.Text = "Square 2";
             this.trkSquare2Pan.Value = 0;
             // 
-            // trkMmc5Pan
-            // 
-            this.trkMmc5Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkMmc5Pan.Location = new System.Drawing.Point(244, 55);
-            this.trkMmc5Pan.Margin = new System.Windows.Forms.Padding(0);
-            this.trkMmc5Pan.Maximum = 100;
-            this.trkMmc5Pan.MaximumSize = new System.Drawing.Size(63, 160);
-            this.trkMmc5Pan.Minimum = -100;
-            this.trkMmc5Pan.MinimumSize = new System.Drawing.Size(206, 55);
-            this.trkMmc5Pan.Name = "trkMmc5Pan";
-            this.trkMmc5Pan.Size = new System.Drawing.Size(206, 55);
-            this.trkMmc5Pan.TabIndex = 18;
-            this.trkMmc5Pan.Text = "MMC5";
-            this.trkMmc5Pan.Value = 0;
-            // 
             // trkTrianglePan
             // 
             this.trkTrianglePan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkTrianglePan.Location = new System.Drawing.Point(12, 110);
+            this.trkTrianglePan.Location = new System.Drawing.Point(0, 96);
             this.trkTrianglePan.Margin = new System.Windows.Forms.Padding(0);
             this.trkTrianglePan.Maximum = 100;
-            this.trkTrianglePan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkTrianglePan.Minimum = -100;
-            this.trkTrianglePan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkTrianglePan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkTrianglePan.Name = "trkTrianglePan";
-            this.trkTrianglePan.Size = new System.Drawing.Size(206, 55);
+            this.trkTrianglePan.Size = new System.Drawing.Size(231, 48);
             this.trkTrianglePan.TabIndex = 14;
             this.trkTrianglePan.Text = "Triangle";
             this.trkTrianglePan.Value = 0;
@@ -897,14 +915,13 @@ namespace Mesen.GUI.Forms.Config
             // trkNoisePan
             // 
             this.trkNoisePan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkNoisePan.Location = new System.Drawing.Point(12, 165);
+            this.trkNoisePan.Location = new System.Drawing.Point(0, 144);
             this.trkNoisePan.Margin = new System.Windows.Forms.Padding(0);
             this.trkNoisePan.Maximum = 100;
-            this.trkNoisePan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkNoisePan.Minimum = -100;
-            this.trkNoisePan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkNoisePan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkNoisePan.Name = "trkNoisePan";
-            this.trkNoisePan.Size = new System.Drawing.Size(206, 55);
+            this.trkNoisePan.Size = new System.Drawing.Size(231, 48);
             this.trkNoisePan.TabIndex = 15;
             this.trkNoisePan.Text = "Noise";
             this.trkNoisePan.Value = 0;
@@ -912,29 +929,69 @@ namespace Mesen.GUI.Forms.Config
             // trkDmcPan
             // 
             this.trkDmcPan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkDmcPan.Location = new System.Drawing.Point(12, 220);
+            this.trkDmcPan.Location = new System.Drawing.Point(0, 192);
             this.trkDmcPan.Margin = new System.Windows.Forms.Padding(0);
             this.trkDmcPan.Maximum = 100;
-            this.trkDmcPan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkDmcPan.Minimum = -100;
-            this.trkDmcPan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkDmcPan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkDmcPan.Name = "trkDmcPan";
-            this.trkDmcPan.Size = new System.Drawing.Size(206, 55);
+            this.trkDmcPan.Size = new System.Drawing.Size(231, 48);
             this.trkDmcPan.TabIndex = 16;
             this.trkDmcPan.Text = "DMC";
             this.trkDmcPan.Value = 0;
             // 
+            // trkSunsoftPan
+            // 
+            this.trkSunsoftPan.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.trkSunsoftPan.Location = new System.Drawing.Point(0, 240);
+            this.trkSunsoftPan.Margin = new System.Windows.Forms.Padding(0);
+            this.trkSunsoftPan.Maximum = 100;
+            this.trkSunsoftPan.Minimum = -100;
+            this.trkSunsoftPan.MinimumSize = new System.Drawing.Size(206, 0);
+            this.trkSunsoftPan.Name = "trkSunsoftPan";
+            this.trkSunsoftPan.Size = new System.Drawing.Size(231, 48);
+            this.trkSunsoftPan.TabIndex = 22;
+            this.trkSunsoftPan.Text = "Sunsoft";
+            this.trkSunsoftPan.Value = 0;
+            // 
+            // trkFdsPan
+            // 
+            this.trkFdsPan.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.trkFdsPan.Location = new System.Drawing.Point(0, 288);
+            this.trkFdsPan.Margin = new System.Windows.Forms.Padding(0);
+            this.trkFdsPan.Maximum = 100;
+            this.trkFdsPan.Minimum = -100;
+            this.trkFdsPan.MinimumSize = new System.Drawing.Size(206, 0);
+            this.trkFdsPan.Name = "trkFdsPan";
+            this.trkFdsPan.Size = new System.Drawing.Size(231, 48);
+            this.trkFdsPan.TabIndex = 17;
+            this.trkFdsPan.Text = "FDS";
+            this.trkFdsPan.Value = 0;
+            // 
+            // trkMmc5Pan
+            // 
+            this.trkMmc5Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.trkMmc5Pan.Location = new System.Drawing.Point(0, 336);
+            this.trkMmc5Pan.Margin = new System.Windows.Forms.Padding(0);
+            this.trkMmc5Pan.Maximum = 100;
+            this.trkMmc5Pan.Minimum = -100;
+            this.trkMmc5Pan.MinimumSize = new System.Drawing.Size(206, 0);
+            this.trkMmc5Pan.Name = "trkMmc5Pan";
+            this.trkMmc5Pan.Size = new System.Drawing.Size(231, 53);
+            this.trkMmc5Pan.TabIndex = 18;
+            this.trkMmc5Pan.Text = "MMC5";
+            this.trkMmc5Pan.Value = 0;
+            // 
             // trkVrc6Pan
             // 
             this.trkVrc6Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkVrc6Pan.Location = new System.Drawing.Point(244, 110);
+            this.trkVrc6Pan.Location = new System.Drawing.Point(231, 0);
             this.trkVrc6Pan.Margin = new System.Windows.Forms.Padding(0);
             this.trkVrc6Pan.Maximum = 100;
-            this.trkVrc6Pan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkVrc6Pan.Minimum = -100;
-            this.trkVrc6Pan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkVrc6Pan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkVrc6Pan.Name = "trkVrc6Pan";
-            this.trkVrc6Pan.Size = new System.Drawing.Size(206, 55);
+            this.trkVrc6Pan.Size = new System.Drawing.Size(232, 48);
             this.trkVrc6Pan.TabIndex = 19;
             this.trkVrc6Pan.Text = "VRC6";
             this.trkVrc6Pan.Value = 0;
@@ -942,14 +999,13 @@ namespace Mesen.GUI.Forms.Config
             // trkVrc7Pan
             // 
             this.trkVrc7Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkVrc7Pan.Location = new System.Drawing.Point(244, 165);
+            this.trkVrc7Pan.Location = new System.Drawing.Point(231, 48);
             this.trkVrc7Pan.Margin = new System.Windows.Forms.Padding(0);
             this.trkVrc7Pan.Maximum = 100;
-            this.trkVrc7Pan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkVrc7Pan.Minimum = -100;
-            this.trkVrc7Pan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkVrc7Pan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkVrc7Pan.Name = "trkVrc7Pan";
-            this.trkVrc7Pan.Size = new System.Drawing.Size(206, 55);
+            this.trkVrc7Pan.Size = new System.Drawing.Size(232, 48);
             this.trkVrc7Pan.TabIndex = 20;
             this.trkVrc7Pan.Text = "VRC7";
             this.trkVrc7Pan.Value = 0;
@@ -957,44 +1013,27 @@ namespace Mesen.GUI.Forms.Config
             // trkNamcoPan
             // 
             this.trkNamcoPan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkNamcoPan.Location = new System.Drawing.Point(244, 220);
+            this.trkNamcoPan.Location = new System.Drawing.Point(231, 96);
             this.trkNamcoPan.Margin = new System.Windows.Forms.Padding(0);
             this.trkNamcoPan.Maximum = 100;
-            this.trkNamcoPan.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkNamcoPan.Minimum = -100;
-            this.trkNamcoPan.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkNamcoPan.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkNamcoPan.Name = "trkNamcoPan";
-            this.trkNamcoPan.Size = new System.Drawing.Size(206, 55);
+            this.trkNamcoPan.Size = new System.Drawing.Size(232, 48);
             this.trkNamcoPan.TabIndex = 21;
             this.trkNamcoPan.Text = "Namco";
             this.trkNamcoPan.Value = 0;
             // 
-            // trkSunsoftPan
-            // 
-            this.trkSunsoftPan.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkSunsoftPan.Location = new System.Drawing.Point(12, 330);
-            this.trkSunsoftPan.Margin = new System.Windows.Forms.Padding(0);
-            this.trkSunsoftPan.Maximum = 100;
-            this.trkSunsoftPan.MaximumSize = new System.Drawing.Size(63, 160);
-            this.trkSunsoftPan.Minimum = -100;
-            this.trkSunsoftPan.MinimumSize = new System.Drawing.Size(206, 55);
-            this.trkSunsoftPan.Name = "trkSunsoftPan";
-            this.trkSunsoftPan.Size = new System.Drawing.Size(206, 55);
-            this.trkSunsoftPan.TabIndex = 22;
-            this.trkSunsoftPan.Text = "Sunsoft";
-            this.trkSunsoftPan.Value = 0;
-            // 
             // trkEPSMPan_L
             // 
             this.trkEPSMPan_L.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkEPSMPan_L.Location = new System.Drawing.Point(12, 275);
+            this.trkEPSMPan_L.Location = new System.Drawing.Point(231, 144);
             this.trkEPSMPan_L.Margin = new System.Windows.Forms.Padding(0);
             this.trkEPSMPan_L.Maximum = 100;
-            this.trkEPSMPan_L.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkEPSMPan_L.Minimum = -100;
-            this.trkEPSMPan_L.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkEPSMPan_L.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkEPSMPan_L.Name = "trkEPSMPan_L";
-            this.trkEPSMPan_L.Size = new System.Drawing.Size(206, 55);
+            this.trkEPSMPan_L.Size = new System.Drawing.Size(232, 48);
             this.trkEPSMPan_L.TabIndex = 22;
             this.trkEPSMPan_L.Text = "EPSM Left";
             this.trkEPSMPan_L.Value = -100;
@@ -1002,17 +1041,44 @@ namespace Mesen.GUI.Forms.Config
             // trkEPSMPan_R
             // 
             this.trkEPSMPan_R.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.trkEPSMPan_R.Location = new System.Drawing.Point(244, 275);
+            this.trkEPSMPan_R.Location = new System.Drawing.Point(231, 192);
             this.trkEPSMPan_R.Margin = new System.Windows.Forms.Padding(0);
             this.trkEPSMPan_R.Maximum = 100;
-            this.trkEPSMPan_R.MaximumSize = new System.Drawing.Size(63, 160);
             this.trkEPSMPan_R.Minimum = -100;
-            this.trkEPSMPan_R.MinimumSize = new System.Drawing.Size(206, 55);
+            this.trkEPSMPan_R.MinimumSize = new System.Drawing.Size(206, 0);
             this.trkEPSMPan_R.Name = "trkEPSMPan_R";
-            this.trkEPSMPan_R.Size = new System.Drawing.Size(206, 55);
+            this.trkEPSMPan_R.Size = new System.Drawing.Size(232, 48);
             this.trkEPSMPan_R.TabIndex = 22;
             this.trkEPSMPan_R.Text = "EPSM Right";
             this.trkEPSMPan_R.Value = 100;
+            // 
+            // trkInvA13Pan
+            // 
+            this.trkInvA13Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.trkInvA13Pan.Location = new System.Drawing.Point(231, 240);
+            this.trkInvA13Pan.Margin = new System.Windows.Forms.Padding(0);
+            this.trkInvA13Pan.Maximum = 100;
+            this.trkInvA13Pan.Minimum = -100;
+            this.trkInvA13Pan.MinimumSize = new System.Drawing.Size(206, 0);
+            this.trkInvA13Pan.Name = "trkInvA13Pan";
+            this.trkInvA13Pan.Size = new System.Drawing.Size(232, 48);
+            this.trkInvA13Pan.TabIndex = 23;
+            this.trkInvA13Pan.Text = "/A13";
+            this.trkInvA13Pan.Value = 50;
+            // 
+            // trkInvOE1Pan
+            // 
+            this.trkInvOE1Pan.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.trkInvOE1Pan.Location = new System.Drawing.Point(231, 288);
+            this.trkInvOE1Pan.Margin = new System.Windows.Forms.Padding(0);
+            this.trkInvOE1Pan.Maximum = 100;
+            this.trkInvOE1Pan.Minimum = -100;
+            this.trkInvOE1Pan.MinimumSize = new System.Drawing.Size(206, 0);
+            this.trkInvOE1Pan.Name = "trkInvOE1Pan";
+            this.trkInvOE1Pan.Size = new System.Drawing.Size(232, 48);
+            this.trkInvOE1Pan.TabIndex = 24;
+            this.trkInvOE1Pan.Text = "/OE1";
+            this.trkInvOE1Pan.Value = 50;
             // 
             // tpgEqualizer
             // 
@@ -1020,7 +1086,7 @@ namespace Mesen.GUI.Forms.Config
             this.tpgEqualizer.Location = new System.Drawing.Point(4, 22);
             this.tpgEqualizer.Name = "tpgEqualizer";
             this.tpgEqualizer.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgEqualizer.Size = new System.Drawing.Size(469, 363);
+            this.tpgEqualizer.Size = new System.Drawing.Size(469, 395);
             this.tpgEqualizer.TabIndex = 5;
             this.tpgEqualizer.Text = "Equalizer";
             this.tpgEqualizer.UseVisualStyleBackColor = true;
@@ -1032,7 +1098,7 @@ namespace Mesen.GUI.Forms.Config
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(463, 357);
+            this.groupBox1.Size = new System.Drawing.Size(463, 389);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             // 
@@ -1092,7 +1158,7 @@ namespace Mesen.GUI.Forms.Config
             this.tlpEqualizer.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpEqualizer.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpEqualizer.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpEqualizer.Size = new System.Drawing.Size(457, 338);
+            this.tlpEqualizer.Size = new System.Drawing.Size(457, 370);
             this.tlpEqualizer.TabIndex = 3;
             // 
             // trkBand6Gain
@@ -1491,7 +1557,7 @@ namespace Mesen.GUI.Forms.Config
             this.tpgEffects.Location = new System.Drawing.Point(4, 22);
             this.tpgEffects.Name = "tpgEffects";
             this.tpgEffects.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgEffects.Size = new System.Drawing.Size(469, 363);
+            this.tpgEffects.Size = new System.Drawing.Size(469, 401);
             this.tpgEffects.TabIndex = 3;
             this.tpgEffects.Text = "Effects";
             this.tpgEffects.UseVisualStyleBackColor = true;
@@ -1511,7 +1577,7 @@ namespace Mesen.GUI.Forms.Config
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(463, 357);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(463, 395);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // grpStereo
@@ -1520,7 +1586,7 @@ namespace Mesen.GUI.Forms.Config
             this.grpStereo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpStereo.Location = new System.Drawing.Point(3, 3);
             this.grpStereo.Name = "grpStereo";
-            this.grpStereo.Size = new System.Drawing.Size(457, 115);
+            this.grpStereo.Size = new System.Drawing.Size(457, 125);
             this.grpStereo.TabIndex = 0;
             this.grpStereo.TabStop = false;
             this.grpStereo.Text = "Stereo";
@@ -1549,7 +1615,7 @@ namespace Mesen.GUI.Forms.Config
             this.tlpStereoFilter.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpStereoFilter.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpStereoFilter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpStereoFilter.Size = new System.Drawing.Size(451, 96);
+            this.tlpStereoFilter.Size = new System.Drawing.Size(451, 106);
             this.tlpStereoFilter.TabIndex = 0;
             // 
             // radStereoCombFilter
@@ -1824,7 +1890,7 @@ namespace Mesen.GUI.Forms.Config
             // 
             this.grpReverb.Controls.Add(this.tableLayoutPanel5);
             this.grpReverb.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpReverb.Location = new System.Drawing.Point(3, 124);
+            this.grpReverb.Location = new System.Drawing.Point(3, 134);
             this.grpReverb.Name = "grpReverb";
             this.grpReverb.Size = new System.Drawing.Size(457, 106);
             this.grpReverb.TabIndex = 1;
@@ -1910,7 +1976,7 @@ namespace Mesen.GUI.Forms.Config
             this.flowLayoutPanel5.Controls.Add(this.nudCrossFeedRatio);
             this.flowLayoutPanel5.Controls.Add(this.lblCrossFeedRatio);
             this.flowLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel5.Location = new System.Drawing.Point(6, 233);
+            this.flowLayoutPanel5.Location = new System.Drawing.Point(6, 243);
             this.flowLayoutPanel5.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
             this.flowLayoutPanel5.Name = "flowLayoutPanel5";
             this.flowLayoutPanel5.Size = new System.Drawing.Size(457, 25);
@@ -1977,7 +2043,7 @@ namespace Mesen.GUI.Forms.Config
             this.tpgAdvanced.Location = new System.Drawing.Point(4, 22);
             this.tpgAdvanced.Name = "tpgAdvanced";
             this.tpgAdvanced.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgAdvanced.Size = new System.Drawing.Size(469, 363);
+            this.tpgAdvanced.Size = new System.Drawing.Size(469, 401);
             this.tpgAdvanced.TabIndex = 2;
             this.tpgAdvanced.Text = "Advanced";
             this.tpgAdvanced.UseVisualStyleBackColor = true;
@@ -1997,23 +2063,23 @@ namespace Mesen.GUI.Forms.Config
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 7;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(463, 357);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(463, 395);
             this.tableLayoutPanel3.TabIndex = 1;
             // 
             // chkDisableDynamicSampleRate
             // 
             this.chkDisableDynamicSampleRate.Checked = false;
             this.chkDisableDynamicSampleRate.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chkDisableDynamicSampleRate.Location = new System.Drawing.Point(0, 48);
+            this.chkDisableDynamicSampleRate.Location = new System.Drawing.Point(0, 60);
             this.chkDisableDynamicSampleRate.Name = "chkDisableDynamicSampleRate";
-            this.chkDisableDynamicSampleRate.Size = new System.Drawing.Size(463, 24);
+            this.chkDisableDynamicSampleRate.Size = new System.Drawing.Size(463, 30);
             this.chkDisableDynamicSampleRate.TabIndex = 4;
             this.chkDisableDynamicSampleRate.Text = "Disable dynamic sample rate";
             // 
@@ -2021,9 +2087,9 @@ namespace Mesen.GUI.Forms.Config
             // 
             this.chkDisableNoiseModeFlag.Checked = false;
             this.chkDisableNoiseModeFlag.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chkDisableNoiseModeFlag.Location = new System.Drawing.Point(0, 96);
+            this.chkDisableNoiseModeFlag.Location = new System.Drawing.Point(0, 120);
             this.chkDisableNoiseModeFlag.Name = "chkDisableNoiseModeFlag";
-            this.chkDisableNoiseModeFlag.Size = new System.Drawing.Size(463, 24);
+            this.chkDisableNoiseModeFlag.Size = new System.Drawing.Size(463, 30);
             this.chkDisableNoiseModeFlag.TabIndex = 3;
             this.chkDisableNoiseModeFlag.Text = "Disable noise channel mode flag";
             // 
@@ -2037,7 +2103,7 @@ namespace Mesen.GUI.Forms.Config
             0,
             0});
             this.nudEPSMClockFrequency.IsHex = false;
-            this.nudEPSMClockFrequency.Location = new System.Drawing.Point(3, 147);
+            this.nudEPSMClockFrequency.Location = new System.Drawing.Point(3, 183);
             this.nudEPSMClockFrequency.Maximum = new decimal(new int[] {
             32000000,
             0,
@@ -2063,9 +2129,9 @@ namespace Mesen.GUI.Forms.Config
             // 
             this.lblEPSMClockFrequency.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblEPSMClockFrequency.AutoSize = true;
-            this.lblEPSMClockFrequency.Location = new System.Drawing.Point(3, 125);
+            this.lblEPSMClockFrequency.Location = new System.Drawing.Point(3, 158);
             this.lblEPSMClockFrequency.Name = "lblEPSMClockFrequency";
-            this.lblEPSMClockFrequency.Size = new System.Drawing.Size(228, 13);
+            this.lblEPSMClockFrequency.Size = new System.Drawing.Size(229, 13);
             this.lblEPSMClockFrequency.TabIndex = 3;
             this.lblEPSMClockFrequency.Text = "EPSM Clock Frequency (default is 3579545Hz)";
             // 
@@ -2082,9 +2148,9 @@ namespace Mesen.GUI.Forms.Config
             // 
             this.chkSwapDutyCycles.Checked = false;
             this.chkSwapDutyCycles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chkSwapDutyCycles.Location = new System.Drawing.Point(0, 72);
+            this.chkSwapDutyCycles.Location = new System.Drawing.Point(0, 90);
             this.chkSwapDutyCycles.Name = "chkSwapDutyCycles";
-            this.chkSwapDutyCycles.Size = new System.Drawing.Size(463, 24);
+            this.chkSwapDutyCycles.Size = new System.Drawing.Size(463, 30);
             this.chkSwapDutyCycles.TabIndex = 0;
             this.chkSwapDutyCycles.Text = "Swap square channels duty cycles (Mimics old clones)";
             // 
@@ -2092,7 +2158,7 @@ namespace Mesen.GUI.Forms.Config
             // 
             this.chkReduceDmcPopping.AutoSize = true;
             this.chkReduceDmcPopping.CheckAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.chkReduceDmcPopping.Location = new System.Drawing.Point(3, 27);
+            this.chkReduceDmcPopping.Location = new System.Drawing.Point(3, 33);
             this.chkReduceDmcPopping.Name = "chkReduceDmcPopping";
             this.chkReduceDmcPopping.Size = new System.Drawing.Size(243, 17);
             this.chkReduceDmcPopping.TabIndex = 2;
@@ -2104,8 +2170,9 @@ namespace Mesen.GUI.Forms.Config
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(477, 450);
+            this.ClientSize = new System.Drawing.Size(477, 456);
             this.Controls.Add(this.tabMain);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -2286,5 +2353,9 @@ namespace Mesen.GUI.Forms.Config
 		private System.Windows.Forms.Label lblStereoCombFilterDelay;
 		private System.Windows.Forms.Label lblStereoCombFilterStrength;
 		private System.Windows.Forms.Label lblCombFilterPercent;
-	}
+	  private ctrlTrackbar trkInvA13Vol;
+	  private ctrlTrackbar trkInvOE1Vol;
+	  private ctrlHorizontalTrackbar trkInvOE1Pan;
+	  private ctrlHorizontalTrackbar trkInvA13Pan;
+   }
 }
