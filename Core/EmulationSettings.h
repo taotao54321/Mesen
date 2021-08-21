@@ -1337,8 +1337,10 @@ public:
 		case NesModel::Dendy:
 			return _exclusiveRefreshRate2;
 			break;
+		default:
+			return _exclusiveRefreshRate;
+			break;
 		}
-		return _exclusiveRefreshRate;
 	}
 
 	void SetExpansionDevice(ExpansionPortDevice expansionDevice)
