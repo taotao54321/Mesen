@@ -5,7 +5,7 @@
 #include "BaseExpansionAudio.h"
 #include "SSGAudio.h"
 #include "Console.h"
-#include "Cpu.h"
+#include "CPU.h"
 
 #include <array>
 #include "ym3438.h"
