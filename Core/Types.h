@@ -30,6 +30,7 @@ enum class IRQSource
 	FrameCounter = 2,
 	DMC = 4,
 	FdsDisk = 8,
+	EPSM = 16,
 };
 
 enum class MemoryOperation
