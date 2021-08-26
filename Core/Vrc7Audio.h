@@ -41,7 +41,6 @@ private:
 
 	void UpdateOutputLevel()
 	{
-		int16_t summedOutput = 0;
 		_console->GetApu()->AddExpansionAudioDelta(AudioChannel::VRC7, _currentOutput - _lastOutput);
 		_lastOutput = _currentOutput;
 	}
