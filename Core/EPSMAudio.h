@@ -86,12 +86,12 @@ private:
 	void WriteToChipIRQ(uint16_t addr, uint8_t value)
 	{
 		switch (addr) {
-		case 0xC000:
-		case 0xC002:
+		case 0x0:
+		case 0x2:
 			currentRegister = value;
 			break;
 
-		case 0xE000:
+		case 0x1:
 			if (currentRegister == 0x24) {
 				//Timer A High 8 bits
 				//std::cout << "Timer A High 8 bits" << std::endl;
@@ -135,7 +135,7 @@ private:
 				//std::cout << "enable IRQ's" << std::endl;
 			}
 			break;
-		case 0xE002:
+		case 0x3:
 			/*if (currentRegister == 0x10) {
 				std::cout << "0x10" << std::endl;
 			}*/
@@ -173,11 +173,9 @@ protected:
 		_clockIRQ += (getClockFrequency()*6) / (double)_console->GetCpu()->GetClockRate(_console->GetModel());
 		while (_clockIRQ >= _cycleCountIRQ) {
 			_cycleCountIRQ++;
-			//std::cout << _cycleCountIRQ << std::endl;
 			if (irqATimerEnable) {
 				irqACurrentTimer--;
 				if (!irqACurrentTimer) {
-					//std::cout << "***IRQ***" << std::endl;
 					irqATimerEnable = 0;
 					_console->GetCpu()->SetIrqSource(IRQSource::EPSM);
 				}
@@ -186,7 +184,6 @@ protected:
 			if (irqBTimerEnable) {
 				irqBCurrentTimer--;
 				if (!irqBCurrentTimer) {
-					//std::cout << "***IRQ***" << std::endl;
 					irqBTimerEnable = 0;
 					_console->GetCpu()->SetIrqSource(IRQSource::EPSM);
 				}
@@ -252,52 +249,51 @@ public:
 		OPN2_SetChipType(0);
 	}
 
-	void WriteRegister(uint16_t addr, uint8_t value)
+	void WriteRegister(uint16_t addr, uint8_t value, uint8_t custom = 0, uint8_t epsmA0 = 0, uint8_t epsmA1 = 0)
 	{
+		if (!custom) {
+			switch (addr) {
+			case 0x4016:
+				if ((value & 0x0F) == 0x02) {writeAddr = 0x0;} //A0 = 0, A1 = 0
+				if ((value & 0x0F) == 0x0A) {writeAddr = 0x1;} //A0 = 1, A1 = 0
+				if ((value & 0x0F) == 0x06) {writeAddr = 0x2;} //A0 = 0, A1 = 1
+				if ((value & 0x0F) == 0x0E) {writeAddr = 0x3;} //A0 = 1, A1 = 1
+				if (value & 0x0E) {writeValue = value;}
+				if ((value & 0x0F) == 0x00) {
+					writeValue = (writeValue & 0xF0) | (value >> 4);
 
-		if (addr == 0x4016) {
-			if ((value & 0x0F) == 0x02) {
-				writeValue = value;
-				writeAddr = 0xC000;
-			}
-			if ((value & 0x0F) == 0x0A) {
-				writeValue = value;
-				writeAddr = 0xE000;
-			}
-			if ((value & 0x0F) == 0x06) {
-				writeValue = value;
-				writeAddr = 0xC002;
-			}
-			if ((value & 0x0F) == 0x0E) {
-				writeValue = value;
-				writeAddr = 0xE002;
-			}
-			if ((value & 0x0F) == 0x00) {
-				writeValue = (writeValue & 0xF0) | (value >> 4);
-
-				const uint8_t a04016 = (writeAddr & 0xF000) == 0xE000;
-				const uint8_t a14016 = !!(writeAddr & 0xF);
-				EPSMSSGAudio::WriteRegister(writeAddr, writeValue);
-				WriteToChip(a04016 | (a14016 << 1), writeValue);
-			}
-		}
-		if (addr == 0x401c) { addr = 0xC000; }
-		if (addr == 0x401d) { addr = 0xE000; }
-		if (addr == 0x401e) { addr = 0xC002; }
-		if (addr == 0x401f) { addr = 0xE002; }
-		switch(addr) {
-			case 0xC000:
-			case 0xE000:
-			case 0xC002:
-			case 0xE002:
-
-				WriteToChipIRQ(addr, value);
-				const uint8_t a0 = (addr & 0xF000) == 0xE000;
-				const uint8_t a1 = !!(addr & 0xF);
-				EPSMSSGAudio::WriteRegister(addr, value);
+					const uint8_t a0 = !!(writeAddr & 0x1);
+					const uint8_t a1 = !!(writeAddr & 0x2);
+					if (a0 == 0x0) { writeAddr = 0xC000; }
+					if (a0 == 0x1) { writeAddr = 0xE000; }
+					if (a1 == 0x0) { EPSMSSGAudio::WriteRegister(writeAddr, value); }
+					WriteToChip(a0 | (a1 << 1), writeValue);
+					WriteToChipIRQ(a0 | (a1 << 1), value);
+				}
+				break;
+			case 0x401c: //0xC000 A0 = 0, A1 = 0
+			case 0x401d: //0xE000 A0 = 1, A1 = 0
+			case 0x401e: //0xC002 A0 = 0, A1 = 1
+			case 0x401f: //0xE002 A0 = 1, A1 = 1
+				
+				const uint8_t a0 = !!(addr & 0x1); //const uint8_t a0 = (addr & 0xF000) == 0xE000;
+				const uint8_t a1 = !!(addr & 0x2); //const uint8_t a1 = !!(addr & 0xF);
+				if (a0 == 0x0) { addr = 0xC000; }
+				if (a0 == 0x1) { addr = 0xE000; }
+				if (a1 == 0x0) { EPSMSSGAudio::WriteRegister(addr, value); }
 				WriteToChip(a0 | (a1 << 1), value);
+				WriteToChipIRQ(a0 | (a1 << 1), value);
 
 				break;
+			}
 		}
+		else{
+			if (epsmA0 == 0x0) { addr = 0xC000; }
+			if (epsmA0 == 0x1) { addr = 0xE000; }
+			if (epsmA1 == 0x0) { EPSMSSGAudio::WriteRegister(addr, value); }
+			WriteToChip(epsmA0 | (epsmA1 << 1), value);
+			WriteToChipIRQ(epsmA0 | (epsmA1 << 1), value);
+		}
+
 	}
 };
