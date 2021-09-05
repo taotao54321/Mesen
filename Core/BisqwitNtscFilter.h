@@ -20,6 +20,7 @@ private:
 	atomic<bool> _workDone;
 
 	bool _keepVerticalRes = false;
+	bool _SMPTE_C = false;
 
 	int _resDivider = 1;
 	uint16_t *_ppuOutputBuffer = nullptr;
@@ -33,8 +34,8 @@ private:
 	*/
 	int _yWidth, _iWidth, _qWidth;
 	int _y;
-	int _ir, _ig, _ib;
-	int _qr, _qg, _qb;
+	int _ir, _ig, _ib, _irC, _igC, _ibC;
+	int _qr, _qg, _qb, _qrC, _qgC, _qbC;
 
 	//To finetune hue, you would have to recalculate sinetable[]. (Coarse changes can be made with Phase0.)
 	int8_t _sinetable[27]; // 8*sin(x*2pi/12)

@@ -89,6 +89,7 @@ void BisqwitNtscFilter::OnBeforeApplyFilter()
 	NtscFilterSettings ntscSettings = _console->GetSettings()->GetNtscFilterSettings();
 
 	_keepVerticalRes = ntscSettings.KeepVerticalResolution;
+	//_SMPTE_C = ntscSettings.NtscSmpteC;
 
 	const double pi = std::atan(1.0) * 4;
 	int contrast = (int)((pictureSettings.Contrast + 1.0) * (pictureSettings.Contrast + 1.0) * 167941);
@@ -103,14 +104,30 @@ void BisqwitNtscFilter::OnBeforeApplyFilter()
 
 	_y = contrast / _yWidth;
 
-	_ir = (int)(contrast * 1.994681e-6 * saturation / _iWidth);
-	_qr = (int)(contrast * 9.915742e-7 * saturation / _qWidth);
+		// magic numbers is corresponding values from the YIQ to RGB formula
+		// but divided by 13,995 * [arbitrary value]
+/*
+		_ir = (int)(( 0.95599 / (13995 *  34.2457747)) * contrast * saturation / _iWidth);
+		_ig = (int)((-0.27201 / (13995 * 212.3864250)) * contrast * saturation / _iWidth);
+		_ib = (int)((-1.10674 / (13995 *  78.0674723)) * contrast * saturation / _iWidth);
+		_qr = (int)(( 0.62082 / (13995 *  44.7370743)) * contrast * saturation / _qWidth);
+		_qg = (int)((-0.64720 / (13995 *  73.0015960)) * contrast * saturation / _qWidth);
+		_qb = (int)(( 1.70423 / (13995 *  73.0404051)) * contrast * saturation / _qWidth);
+*/
+		_ir = (int)(contrast * 1.994681e-6 * saturation / _iWidth);
+		_ig = (int)(contrast * 9.151351e-8 * saturation / _iWidth);
+		_ib = (int)(contrast * -1.012984e-6 * saturation / _iWidth);
+		_qr = (int)(contrast * 9.915742e-7 * saturation / _qWidth);
+		_qg = (int)(contrast * -6.334805e-7 * saturation / _qWidth);
+		_qb = (int)(contrast * 1.667217e-6 * saturation / _qWidth);
 
-	_ig = (int)(contrast * 9.151351e-8 * saturation / _iWidth);
-	_qg = (int)(contrast * -6.334805e-7 * saturation / _qWidth);
-
-	_ib = (int)(contrast * -1.012984e-6 * saturation / _iWidth);
-	_qb = (int)(contrast * 1.667217e-6 * saturation / _qWidth);
+		// alternate values based on the SMPTE C color primaries
+		_irC = (int)((0.95599  / (13995 * 80)) * contrast * saturation / _iWidth);
+		_igC = (int)((-0.27201 / (13995 * 80)) * contrast * saturation / _iWidth);
+		_ibC = (int)((-1.10674 / (13995 * 80)) * contrast * saturation / _iWidth);
+		_qrC = (int)((0.62082  / (13995 * 80)) * contrast * saturation / _qWidth);
+		_qgC = (int)((-0.64720 / (13995 * 80)) * contrast * saturation / _qWidth);
+		_qbC = (int)((1.70423  / (13995 * 80)) * contrast * saturation / _qWidth);
 }
 
 void BisqwitNtscFilter::RecursiveBlend(int iterationCount, uint64_t *output, uint64_t *currentLine, uint64_t *nextLine, int pixelsPerCycle, bool verticalBlend)
@@ -282,9 +299,9 @@ void BisqwitNtscFilter::NtscDecodeLine(int width, const int8_t* signal, uint32_t
 		qsum += Read(s) * Sin(s) - Read(s - _qWidth) * Sin(s - _qWidth);
 
 		if(!(s % _resDivider) && s >= leftOverscan) {
-			int r = std::min(255, std::max(0, (ysum*_y + isum*_ir + qsum*_qr) / 65536));
-			int g = std::min(255, std::max(0, (ysum*_y + isum*_ig + qsum*_qg) / 65536));
-			int b = std::min(255, std::max(0, (ysum*_y + isum*_ib + qsum*_qb) / 65536));
+			int r = std::min(255, std::max(0, (ysum*_y + isum*_irC + qsum*_qrC) / 65536));
+			int g = std::min(255, std::max(0, (ysum*_y + isum*_igC + qsum*_qgC) / 65536));
+			int b = std::min(255, std::max(0, (ysum*_y + isum*_ibC + qsum*_qbC) / 65536));
 
 			*target = 0xFF000000 | (r << 16) | (g << 8) | b;
 			target++;
