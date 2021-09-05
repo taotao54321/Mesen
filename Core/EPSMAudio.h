@@ -30,6 +30,7 @@ private:
 	uint8_t irqAHighValue;
 	uint8_t irqALowValue;
 	uint8_t irqBValue;
+	uint8_t irqEnable;
 	uint16_t currentRegister;
 
 
@@ -92,47 +93,59 @@ private:
 			break;
 
 		case 0x1:
-			if (currentRegister == 0x24) {
-				//Timer A High 8 bits
-				//std::cout << "Timer A High 8 bits" << std::endl;
-				irqAHighValue = value;
-			}
-			if (currentRegister == 0x25) {
-				//Timer A Low 2 bits
-				//std::cout << "Timer A Low 2 bits" << std::endl;
-				irqALowValue = (value & 0x3);
-			}
-			if (currentRegister == 0x26) {
-				//Timer B 8 bits
-				//std::cout << "Timer B 8 bits" << std::endl;
-				irqBValue = value;
-			}
-			if ((currentRegister == 0x27) && ((value & 0x5)|(value & 0xA))) {
-				//Load+Enable IRQ (0xA = TimerB, 0x5 = TimerA)
-				//std::cout << "Load+Enable IRQ" << std::endl;
-				if ((currentRegister == 0x27) && (value & 0x5)) {
-					irqATimer = (uint16_t(irqAHighValue) << 2) | irqALowValue;
-					irqACurrentTimer = 72 * (1024 - irqATimer) * 2;
-					irqATimerEnable = 1;
-					//std::cout << "Load+Enable IRQ A" << std::endl;
+			if (irqEnable) {
+				if (currentRegister == 0x24) {
+					//Timer A High 8 bits
+					irqAHighValue = value;
 				}
-				if ((currentRegister == 0x27) && (value & 0xA)) {
-					irqBTimer = 1152 * (256 - irqBValue) * 2;
-					irqBCurrentTimer = irqBTimer;
-					irqBTimerEnable = 1;
-					//std::cout << "Load+Enable IRQ B " << irqBCurrentTimer << std::endl;
+				if (currentRegister == 0x25) {
+					//Timer A Low 2 bits
+					irqALowValue = (value & 0x3);
+				}
+				if (currentRegister == 0x26) {
+					//Timer B 8 bits
+					irqBValue = value;
+				}
+				if (currentRegister == 0x27) {
+					//Load+Enable IRQ (0xA = TimerB, 0x5 = TimerA)
+					if ((value & 0x5)) {
+						irqATimer = (uint16_t(irqAHighValue) << 2) | irqALowValue;
+						irqACurrentTimer = 72 * (1024 - irqATimer) * 2;
+						irqATimerEnable = 1;
+					}
+					if ((value & 0xA)) {
+						irqBTimer = 1152 * (256 - irqBValue) * 2;
+						irqBCurrentTimer = irqBTimer;
+						irqBTimerEnable = 1;
+					}
+					if ((value & 0x10)) {
+						//Enable/Reset IRQ
+						_console->GetCpu()->ClearIrqSource(IRQSource::EPSM);
+						irqATimerEnable = 0;
+					}
+					if ((value & 0x20)) {
+						//Enable/Reset IRQ
+						_console->GetCpu()->ClearIrqSource(IRQSource::EPSM);
+						irqBTimerEnable = 0;
+					}
 				}
 			}
-			if ((currentRegister == 0x27) && (value & 0x30)) {
-				//Enable/Reset IRQ
-				//std::cout << std::hex << uint16_t(value) << "Reset IRQ" << std::endl;
-				_console->GetCpu()->ClearIrqSource(IRQSource::EPSM);
-				irqATimerEnable = 0;
-				irqBTimerEnable = 0;
-			}
-			if ((currentRegister == 0x29) && (value & 0x3)) {
-				//enable IRQ's
-				//std::cout << "enable IRQ's" << std::endl;
+			if ((currentRegister == 0x29)) {
+				//std::cout << std::hex << "value: " << value << std::endl;
+				if ((value & 0x3 && (value & 0x80))) {
+				//if ((value & 0x3 )) {
+					//enable IRQ's
+					//std::cout << "enable IRQ's" << std::endl;
+					irqEnable = 1;
+				}
+				if (!(value & 0x83)) {
+					//enable IRQ's
+					//std::cout << "enable IRQ's" << std::endl;
+					irqEnable = 0;
+					_console->GetCpu()->ClearIrqSource(IRQSource::EPSM);
+					irqATimerEnable = 0;
+					irqBTimerEnable = 0;
+				}
 			}
 			break;
 		case 0x3:
@@ -141,10 +154,6 @@ private:
 			}*/
 			break;
 		}
-	
-		//irqBValue = value;
-		//std::cout << std::hex << irqBValue << std::endl;
-
 	}
 
 	uint32_t getClockFrequency()
@@ -170,13 +179,13 @@ protected:
 		EPSMSSGAudio::ClockAudio();
 
 		_clock += getClockFrequency() / (double)_console->GetCpu()->GetClockRate(_console->GetModel());
-		_clockIRQ += (getClockFrequency()*6) / (double)_console->GetCpu()->GetClockRate(_console->GetModel());
+		_clockIRQ += _console->GetSettings()->GetEPSMClockFrequency() / (double)_console->GetCpu()->GetClockRate(_console->GetModel());
 		while (_clockIRQ >= _cycleCountIRQ) {
 			_cycleCountIRQ++;
 			if (irqATimerEnable) {
 				irqACurrentTimer--;
 				if (!irqACurrentTimer) {
-					irqATimerEnable = 0;
+					irqACurrentTimer++;
 					_console->GetCpu()->SetIrqSource(IRQSource::EPSM);
 				}
 
@@ -184,7 +193,7 @@ protected:
 			if (irqBTimerEnable) {
 				irqBCurrentTimer--;
 				if (!irqBCurrentTimer) {
-					irqBTimerEnable = 0;
+					irqBCurrentTimer++;
 					_console->GetCpu()->SetIrqSource(IRQSource::EPSM);
 				}
 
@@ -242,6 +251,7 @@ public:
 
 		_clock = 0;
 		_clockIRQ = 0;
+		irqEnable = 0;
 
 		irqATimerEnable = 0;
 		irqBTimerEnable = 0;
