@@ -14,7 +14,7 @@
 #include "CPU.h"
 
 void BaseMapper::WriteRegister(uint16_t addr, uint8_t value) { }
-void BaseMapper::WriteEPSM(uint16_t addr, uint8_t value) { _epsmaudio->WriteRegister(addr, value); }
+void BaseMapper::WriteEPSM(uint16_t addr, uint8_t value) {_epsmaudio->WriteRegister(addr, value); }
 uint8_t BaseMapper::ReadRegister(uint16_t addr) { return 0; }
 void BaseMapper::InitMapper(RomData &romData) { }
 void BaseMapper::Reset(bool softReset) { }
@@ -787,7 +787,7 @@ uint8_t BaseMapper::DebugReadRAM(uint16_t addr)
 void BaseMapper::WriteRAM(uint16_t addr, uint8_t value)
 {
 	if((addr == 0x4016) & (_console->GetCpu()->GetCycleCount() % 2 == 1)){ WriteEPSM(addr, value); }
-	if ((addr >= 0x401c && addr <= 0x401f)) { WriteEPSM(addr, value); }
+	if ((addr >= 0x401c && addr <= 0x401f)) {WriteEPSM(addr, value); }
 	if(_isWriteRegisterAddr[addr]) {
 		if(_hasBusConflicts) {
 			uint8_t prgValue = _prgPages[addr >> 8][(uint8_t)addr];
