@@ -211,7 +211,7 @@ protected:
 			{
 				_clock--;
 
-				int16_t samples[2];
+				int16_t samples[4];
 				OPN2_Clock(&_chip, samples);
 
 				for (uint8_t x = 0; x < 2; x++)
