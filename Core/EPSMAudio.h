@@ -276,9 +276,9 @@ public:
 					const uint8_t a1 = !!(writeAddr & 0x2);
 					if (a0 == 0x0) { writeAddr = 0xC000; }
 					if (a0 == 0x1) { writeAddr = 0xE000; }
-					if (a1 == 0x0) { EPSMSSGAudio::WriteRegister(writeAddr, value); }
+					if (a1 == 0x0) { EPSMSSGAudio::WriteRegister(writeAddr, writeValue); }
 					WriteToChip(a0 | (a1 << 1), writeValue);
-					WriteToChipIRQ(a0 | (a1 << 1), value);
+					WriteToChipIRQ(a0 | (a1 << 1), writeValue);
 				}
 				break;
 			case 0x401c: //0xC000 A0 = 0, A1 = 0
