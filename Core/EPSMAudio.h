@@ -130,7 +130,7 @@ private:
 					}
 				}
 			}
-			if ((currentRegister == 0x29)) {
+			if (currentRegister == 0x29) {
 				//std::cout << std::hex << "value: " << value << std::endl;
 				if ((value & 0x3 && (value & 0x80))) {
 				//if ((value & 0x3 )) {
