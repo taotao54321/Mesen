@@ -533,6 +533,7 @@ namespace Mesen.GUI.Debugger
 			new List<string> {"func","emu.getState","emu.getState()","","* Table* Current emulation state","Return a table containing information about the state of the CPU, PPU, APU and cartridge."},
 			new List<string> {"func","emu.setState","emu.setState(state)","state - *Table* A table containing the state of the emulation to apply.","","Updates the CPU and PPU's state.\nThe* state* parameter must be a table in the same format as the one returned by getState()\nNote: the state of the APU or cartridge cannot be modified by using setState()." },
 			new List<string> {"func","emu.breakExecution","emu.breakExecution()","","","Breaks the execution of the game and displays the debugger window."},
+			new List<string> {"func","emu.stop","emu.stop()","","","Stops execution of the game."},
 			new List<string> {"func","emu.execute","emu.execute(count, type)","count - *Integer* The number of cycles or instructions to run before breaking\ntype - *Enum* See executeCountType","","Runs the emulator for the specified number of cycles/instructions and then breaks the execution."},
 			new List<string> {"func","emu.reset","emu.reset()","","","Resets the current game."},
 			new List<string> {"func","emu.resume","emu.resume()","","","Resumes execution after breaking."},
