@@ -203,6 +203,7 @@ enum class EventType
 	SpriteZeroHit = 9,
 	ScriptEnded = 10,
 	BusConflict = 11,
+	WhilePaused = 12,
 	EventTypeSize
 };
 
