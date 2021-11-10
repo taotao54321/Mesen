@@ -466,7 +466,7 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 void PPU::GetInvA13()
 {
 	// pull level high when PPU/VRAM addr bit 13 is low
-	_A13pinLowSum += (bool)(_ppuBusAddress & 0x2000); // invert relative to 2A03
+	_A13pinLow = (_ppuBusAddress & 0x2000) ? 0 : 1;
 }
 
 uint8_t PPU::ReadPaletteRAM(uint16_t addr)

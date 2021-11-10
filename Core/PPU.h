@@ -180,7 +180,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		static constexpr int32_t OutputBufferSize = 256*240*2;
 		static constexpr int32_t OamDecayCycleCount = 3000;
 		
-		uint8_t _A13pinLowSum;
+		uint8_t _A13pinLow;
 
 		PPU(shared_ptr<Console> console);
 		virtual ~PPU();

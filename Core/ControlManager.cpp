@@ -351,12 +351,11 @@ void ControlManager::WriteRAM(uint16_t addr, uint8_t value)
 	}
 }
 
-bool ControlManager::GetInvOE1(uint16_t addr)
+void ControlManager::GetInvOE1(uint16_t addr)
 {
 	// pull low for only one clock
 	if (addr == 0x4016)
-		_OE1pinLow = !_strobed;
-	return _OE1pinLow;
+		_OE1pinLow = (_strobed) ? 0 : 1;
 }
 
 void ControlManager::Reset(bool softReset)
