@@ -117,9 +117,6 @@ public:
 	void Init();
 	void Release(bool forShutdown);
 
-	uint8_t _InvA13;
-	uint8_t _InvOE1;
-
 	shared_ptr<BatteryManager> GetBatteryManager();
 	shared_ptr<SaveStateManager> GetSaveStateManager();
 	shared_ptr<VideoDecoder> GetVideoDecoder();
@@ -134,7 +131,6 @@ public:
 	bool IsMaster();
 
 	void ProcessCpuClock();
-	void ProcessInterferenceAudio();
 	CPU* GetCpu();
 	PPU* GetPpu();
 	APU* GetApu();

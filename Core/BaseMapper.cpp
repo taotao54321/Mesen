@@ -511,10 +511,8 @@ void BaseMapper::StreamState(bool saving)
 	ArrayInfo<MemoryAccessType> prgMemoryAccess = { _prgMemoryAccess, 0x100 };
 	ArrayInfo<MemoryAccessType> chrMemoryAccess = { _chrMemoryAccess, 0x40 };
 	SnapshotInfo epsmaudio{ _epsmaudio.get() };
-	SnapshotInfo invA13Audio{ _invA13Audio.get() };
-	SnapshotInfo invOE1Audio{ _invOE1Audio.get() };
 
-	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess, epsmaudio, invA13Audio, invOE1Audio);
+	Stream(_mirroringType, chrRam, workRam, saveRam, nametableRam, prgMemoryOffset, chrMemoryOffset, prgMemoryType, chrMemoryType, prgMemoryAccess, chrMemoryAccess, epsmaudio);
 
 	if(!saving) {
 		RestorePrgChrState();
@@ -642,8 +640,6 @@ void BaseMapper::Initialize(RomData &romData)
 	InitMapper();
 	InitMapper(romData);
 	_epsmaudio.reset(new EPSMAudio(_console));
-	_invA13Audio.reset(new InvA13Audio(_console));
-	_invOE1Audio.reset(new InvOE1Audio(_console));
 
 	//Load battery data if present
 	LoadBattery();
