@@ -536,7 +536,7 @@ namespace Mesen.GUI.Debugger
 			new List<string> {"func","emu.stop","emu.stop()","","","Stops execution of the game."},
 			new List<string> {"func","emu.execute","emu.execute(count, type)","count - *Integer* The number of cycles or instructions to run before breaking\ntype - *Enum* See executeCountType","","Runs the emulator for the specified number of cycles/instructions and then breaks the execution."},
 			new List<string> {"func","emu.stepOver", "emu.stepOver()", "","","Step over the next instruction."},
-			new List<string> {"func","emu.stepOut", "emu.stepOver()", "","","Step out of the subroutine."},
+			new List<string> {"func","emu.stepOut", "emu.stepOut()", "","","Step out of the subroutine."},
 			new List<string> {"func","emu.reset","emu.reset()","","","Resets the current game."},
 			new List<string> {"func","emu.resume","emu.resume()","","","Resumes execution after breaking."},
 			new List<string> {"func","emu.rewind","emu.rewind(seconds)","seconds - *Integer* The number of seconds to rewind","","Instantly rewinds the emulation by the number of seconds specified.\n Note: this can only be called from within a 'StartFrame' event callback."},
