@@ -43,10 +43,6 @@ protected:
 	virtual uint8_t GetOpenBusMask(uint8_t port);
 
 public:
-	bool _OE1pinLow;
-	uint16_t _address;
-	bool _strobed;
-
 	ControlManager(shared_ptr<Console> console, shared_ptr<BaseControlDevice> systemActionManager, shared_ptr<BaseControlDevice> mapperControlDevice);
 	virtual ~ControlManager();
 
@@ -84,6 +80,4 @@ public:
 
 	virtual uint8_t ReadRAM(uint16_t addr) override;
 	virtual void WriteRAM(uint16_t addr, uint8_t value) override;
-
-	bool GetInvOE1(uint16_t addr);
 };
