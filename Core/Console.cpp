@@ -465,21 +465,9 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 void Console::ProcessCpuClock()
 {
-	ProcessInterferenceAudio();
+	_mapper->ProcessEPSMClock();
 	_mapper->ProcessCpuClock();
-	_mapper->ProcessMiscClock();
 	_apu->ProcessCpuClock();
-}
-
-void Console::ProcessInterferenceAudio()
-{
-	_InvA13 = _ppu->_A13pinLowSum;
-	_ppu->_A13pinLowSum = 0;
-
-	_InvOE1 = !_controlManager->GetInvOE1(_controlManager->_address); // invert relative to 2A03
-
-	if (_controlManager->_strobed == true)
-		_controlManager->_strobed = false;
 }
 
 CPU* Console::GetCpu()

@@ -46,8 +46,6 @@ namespace Mesen.GUI.Forms.Config
 			AddBinding("Sunsoft5bVolume", trkSunsoft5b);
 			AddBinding("EPSMVolume_L", trkEPSMVol_L);
 			AddBinding("EPSMVolume_R", trkEPSMVol_R);
-			AddBinding("InvA13Volume", trkInvA13Vol);
-			AddBinding("InvOE1Volume", trkInvOE1Vol);
 
 			AddBinding("Square1Panning", trkSquare1Pan);
 			AddBinding("Square2Panning", trkSquare2Pan);
@@ -62,8 +60,6 @@ namespace Mesen.GUI.Forms.Config
 			AddBinding("Sunsoft5bPanning", trkSunsoftPan);
 			AddBinding("EPSMPanning_L", trkEPSMPan_L);
 			AddBinding("EPSMPanning_R", trkEPSMPan_R);
-			AddBinding("InvA13Panning", trkInvA13Pan);
-			AddBinding("InvOE1Panning", trkInvOE1Pan);
 
 			AddBinding("EPSMClockFrequency", nudEPSMClockFrequency);
 

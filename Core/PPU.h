@@ -179,8 +179,6 @@ class PPU : public IMemoryHandler, public Snapshotable
 		static constexpr int32_t PixelCount = 256*240;
 		static constexpr int32_t OutputBufferSize = 256*240*2;
 		static constexpr int32_t OamDecayCycleCount = 3000;
-		
-		uint8_t _A13pinLowSum;
 
 		PPU(shared_ptr<Console> console);
 		virtual ~PPU();
@@ -213,8 +211,6 @@ class PPU : public IMemoryHandler, public Snapshotable
 		
 		void Exec();
 		__forceinline void Run(uint64_t runTo);
-
-		void GetInvA13();
 
 		uint32_t GetFrameCount()
 		{

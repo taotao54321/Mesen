@@ -168,7 +168,7 @@ protected:
 
 		ArrayInfo<int16_t> lastOutputs{ _lastOutputs, 2 };
 		ArrayInfo<int16_t> currentOutputs{ _currentOutputs, 2 };
-		ArrayInfo<InputBuffer> inputBuffer{ &_inputBuffer };
+		ArrayInfo<InputEntry> inputBuffer{ _inputBuffer.data(), INPUT_BUFFER_SIZE };
 		ValueInfo<ym3438_t> chip{ &_chip };
 		ValueInfo<double> clock { &_clock };
 		Stream(lastOutputs, currentOutputs, inputBuffer, chip, clock);
@@ -239,7 +239,7 @@ protected:
 
 	virtual uint32_t GetSSGClockFrequency() override
 	{
-		return EPSMSSGAudio::GetSSGClockFrequency() * (_console->GetSettings()->GetEPSMClockFrequency() / 3579545 );
+		return _console->GetSettings()->GetEPSMClockFrequency() / 4;
 	}
 
 public:

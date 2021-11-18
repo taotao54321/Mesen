@@ -2,7 +2,7 @@ name: "Linux build"
 on: push
 
 jobs:
-  win-build:
+  linux-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,8 +13,8 @@ jobs:
       - name: Build
         run: |
           make
-      # - name: Upload binary
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: Mesen-win
-      #     path: bin/Any CPU/Release/Mesen.exe
+      - name: Upload binary
+        uses: actions/upload-artifact@v1
+        with:
+          name: Mesen-Linux
+          path: bin/x64/Release/Mesen.exe

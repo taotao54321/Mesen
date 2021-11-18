@@ -87,6 +87,8 @@ int LuaApi::GetLibrary(lua_State *lua)
 		{ "reset", LuaApi::Reset },
 	   { "stop", LuaApi::Stop },
 		{ "breakExecution", LuaApi::Break },
+		{ "stepOver", LuaApi::StepOver },
+		{ "stepOut", LuaApi::StepOut },
 		{ "resume", LuaApi::Resume },
 		{ "execute", LuaApi::Execute },
 		{ "rewind", LuaApi::Rewind },
@@ -168,6 +170,7 @@ int LuaApi::GetLibrary(lua_State *lua)
 	lua_pushintvalue(stateSaved, EventType::StateSaved);
 	lua_pushintvalue(inputPolled, EventType::InputPolled);
 	lua_pushintvalue(scriptEnded, EventType::ScriptEnded);
+	lua_pushintvalue(whilePaused, EventType::WhilePaused);
 	lua_settable(lua, -3);
 
 	lua_pushliteral(lua, "executeCountType");
@@ -581,6 +584,24 @@ int LuaApi::Execute(lua_State *lua)
 		case ExecuteCountType::PpuCycles: _debugger->PpuStep(count); break;
 		case ExecuteCountType::CpuInstructions: _debugger->Step(count); break;
 	}
+	return l.ReturnCount();
+}
+
+int LuaApi::StepOut(lua_State* lua)
+{
+	LuaCallHelper l(lua);
+	checkparams();
+	checkinitdone();
+	_debugger->StepOut();
+	return l.ReturnCount();
+}
+
+int LuaApi::StepOver(lua_State* lua)
+{
+	LuaCallHelper l(lua);
+	checkparams();
+	checkinitdone();
+	_debugger->StepOver();
 	return l.ReturnCount();
 }
 

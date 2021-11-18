@@ -333,12 +333,10 @@ uint8_t ControlManager::ReadRAM(uint16_t addr)
 {
 	//Used for lag counter - any frame where the input is read does not count as lag
 	_isLagging = false;
-	_address = addr;
 
 	uint8_t value = _console->GetMemoryManager()->GetOpenBus(GetOpenBusMask(addr - 0x4016));
 	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
 		value |= device->ReadRAM(addr);
-		_strobed = true;
 	}
 
 	return value;
@@ -349,14 +347,6 @@ void ControlManager::WriteRAM(uint16_t addr, uint8_t value)
 	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
 		device->WriteRAM(addr, value);
 	}
-}
-
-bool ControlManager::GetInvOE1(uint16_t addr)
-{
-	// pull low for only one clock
-	if (addr == 0x4016)
-		_OE1pinLow = !_strobed;
-	return _OE1pinLow;
 }
 
 void ControlManager::Reset(bool softReset)

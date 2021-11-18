@@ -26,8 +26,6 @@ namespace Mesen.GUI.Config
 		[MinMax(0, 100)] public UInt32 Sunsoft5bVolume = 100;
 		[MinMax(0, 100)] public UInt32 EPSMVolume_L = 50;
 		[MinMax(0, 100)] public UInt32 EPSMVolume_R = 50;
-		[MinMax(0, 100)] public UInt32 InvA13Volume = 0;
-		[MinMax(0, 100)] public UInt32 InvOE1Volume = 0;
 
 		[MinMax(10000, 32000000)] public UInt32 EPSMClockFrequency = 3579545;
 
@@ -44,8 +42,6 @@ namespace Mesen.GUI.Config
 		[MinMax(-100, 100)] public Int32 Sunsoft5bPanning = 0;
 		[MinMax(-100, 100)] public Int32 EPSMPanning_L = -100;
 		[MinMax(-100, 100)] public Int32 EPSMPanning_R = 100;
-		[MinMax(-100, 100)] public Int32 InvA13Panning = 0;
-		[MinMax(-100, 100)] public Int32 InvOE1Panning = 0;
 
 		[ValidValues(11025, 22050, 44100, 48000, 96000)] public UInt32 SampleRate = 48000;
 		public bool ReduceSoundInBackground = true;
@@ -129,8 +125,6 @@ namespace Mesen.GUI.Config
 			InteropEmu.SetChannelVolume(AudioChannel.EPSM_R, ConvertVolume(audioInfo.EPSMVolume_R));
 			InteropEmu.SetChannelVolume(AudioChannel.EPSM_L, audioInfo.EnableEPSM ? AudioInfo.ConvertVolume(audioInfo.EPSMVolume_L) : 0);
 			InteropEmu.SetChannelVolume(AudioChannel.EPSM_R, audioInfo.EnableEPSM ? AudioInfo.ConvertVolume(audioInfo.EPSMVolume_R) : 0);
-			InteropEmu.SetChannelVolume(AudioChannel.InvA13, ConvertVolume(audioInfo.InvA13Volume));
-			InteropEmu.SetChannelVolume(AudioChannel.InvOE1, ConvertVolume(audioInfo.InvOE1Volume));
 
 			InteropEmu.SetChannelPanning(AudioChannel.Square1, ConvertPanning(audioInfo.Square1Panning));
 			InteropEmu.SetChannelPanning(AudioChannel.Square2, ConvertPanning(audioInfo.Square2Panning));
@@ -145,8 +139,6 @@ namespace Mesen.GUI.Config
 			InteropEmu.SetChannelPanning(AudioChannel.Sunsoft5B, ConvertPanning(audioInfo.Sunsoft5bPanning));
 			InteropEmu.SetChannelPanning(AudioChannel.EPSM_L, ConvertPanning(audioInfo.EPSMPanning_L));
 			InteropEmu.SetChannelPanning(AudioChannel.EPSM_R, ConvertPanning(audioInfo.EPSMPanning_R));
-			InteropEmu.SetChannelPanning(AudioChannel.InvA13, ConvertPanning(audioInfo.InvA13Panning));
-			InteropEmu.SetChannelPanning(AudioChannel.InvOE1, ConvertPanning(audioInfo.InvOE1Panning));
 
 			InteropEmu.SetEPSMClockFrequency(audioInfo.EPSMClockFrequency);
 
