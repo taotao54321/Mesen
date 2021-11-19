@@ -47,6 +47,7 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/DeltaModulationChannel.cpp \
                $(CORE_DIR)/Disassembler.cpp \
                $(CORE_DIR)/DisassemblyInfo.cpp \
+               $(CORE_DIR)/emu2149.cpp \
                $(CORE_DIR)/EmulationSettings.cpp \
                $(CORE_DIR)/EventManager.cpp \
                $(CORE_DIR)/ExpressionEvaluator.cpp \
@@ -83,6 +84,7 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/NsfMapper.cpp \
                $(CORE_DIR)/NsfPpu.cpp \
                $(CORE_DIR)/NtscFilter.cpp \
+               $(CORE_DIR)/opll.cpp \
                $(CORE_DIR)/OggMixer.cpp \
                $(CORE_DIR)/OggReader.cpp \
                $(CORE_DIR)/PPU.cpp \
@@ -115,6 +117,7 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/VirtualFile.cpp \
                $(CORE_DIR)/VsControlManager.cpp \
                $(CORE_DIR)/WaveRecorder.cpp \
+               $(CORE_DIR)/ym3438.cpp \
                $(UTIL_DIR)/ArchiveReader.cpp \
                $(UTIL_DIR)/AutoResetEvent.cpp \
                $(UTIL_DIR)/AviRecorder.cpp \
