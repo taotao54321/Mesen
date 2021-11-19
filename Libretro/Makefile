@@ -325,7 +325,7 @@ ifeq (,$(findstring windows_msvc2017,$(platform)))
 endif
 
 CFLAGS   += -D LIBRETRO $(fpic)
-CXXFLAGS += -D LIBRETRO $(fpic) -std=c++14
+CXXFLAGS += -D LIBRETRO $(fpic) -std=c++17
 
 all: $(TARGET)
 
