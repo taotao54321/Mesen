@@ -7,7 +7,7 @@ If you want to support this project, please consider making a donation:
 [![Donate](https://www.mesen.ca/images/donate.png)](https://www.mesen.ca/Donate.php)
 
 [Website (https://www.mesen.ca)](https://www.mesen.ca)  
-[Documentation (https://www.mesen.ca/docs)](https://www.mesen.ca/docs)
+[Documentation](Docs/content/_index.md)
 
 ## Development Builds
 
