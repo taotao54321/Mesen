@@ -1,15 +1,21 @@
 name: "Linux build"
-on: push
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   linux-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up dependencies
         run: |
-          sudo apt-get -qq update
-          sudo apt-get install -yq libsdl2-dev mono-devel
+          sudo apt-get install -yq --no-install-recommends gnupg ca-certificates
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+          echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+          sudo apt-get update
+          sudo apt-get install -yq --no-install-recommends mono-devel libsdl2-dev libsdl2-2.0 gnome-themes-standard xvfb x11-apps
+          sudo apt-get clean && sudo rm -rf /var/cache/apt/lists/*
       - name: Build
         run: |
           make
