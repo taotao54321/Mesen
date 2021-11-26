@@ -7,7 +7,7 @@ If you want to support this project, please consider making a donation:
 [![Donate](https://www.mesen.ca/images/donate.png)](https://www.mesen.ca/Donate.php)
 
 [Website (https://www.mesen.ca)](https://www.mesen.ca)  
-[Documentation](Docs/content/_index.md)
+[Documentation](https://novasquirrel.github.io/Mesen-X/index.html)
 
 ## Development Builds
 
