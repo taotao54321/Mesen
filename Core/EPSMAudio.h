@@ -42,10 +42,10 @@ private:
 
 	struct InputEntry
 	{
-		uint8_t addr = 0;
-		uint8_t data = 0;
-		uint8_t cycle = 0;
-		uint8_t wrote = 0;
+		uint8_t addr;
+		uint8_t data;
+		uint8_t cycle;
+		uint8_t wrote;
 	};
 
 	static constexpr uint8_t INPUT_BUFFER_SIZE = cycleCount;
@@ -156,7 +156,7 @@ private:
 		}
 	}
 
-	uint32_t getClockFrequency()
+	uint32_t getClockFrequency()  
 	{
 		return _console->GetSettings()->GetEPSMClockFrequency() / 6;
 	}
