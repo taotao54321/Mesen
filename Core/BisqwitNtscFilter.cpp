@@ -8,11 +8,12 @@
 #include "EmulationSettings.h"
 #include "Console.h"
 
-BisqwitNtscFilter::BisqwitNtscFilter(shared_ptr<Console> console, int resDivider) : BaseVideoFilter(console)
+BisqwitNtscFilter::BisqwitNtscFilter(shared_ptr<Console> console, int resDivider, bool SMPTE_C) : BaseVideoFilter(console)
 {
 	_resDivider = resDivider;
 	_stopThread = false;
 	_workDone = false;
+	_SMPTE_C = SMPTE_C;
 
 	const int8_t signalLumaLow[4] = { -29, -15, 22, 71 };
 	const int8_t signalLumaHigh[4] = { 32, 66, 105, 105 };
@@ -49,7 +50,7 @@ BisqwitNtscFilter::BisqwitNtscFilter(shared_ptr<Console> console, int resDivider
 				outputBuffer += GetOverscan().GetScreenWidth() * 64 / _resDivider / _resDivider * (120 - GetOverscan().Top);
 			}
 
-			DecodeFrame(120, 239 - GetOverscan().Bottom, _ppuOutputBuffer, outputBuffer, (IsOddFrame() ? 8 : 0) + 327360); 
+			DecodeFrame(120, 239 - GetOverscan().Bottom, _ppuOutputBuffer, outputBuffer, (IsOddFrame() ? 8 : 0) + 327360, SMPTE_C);
 
 			_workDone = true;
 		}
@@ -69,7 +70,7 @@ void BisqwitNtscFilter::ApplyFilter(uint16_t *ppuOutputBuffer)
 
 	_workDone = false;
 	_waitWork.Signal();
-	DecodeFrame(GetOverscan().Top, 120, ppuOutputBuffer, GetOutputBuffer(), (IsOddFrame() ? 8 : 0) + GetOverscan().Top*341*8);
+	DecodeFrame(GetOverscan().Top, 120, ppuOutputBuffer, GetOutputBuffer(), (IsOddFrame() ? 8 : 0) + GetOverscan().Top*341*8, _SMPTE_C);
 	while(!_workDone) {}
 }
 
@@ -89,7 +90,6 @@ void BisqwitNtscFilter::OnBeforeApplyFilter()
 	NtscFilterSettings ntscSettings = _console->GetSettings()->GetNtscFilterSettings();
 
 	_keepVerticalRes = ntscSettings.KeepVerticalResolution;
-	//_SMPTE_C = ntscSettings.NtscSmpteC;
 
 	const double pi = std::atan(1.0) * 4;
 	int contrast = (int)((pictureSettings.Contrast + 1.0) * (pictureSettings.Contrast + 1.0) * 167941);
@@ -209,7 +209,7 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 	phase += (341 - 256 - _paddingSize * 2) * _signalsPerPixel;
 }
 
-void BisqwitNtscFilter::DecodeFrame(int startRow, int endRow, uint16_t *ppuOutputBuffer, uint32_t* outputBuffer, int startPhase)
+void BisqwitNtscFilter::DecodeFrame(int startRow, int endRow, uint16_t *ppuOutputBuffer, uint32_t* outputBuffer, int startPhase, bool SMPTE_C)
 {
 	int pixelsPerCycle = 8 / _resDivider;
 	int phase = startPhase;
@@ -229,7 +229,7 @@ void BisqwitNtscFilter::DecodeFrame(int startRow, int endRow, uint16_t *ppuOutpu
 		GenerateNtscSignal(rowSignal, phase, y);
 
 		//Convert the NTSC signal to RGB
-		NtscDecodeLine(lineWidth * _signalsPerPixel, rowSignal, outputBuffer, (startCycle + 7) % 12);
+		NtscDecodeLine(lineWidth * _signalsPerPixel, rowSignal, outputBuffer, (startCycle + 7) % 12, SMPTE_C);
 
 		outputBuffer += rowPixelGap;
 	}
@@ -281,7 +281,7 @@ void BisqwitNtscFilter::DecodeFrame(int startRow, int endRow, uint16_t *ppuOutpu
 *         In essence it conveys in one integer the same information that real NTSC signal
 *         would convey in the colorburst period in the beginning of each scanline.
 */
-void BisqwitNtscFilter::NtscDecodeLine(int width, const int8_t* signal, uint32_t* target, int phase0)
+void BisqwitNtscFilter::NtscDecodeLine(int width, const int8_t* signal, uint32_t* target, int phase0, bool SMPTE_C)
 {
 	auto Read = [=](int pos) -> char { return pos >= 0 ? signal[pos] : 0; };
 	auto Cos = [=](int pos) -> char { return _sinetable[(pos + 36) % 12 + phase0]; };
@@ -299,9 +299,9 @@ void BisqwitNtscFilter::NtscDecodeLine(int width, const int8_t* signal, uint32_t
 		qsum += Read(s) * Sin(s) - Read(s - _qWidth) * Sin(s - _qWidth);
 
 		if(!(s % _resDivider) && s >= leftOverscan) {
-			int r = std::min(255, std::max(0, (ysum*_y + isum*_irC + qsum*_qrC) / 65536));
-			int g = std::min(255, std::max(0, (ysum*_y + isum*_igC + qsum*_qgC) / 65536));
-			int b = std::min(255, std::max(0, (ysum*_y + isum*_ibC + qsum*_qbC) / 65536));
+			int r = std::min(255, std::max(0, (ysum*_y + isum*(SMPTE_C ? _irC : _ir) + qsum*(SMPTE_C ? _qrC : _qr)) / 65536));
+			int g = std::min(255, std::max(0, (ysum*_y + isum*(SMPTE_C ? _igC : _ig) + qsum*(SMPTE_C ? _qgC : _qg)) / 65536));
+			int b = std::min(255, std::max(0, (ysum*_y + isum*(SMPTE_C ? _ibC : _ib) + qsum*(SMPTE_C ? _qbC : _qb)) / 65536));
 
 			*target = 0xFF000000 | (r << 16) | (g << 8) | b;
 			target++;

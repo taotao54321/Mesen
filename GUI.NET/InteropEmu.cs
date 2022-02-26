@@ -2362,6 +2362,9 @@ namespace Mesen.GUI
 		Prescale6x = 22,
 		Prescale8x = 23,
 		Prescale10x = 24,
+		BisqwitNtscSMPTECQuarterRes = 26,
+		BisqwitNtscSMPTECHalfRes = 27,
+		BisqwitNtscSMPTEC = 28,
 	}
 
 	public enum HDPackOuputTileType

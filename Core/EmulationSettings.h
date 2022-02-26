@@ -171,6 +171,9 @@ enum class VideoFilterType
 	Prescale8x = 23,
 	Prescale10x = 24,
 	Raw = 25,
+	BisqwitNtscSMPTECQuarterRes = 26,
+	BisqwitNtscSMPTECHalfRes = 27,
+	BisqwitNtscSMPTEC = 28,
 	HdPack = 999
 };
 

@@ -44,14 +44,14 @@ private:
 
 	void RecursiveBlend(int iterationCount, uint64_t *output, uint64_t *currentLine, uint64_t *nextLine, int pixelsPerCycle, bool verticalBlend);
 	
-	void NtscDecodeLine(int width, const int8_t* signal, uint32_t* target, int phase0);
+	void NtscDecodeLine(int width, const int8_t* signal, uint32_t* target, int phase0, bool SMPTE_C);
 	
 	void GenerateNtscSignal(int8_t *ntscSignal, int &phase, int rowNumber);
-	void DecodeFrame(int startRow, int endRow, uint16_t *ppuOutputBuffer, uint32_t* outputBuffer, int startPhase);
+	void DecodeFrame(int startRow, int endRow, uint16_t *ppuOutputBuffer, uint32_t* outputBuffer, int startPhase, bool SMPTE_C);
 	void OnBeforeApplyFilter();
 
 public:
-	BisqwitNtscFilter(shared_ptr<Console> console, int resDivider);
+	BisqwitNtscFilter(shared_ptr<Console> console, int resDivider, bool SMPTE_C);
 	virtual ~BisqwitNtscFilter();
 
 	virtual void ApplyFilter(uint16_t *ppuOutputBuffer);
