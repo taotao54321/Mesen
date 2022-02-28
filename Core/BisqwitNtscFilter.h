@@ -20,6 +20,7 @@ private:
 	atomic<bool> _workDone;
 
 	bool _keepVerticalRes = false;
+	bool _SMPTE_C = false;
 
 	int _resDivider = 1;
 	uint16_t *_ppuOutputBuffer = nullptr;
@@ -33,8 +34,8 @@ private:
 	*/
 	int _yWidth, _iWidth, _qWidth;
 	int _y;
-	int _ir, _ig, _ib;
-	int _qr, _qg, _qb;
+	int _ir, _ig, _ib, _irC, _igC, _ibC;
+	int _qr, _qg, _qb, _qrC, _qgC, _qbC;
 
 	//To finetune hue, you would have to recalculate sinetable[]. (Coarse changes can be made with Phase0.)
 	int8_t _sinetable[27]; // 8*sin(x*2pi/12)
@@ -43,14 +44,14 @@ private:
 
 	void RecursiveBlend(int iterationCount, uint64_t *output, uint64_t *currentLine, uint64_t *nextLine, int pixelsPerCycle, bool verticalBlend);
 	
-	void NtscDecodeLine(int width, const int8_t* signal, uint32_t* target, int phase0);
+	void NtscDecodeLine(int width, const int8_t* signal, uint32_t* target, int phase0, bool SMPTE_C);
 	
 	void GenerateNtscSignal(int8_t *ntscSignal, int &phase, int rowNumber);
-	void DecodeFrame(int startRow, int endRow, uint16_t *ppuOutputBuffer, uint32_t* outputBuffer, int startPhase);
+	void DecodeFrame(int startRow, int endRow, uint16_t *ppuOutputBuffer, uint32_t* outputBuffer, int startPhase, bool SMPTE_C);
 	void OnBeforeApplyFilter();
 
 public:
-	BisqwitNtscFilter(shared_ptr<Console> console, int resDivider);
+	BisqwitNtscFilter(shared_ptr<Console> console, int resDivider, bool SMPTE_C);
 	virtual ~BisqwitNtscFilter();
 
 	virtual void ApplyFilter(uint16_t *ppuOutputBuffer);
