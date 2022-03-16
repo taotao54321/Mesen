@@ -2,7 +2,9 @@
 #include "stdafx.h"
 #include "BaseMapper.h"
 
-class Mapper200 : public BaseMapper
+// INES Mapper 200 is similar but with the mirroring bit's meaning flipped, and the mirroring bit being also used as a fourth bank bit.
+
+class BmcSa005A : public BaseMapper
 {
 protected:
 	virtual uint16_t GetPRGPageSize() override { return 0x4000; }
@@ -17,11 +19,11 @@ protected:
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
 	{
-		uint8_t bank = addr & 0x07;
+		uint8_t bank = addr & 0x0F;
 		SelectPRGPage(0, bank);
 		SelectPRGPage(1, bank);
 		SelectCHRPage(0, bank);
 
-		SetMirroringType(addr & 0x08 ? MirroringType::Horizontal : MirroringType::Vertical);
+		SetMirroringType(addr & 0x08 ? MirroringType::Vertical : MirroringType::Horizontal);
 	}
 };

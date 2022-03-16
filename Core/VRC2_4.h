@@ -5,6 +5,10 @@
 
 enum class VRCVariant
 {
+	VRC2_308, //308
+	VRC2_524, //524
+	VRC2_525, //525
+	VRC2_527, //527
 	VRC2a,	//Mapper 22
 	VRC2b,	//23
 	VRC2c,	//25
@@ -33,6 +37,11 @@ class VRC2_4 : public BaseMapper
 		uint8_t _loCHRRegs[8];
 
 		uint8_t _latch = 0;
+
+		// Mapper 308 IRQ
+		uint16_t _irqCounter;
+		uint8_t _irqCounterHigh;
+		bool _irqEnabled;
 
 		void DetectVariant()
 		{
@@ -72,9 +81,13 @@ class VRC2_4 : public BaseMapper
 					break;
 
 				case 27: _variant = VRCVariant::VRC4_27; break; //Untested
+				case 308: _variant = VRCVariant::VRC2_308; break;
+				case 524: _variant = VRCVariant::VRC2_524; break;
+				case 525: _variant = VRCVariant::VRC2_525; break;
+				case 527: _variant = VRCVariant::VRC2_527; break;
 			}
 
-			_useHeuristics = (_romInfo.SubMapperID == 0) && _romInfo.MapperID != 22 && _romInfo.MapperID != 27;
+			_useHeuristics = (_romInfo.SubMapperID == 0) && _romInfo.MapperID != 22 && _romInfo.MapperID != 27 && _romInfo.MapperID != 308 && _romInfo.MapperID != 524  && _romInfo.MapperID != 527  && _romInfo.MapperID != 525;
 		}
 
 	protected:
@@ -82,7 +95,7 @@ class VRC2_4 : public BaseMapper
 		uint16_t GetCHRPageSize() override { return 0x0400; }
 		bool AllowRegisterRead() override { return true; }
 
-		void InitMapper() override 
+		void InitMapper() override
 		{
 			_irq.reset(new VrcIrq(_console));
 			DetectVariant();
@@ -106,10 +119,24 @@ class VRC2_4 : public BaseMapper
 				AddRegisterRange(0x6000, 0x7FFF, MemoryOperation::Any);
 			}
 		}
-		
+
 		void ProcessCpuClock() override
 		{
-			if((_useHeuristics && _romInfo.MapperID != 22) || _variant >= VRCVariant::VRC4a) {
+			if(_variant == VRCVariant::VRC2_308) {
+				if(_irqEnabled) {
+					_irqCounter++;
+					if((_irqCounter & 0x0FFF) == 2048)
+						_irqCounterHigh--;
+					if(!_irqCounterHigh && (_irqCounter & 0x0FFF) < 2048)
+						_console->GetCpu()->SetIrqSource(IRQSource::External);
+				}
+			} else if(_variant == VRCVariant::VRC2_524) {
+				if(_irqEnabled) {
+					_irqCounter++;
+					if(_irqCounter & 1024)
+						_console->GetCpu()->SetIrqSource(IRQSource::External);
+				}
+			} else if((_useHeuristics && _romInfo.MapperID != 22) || _variant >= VRCVariant::VRC4a) {
 				//Only VRC4 supports IRQs
 				_irq->ProcessCpuClock();
 			}
@@ -126,7 +153,19 @@ class VRC2_4 : public BaseMapper
 				SelectCHRPage(i, page);
 			}
 
-			if(_prgMode == 0) {
+			if(_variant == VRCVariant::VRC2_527) {
+				SetNametable(0, (_hiCHRRegs[0] >> 3) & 0x01);
+				SetNametable(1, (_hiCHRRegs[0] >> 3) & 0x01);
+				SetNametable(2, (_hiCHRRegs[1] >> 3) & 0x01);
+				SetNametable(3, (_hiCHRRegs[1] >> 3) & 0x01);
+			}
+
+			if(_variant == VRCVariant::VRC2_525) {
+				SelectPRGPage(0, _prgReg0 + 0);
+				SelectPRGPage(1, _prgReg0 + 1);
+				SelectPRGPage(2, -2);
+				SelectPRGPage(3, -1);
+			} else if(_prgMode == 0) {
 				SelectPRGPage(0, _prgReg0);
 				SelectPRGPage(1, _prgReg1);
 				SelectPRGPage(2, -2);
@@ -175,29 +214,56 @@ class VRC2_4 : public BaseMapper
 			} else if(addr >= 0xA000 && addr <= 0xA006) {
 				_prgReg1 = value & 0x1F;
 			} else if(addr >= 0xB000 && addr <= 0xE006) {
+				if(_variant == VRCVariant::VRC2_525) {
+					if(addr <= 0xB007) {
+						_loCHRRegs[addr & 0x07] = value;
+						_hiCHRRegs[addr & 0x07] = 0;
+					}
+				} else {
 				uint8_t regNumber = ((((addr >> 12) & 0x07) - 3) << 1) + ((addr >> 1) & 0x01);
 				bool lowBits = (addr & 0x01) == 0x00;
 				if(lowBits) {
 					//The other reg contains the low 4 bits
 					_loCHRRegs[regNumber] = value & 0x0F;
 				} else {
-					//One reg contains the high 5 bits 
+					//One reg contains the high 5 bits
 					_hiCHRRegs[regNumber] = value & 0x1F;
 				}
-			} else if(addr == 0xF000) {
-				_irq->SetReloadValueNibble(value, false);
-			} else if(addr == 0xF001) {
-				_irq->SetReloadValueNibble(value, true);
-			} else if(addr == 0xF002) {
-				_irq->SetControlValue(value);
-			} else if(addr == 0xF003) {
-				_irq->AcknowledgeIrq();
+				}
+			} else if(_variant == VRCVariant::VRC2_308) {
+				if(addr == 0xF000) {
+					_irqEnabled = false;
+					_irqCounter = 0;
+					_console->GetCpu()->ClearIrqSource(IRQSource::External);
+				} else if(addr == 0xF001) {
+					_irqEnabled = true;
+				} else if(addr == 0xF003) {
+					_irqCounterHigh = value >> 4;
+				}
+			} else if(_variant == VRCVariant::VRC2_524) {
+				if(addr == 0xF002) {
+					_irqEnabled = true;
+				} else if(addr == 0xF003) {
+					_irqEnabled = false;
+					_irqCounter = 0;
+					_console->GetCpu()->ClearIrqSource(IRQSource::External);
+				}
+			} else {
+				if(addr == 0xF000) {
+					_irq->SetReloadValueNibble(value, false);
+				} else if(addr == 0xF001) {
+					_irq->SetReloadValueNibble(value, true);
+				} else if(addr == 0xF002) {
+					_irq->SetControlValue(value);
+				} else if(addr == 0xF003) {
+					_irq->AcknowledgeIrq();
+				}
 			}
 
 			UpdateState();
 		}
 
-	public:		
+	public:
 		uint16_t TranslateAddress(uint16_t addr)
 		{
 			uint32_t A0, A1;
@@ -253,9 +319,24 @@ class VRC2_4 : public BaseMapper
 						break;
 
 					case VRCVariant::VRC4_27:
+					case VRCVariant::VRC2_308:
+					case VRCVariant::VRC2_527:
 						//Mapper 27
 						A0 = addr & 0x01;
 						A1 = (addr >> 1) & 0x01;
+						break;
+
+					case VRCVariant::VRC2_525:
+						A0 = addr & 0x01;
+						A1 = (addr >> 1) & 0x03;
+						break;
+
+					case VRCVariant::VRC2_524:
+						//Mapper 524
+						A0 = addr & 0x01;
+						A1 = (addr >> 1) & 0x01;
+						A0 |= (addr >> 2) & 0x01;
+						A1 |= (addr >> 3) & 0x01;
 						break;
 
 					case VRCVariant::VRC2c:
@@ -299,7 +380,6 @@ class VRC2_4 : public BaseMapper
 						throw std::runtime_error("not supported");
 						break;
 				}
-
 			}
 
 			return (addr & 0xFF00) | (A1 << 1) | A0;
@@ -311,6 +391,6 @@ class VRC2_4 : public BaseMapper
 			ArrayInfo<uint8_t> loChrRegs = { _loCHRRegs, 8 };
 			ArrayInfo<uint8_t> hiChrRegs = { _hiCHRRegs, 8 };
 			SnapshotInfo irq{ _irq.get() };
-			Stream(_prgReg0, _prgReg1, _prgMode, loChrRegs, hiChrRegs, _latch, irq);
+			Stream(_prgReg0, _prgReg1, _prgMode, loChrRegs, hiChrRegs, _latch, irq, _irqCounter, _irqCounterHigh, _irqEnabled);
 		}
 };

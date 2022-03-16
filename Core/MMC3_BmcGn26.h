@@ -2,20 +2,23 @@
 #include "stdafx.h"
 #include "MMC3.h"
 
-class MMC3_Bmc411120C : public MMC3
+class MMC3_BmcGn26 : public MMC3
 {
 private:
 	uint8_t _exReg;
 
 protected:
-	uint32_t GetDipSwitchCount() override { return 1; }
-
 	void InitMapper() override
 	{
-		AddRegisterRange(0x6000, 0xFFFF, MemoryOperation::Write);
 		_exReg = 0;
-
 		MMC3::InitMapper();
+		AddRegisterRange(0x6000, 0x7FFF, MemoryOperation::Write);
+	}
+
+	void Reset(bool softreset) override
+	{
+		_exReg = 0;
+		UpdateState();
 	}
 
 	void StreamState(bool saving) override
@@ -26,23 +29,34 @@ protected:
 	
 	void SelectCHRPage(uint16_t slot, uint16_t page, ChrMemoryType memoryType = ChrMemoryType::Default) override
 	{
-		MMC3::SelectCHRPage(slot, page | ((_exReg & 0x07) << 7), memoryType);
+		uint8_t mask = (_exReg & 0x04) ? 0xFF : 0x7F;
+		page &= mask;
+		page |= ((_exReg << 7) & ~mask);
+		MMC3::SelectCHRPage(slot, page, memoryType);
 	}
 
 	void SelectPRGPage(uint16_t slot, uint16_t page, PrgMemoryType memoryType = PrgMemoryType::PrgRom) override
 	{
-		if(_exReg & (0x08 | (GetDipSwitches() << 2))) {
-			MMC3::SelectPrgPage4x(0, (((_exReg >> 4) & 0x03) | 0x0C) << 2);
+		if (_exReg & 0x04) {
+			if (slot == 0) {
+				page >>= 2;
+				page |= (_exReg << 2);
+				SelectPrgPage4x(0, page << 2);
+			}
 		} else {
-			MMC3::SelectPRGPage(slot, (page & 0x0F) | ((_exReg & 0x07) << 4));
+			page &= 0x0F;
+			page |= (_exReg << 4);
+			MMC3::SelectPRGPage(slot, page);
 		}
 	}
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
 	{
-		if(addr < 0x8000) {
-			_exReg = (uint8_t)addr;
-			UpdateState();
+		if(addr <= 0x7FFF) {
+			if (CanWriteToWorkRam()) {
+				_exReg = (uint8_t)addr;
+				UpdateState();
+			}
 		} else {
 			MMC3::WriteRegister(addr, value);
 		}
