@@ -165,12 +165,7 @@ namespace Mesen.GUI.Forms.Config
 				tlpNtscFilter2.Visible = false;
 				chkMergeFields.Visible = true;
 				grpNtscFilter.Visible = true;
-			} else if(filter == VideoFilterType.BisqwitNtsc ||
-				filter == VideoFilterType.BisqwitNtscHalfRes ||
-				filter == VideoFilterType.BisqwitNtscQuarterRes ||
-				filter == VideoFilterType.BisqwitNtscSMPTEC ||
-				filter == VideoFilterType.BisqwitNtscSMPTECHalfRes ||
-				filter == VideoFilterType.BisqwitNtscSMPTECQuarterRes) {
+			} else if(filter == VideoFilterType.BisqwitNtsc || filter == VideoFilterType.BisqwitNtscHalfRes || filter == VideoFilterType.BisqwitNtscQuarterRes) {
 				tlpNtscFilter1.Visible = true;
 				tlpNtscFilter2.Visible = true;
 				chkMergeFields.Visible = false;
