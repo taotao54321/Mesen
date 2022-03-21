@@ -195,7 +195,28 @@
 #include "MMC3_249.h"
 #include "MMC3_250.h"
 #include "MMC3_254.h"
+#include "MMC3_267.h"
+#include "MMC3_334.h"
+#include "MMC3_353.h"
+#include "MMC3_364.h"
+#include "MMC3_370.h"
+#include "MMC3_372.h"
+#include "MMC3_376.h"
+#include "MMC3_377.h"
+#include "MMC3_383.h"
+#include "MMC3_391.h"
+#include "MMC3_393.h"
+#include "MMC3_395.h"
+#include "MMC3_401.h"
+#include "MMC3_410.h"
+#include "MMC3_411.h"
+#include "MMC3_412.h"
 #include "MMC3_422.h"
+#include "MMC3_430.h"
+#include "MMC3_432.h"
+#include "MMC3_441.h"
+#include "MMC3_444.h"
+#include "MMC3_445.h"
 #include "MMC3_534.h"
 #include "MMC3_Bmc411120C.h"
 #include "MMC3_BmcF15.h"
@@ -577,7 +598,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 264: return new Yoko();
 		case 265: return new T262();
 		case 266: return new CityFighter();
-		//267
+		case 267: return new MMC3_267();
 		case 268:
 			if(romData.Info.BoardName.compare("MINDKIDS") == 0) {
 				romData.Info.SubMapperID = 1;
@@ -633,7 +654,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 331: return new Bmc12in1();
 		case 332: return new Super40in1Ws();
 		case 333: return new Bmc8in1(); // + NEWSTAR-GRM070-8IN1
-		//334
+		case 334: return new MMC3_334();
 		case 335: return new BmcCtc09();
 		case 336: return new BmcK3046();
 		case 337: return new BmcCtc12in1();
@@ -651,10 +672,34 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 349: return new BmcG146();
 		case 350: return new Bmc891227();
 		//352:
+		case 353: return new MMC3_353();
+		case 364: return new MMC3_364();
 		case 366: return new BmcGn45();
+		case 370: return new MMC3_370();
+		case 372: return new MMC3_372();
+		case 376: return new MMC3_376();
+		case 377: return new MMC3_377();
+		//378-382
+		case 383: return new MMC3_383();
+		//384-390
+		case 391: return new MMC3_391();
+		case 393: return new MMC3_393();
+		//394
+		case 395: return new MMC3_395();
+		//396-400
+		case 401: return new MMC3_401();
+		case 410: return new MMC3_410();
+		case 411: return new MMC3_411();
+		case 412: return new MMC3_412();
 
 		case 422: return new MMC3_422();
+		case 430: return new MMC3_430();
+		case 432: return new MMC3_432();
 		case 434: return new BmcS2009();
+
+		case 441: return new MMC3_441();
+		case 444: return new MMC3_444();
+		case 445: return new MMC3_445();
 
 		case 513: return new Sachen9602();
 		//514-517
