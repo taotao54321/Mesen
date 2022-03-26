@@ -157,6 +157,10 @@
 #include "Mapper244.h"
 #include "Mapper246.h"
 #include "Mapper253.h"
+#include "Mapper319.h"
+#include "Mapper375.h"
+#include "Mapper380.h"
+#include "Mapper449.h"
 #include "McAcc.h"
 #include "MMC1.h"
 #include "MMC1_105.h"
@@ -408,6 +412,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 52: return new MMC3_52();
 		case 53: return new Supervision();
 		case 54: return new NovelDiamond();
+		case 55: return new Malee();
 		case 56: return new Kaiser202();
 		case 57: return new Mapper57();
 		case 58: return new Mapper58();
@@ -640,7 +645,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 314: return new Bmc64in1NoRepeat();
 		case 315: return new Bmc830134C();
 		//316-318
-		case 319: return new Hp898f();
+		case 319: return new Mapper319();
 		case 320: return new Bmc830425C4391T();
 		//321
 		case 322: return new MMC3_BmcK3033();
@@ -677,9 +682,12 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 366: return new BmcGn45();
 		case 370: return new MMC3_370();
 		case 372: return new MMC3_372();
+		case 375: return new Mapper375();
 		case 376: return new MMC3_376();
 		case 377: return new MMC3_377();
-		//378-382
+		//378-379
+		case 380: return new Mapper380();
+		//381-382
 		case 383: return new MMC3_383();
 		//384-390
 		case 391: return new MMC3_391();
@@ -700,6 +708,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 441: return new MMC3_441();
 		case 444: return new MMC3_444();
 		case 445: return new MMC3_445();
+		case 449: return new Mapper449();
 
 		case 513: return new Sachen9602();
 		//514-517
@@ -721,13 +730,13 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case UnifBoards::Ac08: return new Ac08(); //mapper 42?
 		case UnifBoards::Cc21: return new Cc21();
 		case UnifBoards::Ghostbusters63in1: return new Ghostbusters63in1(); //mapper 226?
-		case UnifBoards::Malee: return new Malee(); //mapper 42?
 		case UnifBoards::SssNrom256: return new FamicomBox();
 		case UnifBoards::Unl255in1: return new Unl255in1();
 		case UnifBoards::Unl8237A: return new Unl8237A(); //mapper 215.1
 		case UnifBoards::UnlPuzzle: return new UnlPuzzle();
 		case UnifBoards::Ks106C: return new UnlKs106C(); //mapper 352, sub 1
 		case UnifBoards::ResetNromX1n1: return new BmcResetNromX1n1(); //352
+		case UnifBoards::Hp898f: return new Hp898f(); // Mapper 319 with the differentt bank order, specific for UNIF dump of Prima Soft 9999999-in-1
 
 		case MapperFactory::StudyBoxMapperID: return new StudyBox();
 		case MapperFactory::NsfMapperID: return new NsfMapper();
