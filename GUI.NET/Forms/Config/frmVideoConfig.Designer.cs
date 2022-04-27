@@ -915,9 +915,9 @@ namespace Mesen.GUI.Forms.Config
             this.chkColorimetryCorrection.AutoSize = true;
             this.chkColorimetryCorrection.Location = new System.Drawing.Point(143, 28);
             this.chkColorimetryCorrection.Name = "chkColorimetryCorrection";
-            this.chkColorimetryCorrection.Size = new System.Drawing.Size(100, 17);
+            this.chkColorimetryCorrection.Size = new System.Drawing.Size(101, 17);
             this.chkColorimetryCorrection.TabIndex = 32;
-            this.chkColorimetryCorrection.Text = "Colorimetry correction";
+            this.chkColorimetryCorrection.Text = "Color Correction";
             this.chkColorimetryCorrection.UseVisualStyleBackColor = true;
             // 
             // grpCommon
