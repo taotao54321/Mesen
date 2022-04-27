@@ -64,6 +64,7 @@ namespace Mesen.GUI.Forms.Config
 			AddBinding("NtscSharpness", trkSharpness);
 			AddBinding("NtscMergeFields", chkMergeFields);
 			AddBinding("NtscVerticalBlend", chkVerticalBlend);
+			AddBinding("NtscColorimetryCorrection", chkColorimetryCorrection);
 
 			AddBinding("NtscYFilterLength", trkYFilterLength);
 			AddBinding("NtscIFilterLength", trkIFilterLength);
@@ -296,6 +297,7 @@ namespace Mesen.GUI.Forms.Config
 			trkSharpness.Value = 0;
 			chkMergeFields.Checked = false;
 			chkVerticalBlend.Checked = true;
+			chkColorimetryCorrection.Checked = true;
 
 			trkYFilterLength.Value = 0;
 			trkIFilterLength.Value = 50;
