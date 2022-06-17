@@ -397,6 +397,9 @@
     <ClInclude Include="Mapper62.h">
       <Filter>Nes\Mappers\Unnamed</Filter>
     </ClInclude>
+    <ClInclude Include="Mapper81.h">
+      <Filter>Nes\Mappers\Unnamed</Filter>
+    </ClInclude>
     <ClInclude Include="Mapper91.h">
       <Filter>Nes\Mappers\Unnamed</Filter>
     </ClInclude>
@@ -425,6 +428,9 @@
       <Filter>Nes\Mappers\Unnamed</Filter>
     </ClInclude>
     <ClInclude Include="Mapper231.h">
+      <Filter>Nes\Mappers\Unnamed</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper237.h">
       <Filter>Nes\Mappers\Unnamed</Filter>
     </ClInclude>
     <ClInclude Include="Mapper240.h">
@@ -742,6 +748,9 @@
     <ClInclude Include="Kaiser202.h">
       <Filter>Nes\Mappers\Kaiser</Filter>
     </ClInclude>
+    <ClInclude Include="Kaiser7010.h">
+      <Filter>Nes\Mappers\Kaiser</Filter>
+    </ClInclude>
     <ClInclude Include="Henggedianzi177.h">
       <Filter>Nes\Mappers</Filter>
     </ClInclude>
@@ -907,6 +916,9 @@
     <ClInclude Include="Sachen_136.h">
       <Filter>Nes\Mappers\Sachen</Filter>
     </ClInclude>
+    <ClInclude Include="Sachen3013.h">
+      <Filter>Nes\Mappers\Sachen</Filter>
+    </ClInclude>
     <ClInclude Include="UnifLoader.h">
       <Filter>Nes\RomLoader</Filter>
     </ClInclude>
@@ -922,10 +934,16 @@
     <ClInclude Include="A12Watcher.h">
       <Filter>Nes\Mappers</Filter>
     </ClInclude>
+    <ClInclude Include="Ctc15.h">
+      <Filter>Nes\Mappers</Filter>
+    </ClInclude>
     <ClInclude Include="StudyBox.h">
       <Filter>Nes\Mappers</Filter>
     </ClInclude>
     <ClInclude Include="MMC1_105.h">
+      <Filter>Nes\Mappers\MMC</Filter>
+    </ClInclude>
+    <ClInclude Include="MMC1_550.h">
       <Filter>Nes\Mappers\MMC</Filter>
     </ClInclude>
     <ClInclude Include="Waixing162.h">

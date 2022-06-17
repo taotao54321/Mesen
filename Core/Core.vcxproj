@@ -558,6 +558,7 @@
     <ClInclude Include="BmcCtc09.h" />
     <ClInclude Include="BmcCtc12in1.h" />
     <ClInclude Include="Bmc891227.h" />
+    <ClInclude Include="Ctc15.h" />
     <ClInclude Include="CityFighter.h" />
     <ClInclude Include="ConsolePauseHelper.h" />
     <ClInclude Include="ControlDeviceState.h" />
@@ -728,6 +729,7 @@
     <ClInclude Include="JalecoJf17_19.h" />
     <ClInclude Include="JyCompany.h" />
     <ClInclude Include="Kaiser202.h" />
+    <ClInclude Include="Kaiser7010.h" />
     <ClInclude Include="Kaiser7012.h" />
     <ClInclude Include="Kaiser7013B.h" />
     <ClInclude Include="Kaiser7022.h" />
@@ -738,6 +740,7 @@
     <ClInclude Include="Lh10.h" />
     <ClInclude Include="Lh32.h" />
     <ClInclude Include="Malee.h" />
+    <ClInclude Include="Mapper81.h" />
     <ClInclude Include="Mapper103.h" />
     <ClInclude Include="Mapper106.h" />
     <ClInclude Include="Mapper107.h" />
@@ -765,6 +768,7 @@
     <ClInclude Include="Mapper230.h" />
     <ClInclude Include="Mapper233.h" />
     <ClInclude Include="Mapper234.h" />
+    <ClInclude Include="Mapper237.h" />
     <ClInclude Include="Mapper183.h" />
     <ClInclude Include="Mapper253.h" />
     <ClInclude Include="Mapper43.h" />
@@ -791,6 +795,7 @@
     <ClInclude Include="MMC1_155.h" />
     <ClInclude Include="MMC3_114.h" />
     <ClInclude Include="MMC3_121.h" />
+    <ClInclude Include="MMC1_550.h" />
     <ClInclude Include="MMC3_14.h" />
     <ClInclude Include="MMC3_165.h" />
     <ClInclude Include="MMC3_182.h" />
@@ -873,6 +878,7 @@
     <ClInclude Include="Rambo1.h" />
     <ClInclude Include="Rt01.h" />
     <ClInclude Include="Sachen74LS374N.h" />
+    <ClInclude Include="Sachen3013.h" />
     <ClInclude Include="Sachen8259.h" />
     <ClInclude Include="Sachen_133.h" />
     <ClInclude Include="Sachen_136.h" />

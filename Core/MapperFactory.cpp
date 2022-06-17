@@ -55,6 +55,7 @@
 #include "Bs5.h"
 #include "Caltron41.h"
 #include "Cc21.h"
+#include "Ctc15.h"
 #include "Cheapocabra.h"
 #include "CityFighter.h"
 #include "CNROM.h"
@@ -93,6 +94,7 @@
 #include "JalecoSs88006.h"
 #include "JyCompany.h"
 #include "Kaiser202.h"
+#include "Kaiser7010.h"
 #include "Kaiser7012.h"
 #include "Kaiser7013B.h"
 #include "Kaiser7016.h"
@@ -119,6 +121,7 @@
 #include "Mapper60.h"
 #include "Mapper61.h"
 #include "Mapper62.h"
+#include "Mapper81.h"
 #include "Mapper83.h"
 #include "Mapper91.h"
 #include "Mapper103.h"
@@ -150,6 +153,7 @@
 #include "Mapper230.h"
 #include "Mapper231.h"
 #include "Mapper233.h"
+#include "Mapper237.h"
 #include "Mapper234.h"
 #include "Mapper240.h"
 #include "Mapper241.h"
@@ -165,6 +169,7 @@
 #include "MMC1.h"
 #include "MMC1_105.h"
 #include "MMC1_155.h"
+#include "MMC1_550.h"
 #include "MMC2.h"
 #include "MMC3.h"
 #include "MMC3_12.h"
@@ -262,6 +267,7 @@
 #include "Sachen_147.h"
 #include "Sachen_148.h"
 #include "Sachen_149.h"
+#include "Sachen3013.h"
 #include "Sachen74LS374N.h"
 #include "Sachen8259.h"
 #include "Sachen9602.h"
@@ -438,6 +444,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 78: return new JalecoJf16();
 		case 79: return new Nina03_06(false);
 		case 80: return new TaitoX1005(false);
+		case 81: return new Mapper81();
 		case 82: return new TaitoX1017();
 		case 83: return new Mapper83();
 		case 85: return new VRC7();
@@ -577,6 +584,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 234: return new Mapper234();
 		case 235: return new Bmc235();
 		case 236: return new Bmc70in1();
+		case 237: return new Mapper237();
 		case 238: return new MMC3_238();
 		case 240: return new Mapper240();
 		case 241: return new Mapper241();
@@ -726,6 +734,13 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 529: return new T230();
 		case 530: return new Ax5705();
 		case 534: return new MMC3_534();
+
+		case 548: return new Ctc15();
+		case 550: return new MMC1_550();
+		case 551: return new Waixing178();
+		case 552: return new TaitoX1017();
+		case 553: return new Sachen3013();
+		case 554: return new Kaiser7010();
 
 		case UnifBoards::Ac08: return new Ac08(); //mapper 42?
 		case UnifBoards::Cc21: return new Cc21();
