@@ -51,6 +51,7 @@
 #include "BmcCtc12in1.h"
 #include "UnlKs106C.h"
 #include "BmcResetNromX1n1.h"
+#include "Bmc830752C.h"
 #include "BnRom.h"
 #include "Bs5.h"
 #include "Caltron41.h"
@@ -164,11 +165,27 @@
 #include "Mapper319.h"
 #include "Mapper375.h"
 #include "Mapper380.h"
+#include "Mapper389.h"
+#include "Mapper437.h"
+#include "Mapper438.h"
+#include "Mapper453.h"
 #include "Mapper449.h"
+#include "Mapper541.h"
+#include "Mapper433.h"
+#include "Mapper431.h"
+#include "Mapper429.h"
+#include "Mapper417.h"
+#include "Mapper416.h"
+#include "Mapper415.h"
+#include "Mapper414.h"
+#include "Mapper409.h"
+#include "Mapper403.h"
+#include "Mapper402.h"
 #include "McAcc.h"
 #include "MMC1.h"
 #include "MMC1_105.h"
 #include "MMC1_155.h"
+#include "MMC1_404.h"
 #include "MMC1_550.h"
 #include "MMC2.h"
 #include "MMC3.h"
@@ -216,6 +233,7 @@
 #include "MMC3_391.h"
 #include "MMC3_393.h"
 #include "MMC3_395.h"
+#include "MMC3_399.h"
 #include "MMC3_401.h"
 #include "MMC3_410.h"
 #include "MMC3_411.h"
@@ -226,6 +244,7 @@
 #include "MMC3_441.h"
 #include "MMC3_444.h"
 #include "MMC3_445.h"
+#include "MMC3_516.h"
 #include "MMC3_534.h"
 #include "MMC3_Bmc411120C.h"
 #include "MMC3_BmcF15.h"
@@ -697,29 +716,53 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 380: return new Mapper380();
 		//381-382
 		case 383: return new MMC3_383();
+		case 389: return new Mapper389();
 		//384-390
 		case 391: return new MMC3_391();
 		case 393: return new MMC3_393();
 		//394
 		case 395: return new MMC3_395();
+		case 396: return new Bmc830752C();
+		//
+		case 399: return new MMC3_399();
 		//396-400
 		case 401: return new MMC3_401();
+
+		case 402: return new Mapper402();
+		case 403: return new Mapper403();
+		case 404: return new MMC1_404();
+		//
+		case 409: return new Mapper409();
 		case 410: return new MMC3_410();
 		case 411: return new MMC3_411();
 		case 412: return new MMC3_412();
+		//
+		case 414: return new Mapper414();
+		case 415: return new Mapper415();
+		case 416: return new Mapper416();
+		case 417: return new Mapper417();
 
 		case 422: return new MMC3_422();
+		case 429: return new Mapper429();
 		case 430: return new MMC3_430();
+		case 431: return new Mapper431();
 		case 432: return new MMC3_432();
+		case 433: return new Mapper433();
 		case 434: return new BmcS2009();
-
+		//
+		case 437: return new Mapper437();
+		case 438: return new Mapper438();
+		//
 		case 441: return new MMC3_441();
 		case 444: return new MMC3_444();
 		case 445: return new MMC3_445();
 		case 449: return new Mapper449();
-
+		//
+		case 453: return new Mapper453();
+		//
 		case 513: return new Sachen9602();
 		//514-517
+		case 516: return new MMC3_516();
 		case 518: return new Dance2000();
 		case 519: return new Eh8813A();
 		//520
@@ -735,6 +778,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 530: return new Ax5705();
 		case 534: return new MMC3_534();
 
+		case 541: return new Mapper541();
 		case 548: return new Ctc15();
 		case 550: return new MMC1_550();
 		case 551: return new Waixing178();
