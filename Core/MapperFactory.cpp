@@ -163,8 +163,13 @@
 #include "Mapper246.h"
 #include "Mapper253.h"
 #include "Mapper319.h"
+#include "Mapper359.h"
+#include "Mapper357.h"
+#include "Mapper360.h"
 #include "Mapper375.h"
 #include "Mapper380.h"
+#include "Mapper382.h"
+#include "Mapper385.h"
 #include "Mapper389.h"
 #include "Mapper437.h"
 #include "Mapper438.h"
@@ -181,6 +186,8 @@
 #include "Mapper409.h"
 #include "Mapper403.h"
 #include "Mapper402.h"
+#include "Mapper452.h"
+#include "Mapper540.h"
 #include "McAcc.h"
 #include "MMC1.h"
 #include "MMC1_105.h"
@@ -224,6 +231,7 @@
 #include "MMC3_267.h"
 #include "MMC3_334.h"
 #include "MMC3_353.h"
+#include "MMC3_361.h"
 #include "MMC3_364.h"
 #include "MMC3_370.h"
 #include "MMC3_372.h"
@@ -705,6 +713,10 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 350: return new Bmc891227();
 		//352:
 		case 353: return new MMC3_353();
+		case 357: return new Mapper357();
+		case 359: return new Mapper359();
+		case 360: return new Mapper360();
+		case 361: return new MMC3_361();
 		case 364: return new MMC3_364();
 		case 366: return new BmcGn45();
 		case 370: return new MMC3_370();
@@ -715,7 +727,9 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		//378-379
 		case 380: return new Mapper380();
 		//381-382
+		case 382: return new Mapper382();
 		case 383: return new MMC3_383();
+		case 385: return new Mapper385();
 		case 389: return new Mapper389();
 		//384-390
 		case 391: return new MMC3_391();
@@ -758,6 +772,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 445: return new MMC3_445();
 		case 449: return new Mapper449();
 		//
+		case 452: return new Mapper452();
 		case 453: return new Mapper453();
 		//
 		case 513: return new Sachen9602();
@@ -778,6 +793,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case 530: return new Ax5705();
 		case 534: return new MMC3_534();
 
+		case 540: return new Mapper540();
 		case 541: return new Mapper541();
 		case 548: return new Ctc15();
 		case 550: return new MMC1_550();
