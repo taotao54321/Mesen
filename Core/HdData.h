@@ -99,8 +99,9 @@ struct HdPpuPixelInfo
 {
 	HdPpuTileInfo Tile;
 	vector<HdPpuTileInfo> Sprite;
+	vector<HdPpuTileInfo> SprAddition;
 	int SpriteCount;
-	
+
 	uint16_t TmpVideoRamAddr;
 	uint8_t XScroll;
 	uint8_t EmphasisBits;
@@ -110,7 +111,8 @@ struct HdPpuPixelInfo
 	{
 		for(int i = 0; i < 4; i++) {
 			Sprite.push_back(HdPpuTileInfo());
-		}		
+			SprAddition.push_back(HdPpuTileInfo());
+		}
 	}
 };
 
@@ -141,6 +143,7 @@ struct HdSpriteFrameRangeInfo
 struct HdScreenInfo
 {
 	HdPpuPixelInfo* ScreenTiles;
+	uint8_t AdditionCount[PPU::PixelCount];
 	std::unordered_map<uint32_t, uint8_t> WatchedAddressValues;
 	uint32_t FrameNumber;
 	HdSpriteFrameRangeInfo* spriteFrameRanges;
@@ -318,6 +321,40 @@ struct HdPackTileInfo : public HdTileKey
 	}
 };
 
+struct HdPackAdditionInfo : public HdTileKey
+{
+	int16_t OffsetX;
+	int16_t OffsetY;
+	HdTileKey additionSpr;
+
+	string ToString(int pngIndex)
+	{
+		stringstream out;
+		out << "<tile>" << pngIndex << ",";
+		if (IsChrRamTile) {
+			for (int i = 0; i < 16; i++) {
+				out << HexUtilities::ToHex(TileData[i]);
+			}
+		}
+		else {
+			out << HexUtilities::ToHex(TileIndex);
+		}
+		out << "," << HexUtilities::ToHex(PaletteColors, true) << "," <<
+			OffsetX << "," <<
+			OffsetY << ",";
+		if (IsChrRamTile) {
+			for (int i = 0; i < 16; i++) {
+				out << HexUtilities::ToHex(additionSpr.TileData[i]);
+			}
+		}
+		else {
+			out << HexUtilities::ToHex(additionSpr.TileIndex);
+		}
+		out << "," << HexUtilities::ToHex(PaletteColors, true);
+		return out.str();
+	}
+};
+
 struct HdPackBitmapInfo
 {
 	vector<uint32_t> PixelData;
@@ -388,6 +425,7 @@ struct HdPackData
 	vector<unique_ptr<HdBackgroundFileData>> BackgroundFileData;
 	vector<unique_ptr<HdPackTileInfo>> Tiles;
 	vector<unique_ptr<HdPackCondition>> Conditions;
+	vector<unique_ptr<HdPackAdditionInfo>> Additions;
 	std::unordered_set<uint32_t> WatchedMemoryAddresses;
 	std::unordered_map<HdTileKey, vector<HdPackTileInfo*>> TileByKey;
 	std::unordered_map<string, string> PatchesByHash;
