@@ -171,22 +171,37 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 		int8_t high = _signalHigh[color & 0x3F];
 		int8_t emphasis = color >> 6;
 
+		// deemphasis code based on
+		// https://bisqwit.iki.fi/jutut/kuvat/programming_examples/nesemu1/ntsc-small.cc
+		int8_t deemphasis = 0;
+		if (emphasis & 0b001)		// tint R; phase C
+			deemphasis |= (0x3F03F / 0x001);
+		if (emphasis & 0b010)		// tint G; phase 4
+			deemphasis |= (0x3F03F / 0x100);
+		if (emphasis & 0b100)		// tint B; phase 8
+			deemphasis |= (0x3F03F / 0x010);
+
 		uint16_t phaseBitmask = _bitmaskLut[std::abs(phase - (color & 0x0F)) % 12];
 
-		uint8_t voltage;
+		int8_t voltage;
 		for(int j = 0; j < 8; j++) {
 			phaseBitmask <<= 1;
 			voltage = high;
-			if(phaseBitmask >= 0x40) {
-				if(phaseBitmask == 0x1000) {
-					phaseBitmask = 1;
-				} else {
-					voltage = low;
-				}
+			// 12 phases done, wrap back to beginning
+			if(phaseBitmask >= (1 << 12)) {
+				phaseBitmask = 1;
 			}
-
-			if(phaseBitmask & emphasis) {
-				voltage -= voltage / 4;
+			else {
+				// 6 out of 12 cycles
+				if (phaseBitmask >= (1 << 6))
+					voltage = low;
+			}
+			// colors $xE and $xF are not affected by emphasis
+			// https://forums.nesdev.org/viewtopic.php?p=160669#p160669
+			if ((color & 0x0F) <= 0x0D) {
+				if (deemphasis & phaseBitmask) {
+					voltage *= 0.746;
+				}
 			}
 
 			ntscSignal[((x + _paddingSize) << 3) | j] = voltage;
