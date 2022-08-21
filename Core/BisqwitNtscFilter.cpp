@@ -173,13 +173,13 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 
 		// deemphasis code based on
 		// https://bisqwit.iki.fi/jutut/kuvat/programming_examples/nesemu1/ntsc-small.cc
-		int8_t deemphasis = 0;
+		uint16_t deemphasis = 0;
 		if (emphasis & 0b001)		// tint R; phase C
-			deemphasis |= (0x3F03F / 0x001);
+			deemphasis |= (0b100000011111);
 		if (emphasis & 0b010)		// tint G; phase 4
-			deemphasis |= (0x3F03F / 0x100);
+			deemphasis |= (0b000111111000);
 		if (emphasis & 0b100)		// tint B; phase 8
-			deemphasis |= (0x3F03F / 0x010);
+			deemphasis |= (0b111110000001);
 
 		uint16_t phaseBitmask = _bitmaskLut[std::abs(phase - (color & 0x0F)) % 12];
 
@@ -199,7 +199,7 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 			// colors $xE and $xF are not affected by emphasis
 			// https://forums.nesdev.org/viewtopic.php?p=160669#p160669
 			if ((color & 0x0F) <= 0x0D) {
-				if (deemphasis & phaseBitmask) {
+				if (phaseBitmask & deemphasis) {
 					voltage *= 0.746;
 				}
 			}
