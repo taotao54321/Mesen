@@ -14,24 +14,26 @@ BisqwitNtscFilter::BisqwitNtscFilter(shared_ptr<Console> console, int resDivider
 	_stopThread = false;
 	_workDone = false;
 
-	const int8_t signalLumaLow[4] = { -29, -15, 22, 71 };
-	const int8_t signalLumaHigh[4] = { 32, 66, 105, 105 };
+	const int8_t signalLumaLow[2][4] = { { -29, -15, 22, 71 }, { -38, -28, -1, 34 } };
+	const int8_t signalLumaHigh[2][4] = { { 32, 66, 105, 105 }, { 6, 31, 58, 58 } };
 
 	//Precalculate the low and high signal chosen for each 64 base colors
-	for(int i = 0; i <= 0x3F; i++) {
-		int r = (i & 0x0F) >= 0x0E ? 0x1D : i;
+	//with their respective attenuated values
+	for (int h = 0; h <= 1; h++) {
+		for(int i = 0; i <= 0x3F; i++) {
+			int r = (i & 0x0F) >= 0x0E ? 0x1D : i;
 
-		int m = signalLumaLow[r / 0x10];
-		int q = signalLumaHigh[r / 0x10];
-		if((r & 0x0F) == 13) {
-			q = m;
-		} else if((r & 0x0F) == 0) { 
-			m = q;
+			int m = signalLumaLow[h][r / 0x10];
+			int q = signalLumaHigh[h][r / 0x10];
+			if((r & 0x0F) == 13) {
+				q = m;
+			} else if((r & 0x0F) == 0) { 
+				m = q;
+			}
+			_signalLow[h][i] = m;
+			_signalHigh[h][i] = q;
 		}
-		_signalLow[i] = m;
-		_signalHigh[i] = q;
 	}
-
 	_extraThread = std::thread([=]() {
 		//Worker thread to improve decode speed
 		while(!_stopThread) {
@@ -165,11 +167,11 @@ void BisqwitNtscFilter::RecursiveBlend(int iterationCount, uint64_t *output, uin
 void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int rowNumber)
 {
 	for(int x = -_paddingSize; x < 256 + _paddingSize; x++) {
-		uint16_t color = _ppuOutputBuffer[(rowNumber << 8) | (x < 0 ? 0 : (x >= 256 ? 255 : x))];
+		// pixel_color = Pixel color (9-bit) given as input. Bitmask format: "eeellcccc".
+		uint16_t pixel_color = _ppuOutputBuffer[(rowNumber << 8) | (x < 0 ? 0 : (x >= 256 ? 255 : x))];
 
-		int8_t low = _signalLow[color & 0x3F];
-		int8_t high = _signalHigh[color & 0x3F];
-		int8_t emphasis = color >> 6;
+		int8_t emphasis = pixel_color >> 6;
+		int8_t color = pixel_color & 0x3F;
 
 		// deemphasis code based on
 		// https://bisqwit.iki.fi/jutut/kuvat/programming_examples/nesemu1/ntsc-small.cc
@@ -181,12 +183,21 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 		if (emphasis & 0b100)		// tint B; phase 8
 			deemphasis |= (0b111110000001);
 
+		bool phase_att = 0;
+
 		uint16_t phaseBitmask = _bitmaskLut[std::abs(phase - (color & 0x0F)) % 12];
 
 		int8_t voltage;
 		for(int j = 0; j < 8; j++) {
 			phaseBitmask <<= 1;
-			voltage = high;
+			
+			// colors $xE and $xF are not affected by emphasis
+			// https://forums.nesdev.org/viewtopic.php?p=160669#p160669
+			if ((color & 0x0F) <= 0x0D) {
+				phase_att = (phaseBitmask & deemphasis);
+			}
+			
+			voltage = _signalHigh[phase_att][color];
 			// 12 phases done, wrap back to beginning
 			if(phaseBitmask >= (1 << 12)) {
 				phaseBitmask = 1;
@@ -194,16 +205,8 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 			else {
 				// 6 out of 12 cycles
 				if (phaseBitmask >= (1 << 6))
-					voltage = low;
+					voltage = _signalLow[phase_att][color];
 			}
-			// colors $xE and $xF are not affected by emphasis
-			// https://forums.nesdev.org/viewtopic.php?p=160669#p160669
-			if ((color & 0x0F) <= 0x0D) {
-				if (phaseBitmask & deemphasis) {
-					voltage *= 0.746;
-				}
-			}
-
 			ntscSignal[((x + _paddingSize) << 3) | j] = voltage;
 		}
 
