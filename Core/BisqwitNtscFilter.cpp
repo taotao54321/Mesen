@@ -193,10 +193,11 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 			
 			// colors $xE and $xF are not affected by emphasis
 			// https://forums.nesdev.org/viewtopic.php?p=160669#p160669
-			if ((color & 0x0F) <= 0x0D) {
+			if ((color & 0x0F) <= 0x0D)
 				phase_att = (phaseBitmask & deemphasis);
-			}
-			
+			else
+				phase_att = 0;
+
 			voltage = _signalHigh[phase_att][color];
 			// 12 phases done, wrap back to beginning
 			if(phaseBitmask >= (1 << 12)) {
