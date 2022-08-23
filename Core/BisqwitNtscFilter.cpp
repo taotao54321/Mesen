@@ -173,32 +173,35 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 		int8_t emphasis = pixel_color >> 6;
 		int8_t color = pixel_color & 0x3F;
 
-		// deemphasis code based on
-		// https://bisqwit.iki.fi/jutut/kuvat/programming_examples/nesemu1/ntsc-small.cc
-		uint16_t deemphasis = 0;
-		if (emphasis & 0b001)		// tint R; phase C
-			deemphasis |= (0b100000011111);
-		if (emphasis & 0b010)		// tint G; phase 4
-			deemphasis |= (0b000111111000);
-		if (emphasis & 0b100)		// tint B; phase 8
-			deemphasis |= (0b111110000001);
+		auto phase_shift_up = [=](uint16_t value, uint16_t amt) {
+			amt = amt % 12;
+			uint16_t uint12_value = value & 0xFFF;
+			uint32_t result = (((uint12_value << 12) | uint12_value) & 0xFFFFFFFF);
+			return uint16_t((result >> (amt % 12)) & 0xFFFF);
+		};
 
-		bool phase_att = 0;
+		uint16_t emphasis_wave = 0;
+		if (emphasis & 0b001)		// tint R; color phase C
+			emphasis_wave |= 0b000000111111;
+		if (emphasis & 0b010)		// tint G; color phase 4
+			emphasis_wave |= 0b001111110000;
+		if (emphasis & 0b100)		// tint B; color phase 8
+			emphasis_wave |= 0b111100000011;
+		if (emphasis)
+			emphasis_wave = phase_shift_up(emphasis_wave, (color & 0x0F));
 
 		uint16_t phaseBitmask = _bitmaskLut[std::abs(phase - (color & 0x0F)) % 12];
+		bool attenuate = 0;
 
 		int8_t voltage;
-		for(int j = 0; j < 8; j++) {
-			phaseBitmask <<= 1;
-			
+		for(int j = 0; j < _signalsPerPixel; j++) {
 			// colors $xE and $xF are not affected by emphasis
 			// https://forums.nesdev.org/viewtopic.php?p=160669#p160669
 			if ((color & 0x0F) <= 0x0D)
-				phase_att = (phaseBitmask & deemphasis);
-			else
-				phase_att = 0;
+				attenuate = (phaseBitmask & emphasis_wave);
 
-			voltage = _signalHigh[phase_att][color];
+			voltage = _signalHigh[attenuate][color];
+			
 			// 12 phases done, wrap back to beginning
 			if(phaseBitmask >= (1 << 12)) {
 				phaseBitmask = 1;
@@ -206,11 +209,11 @@ void BisqwitNtscFilter::GenerateNtscSignal(int8_t *ntscSignal, int &phase, int r
 			else {
 				// 6 out of 12 cycles
 				if (phaseBitmask >= (1 << 6))
-					voltage = _signalLow[phase_att][color];
+					voltage = _signalLow[attenuate][color];
 			}
+			phaseBitmask <<= 1;
 			ntscSignal[((x + _paddingSize) << 3) | j] = voltage;
 		}
-
 		phase += _signalsPerPixel;
 	}
 	phase += (341 - 256 - _paddingSize * 2) * _signalsPerPixel;
@@ -236,7 +239,7 @@ void BisqwitNtscFilter::DecodeFrame(int startRow, int endRow, uint16_t *ppuOutpu
 		GenerateNtscSignal(rowSignal, phase, y);
 
 		//Convert the NTSC signal to RGB
-		NtscDecodeLine(lineWidth * _signalsPerPixel, rowSignal, outputBuffer, (startCycle + 7) % 12);
+		NtscDecodeLine(lineWidth * _signalsPerPixel, rowSignal, outputBuffer, (startCycle + 6) % 12);
 
 		outputBuffer += rowPixelGap;
 	}
