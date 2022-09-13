@@ -59,10 +59,25 @@ void NtscFilter::OnBeforeApplyFilter()
 	NtscFilterSettings ntscSettings = _console->GetSettings()->GetNtscFilterSettings();
 
 	_keepVerticalRes = ntscSettings.KeepVerticalResolution;
+	if (ntscSettings.UseExternalPalette != _useExternalPalette) {
+		paletteChanged = true;
+		_useExternalPalette = ntscSettings.UseExternalPalette;
+	}
 
-	if(paletteChanged || _ntscSetup.hue != pictureSettings.Hue || _ntscSetup.saturation != pictureSettings.Saturation || _ntscSetup.brightness != pictureSettings.Brightness || _ntscSetup.contrast != pictureSettings.Contrast ||
-		_ntscSetup.artifacts != ntscSettings.Artifacts || _ntscSetup.bleed != ntscSettings.Bleed || _ntscSetup.fringing != ntscSettings.Fringing || _ntscSetup.gamma != ntscSettings.Gamma ||
-		(_ntscSetup.merge_fields == 1) != ntscSettings.MergeFields || _ntscSetup.resolution != ntscSettings.Resolution || _ntscSetup.sharpness != ntscSettings.Sharpness) {
+	if(
+		paletteChanged ||
+		_ntscSetup.hue != pictureSettings.Hue ||
+		_ntscSetup.saturation != pictureSettings.Saturation ||
+		_ntscSetup.brightness != pictureSettings.Brightness ||
+		_ntscSetup.contrast != pictureSettings.Contrast ||
+		_ntscSetup.artifacts != ntscSettings.Artifacts ||
+		_ntscSetup.bleed != ntscSettings.Bleed ||
+		_ntscSetup.fringing != ntscSettings.Fringing ||
+		_ntscSetup.gamma != ntscSettings.Gamma ||
+		(_ntscSetup.merge_fields == 1) != ntscSettings.MergeFields ||
+		_ntscSetup.resolution != ntscSettings.Resolution ||
+		_ntscSetup.sharpness != ntscSettings.Sharpness
+		) {
 		_ntscSetup.hue = pictureSettings.Hue;
 		_ntscSetup.saturation = pictureSettings.Saturation;
 		_ntscSetup.brightness = pictureSettings.Brightness;
@@ -76,11 +91,29 @@ void NtscFilter::OnBeforeApplyFilter()
 		_ntscSetup.resolution = ntscSettings.Resolution;
 		_ntscSetup.sharpness = ntscSettings.Sharpness;
 
-		if(_console->GetSettings()->IsFullColorPalette()) {
+		float decodermatrix[6] = {
+			(float)ntscSettings.DecodeMatrixIR,
+			(float)ntscSettings.DecodeMatrixQR,
+			(float)ntscSettings.DecodeMatrixIG,
+			(float)ntscSettings.DecodeMatrixQG,
+			(float)ntscSettings.DecodeMatrixIB,
+			(float)ntscSettings.DecodeMatrixQB
+		};
+
+		_ntscSetup.decoder_matrix = decodermatrix;
+
+		if (_useExternalPalette) {
+			if (_console->GetSettings()->IsFullColorPalette()) {
+				_ntscSetup.base_palette = nullptr;
+				_ntscSetup.palette = _palette;
+			}
+			else {
+				_ntscSetup.base_palette = _palette;
+				_ntscSetup.palette = nullptr;
+			}
+		}
+		else {
 			_ntscSetup.base_palette = nullptr;
-			_ntscSetup.palette = _palette;
-		} else {
-			_ntscSetup.base_palette = _palette;
 			_ntscSetup.palette = nullptr;
 		}
 
