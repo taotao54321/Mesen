@@ -123,7 +123,7 @@ void NtscFilter::OnBeforeApplyFilter()
 
 void NtscFilter::ApplyFilter(uint16_t *ppuOutputBuffer)
 {
-	nes_ntsc_blit(&_ntscData, ppuOutputBuffer, PPU::ScreenWidth, IsOddFrame() ? 0 : 1, PPU::ScreenWidth, 240, _ntscBuffer, NES_NTSC_OUT_WIDTH(PPU::ScreenWidth)*4);
+	nes_ntsc_blit(&_ntscData, ppuOutputBuffer, _console->GetPpu()->GetCurrentBgColor(), PPU::ScreenWidth, IsOddFrame() ? 0 : 1, PPU::ScreenWidth, 240, _ntscBuffer, NES_NTSC_OUT_WIDTH(PPU::ScreenWidth)*4);
 	GenerateArgbFrame(_ntscBuffer);
 }
 
