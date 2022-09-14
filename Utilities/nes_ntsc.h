@@ -68,7 +68,7 @@ In_row_width is the number of pixels to get to the next input row. Out_pitch
 is the number of *bytes* to get to the next output row. Output pixel format
 is set by NES_NTSC_OUT_DEPTH (defaults to 16-bit RGB). */
 EXPORT void nes_ntsc_blit( nes_ntsc_t const* ntsc, NES_NTSC_IN_T const* nes_in,
-		NES_NTSC_IN_T ntsc_bg, long in_row_width, int burst_phase, int in_width,
+		NES_NTSC_IN_T ntsc_border, long in_row_width, int burst_phase, int in_width,
 		int in_height, void* rgb_out, long out_pitch );
 
 /* Number of output pixels written by blitter for given input width. Width might
