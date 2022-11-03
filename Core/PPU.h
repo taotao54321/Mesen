@@ -44,6 +44,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 
 		uint8_t _spriteRAM[0x100];
 		uint8_t _secondarySpriteRAM[0x20];
+		uint8_t _secondarySpriteRAMLink[8];
 		bool _hasSprite[257];
 
 		uint16_t *_currentOutputBuffer;
@@ -90,6 +91,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		uint8_t _spriteAddrL;
 		bool _oamCopyDone;
 		uint8_t _overflowBugCounter;
+		uint8_t _oamID;
 
 		bool _needStateUpdate;
 		bool _renderingEnabled;
@@ -134,7 +136,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		void TriggerNmi();
 
 		void LoadTileInfo();
-		void LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uint8_t spriteX, bool extraSprite);
+		void LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uint8_t spriteX, bool extraSprite, uint8_t oamID);
 		void LoadSpriteTileInfo();
 		void LoadExtraSprites();
 		__forceinline void ShiftTileRegisters();

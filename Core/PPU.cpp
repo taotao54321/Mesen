@@ -337,6 +337,7 @@ uint8_t PPU::ReadRAM(uint16_t addr)
 						uint8_t step = ((_cycle - 257) % 8) > 3 ? 3 : ((_cycle - 257) % 8);
 						_secondaryOAMAddr = (_cycle - 257) / 8 * 4 + step;
 						_oamCopybuffer = _secondarySpriteRAM[_secondaryOAMAddr];
+						_oamID = _secondarySpriteRAMLink[_secondaryOAMAddr >> 2];
 					}
 					//Return the value that PPU is currently using for sprite evaluation/rendering
 					returnValue = _oamCopybuffer;
@@ -690,7 +691,7 @@ void PPU::LoadTileInfo()
 	}
 }
 
-void PPU::LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uint8_t spriteX, bool extraSprite)
+void PPU::LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uint8_t spriteX, bool extraSprite, uint8_t oamID)
 {
 	bool backgroundPriority = (attributes & 0x20) == 0x20;
 	bool horizontalMirror = (attributes & 0x40) == 0x40;
@@ -730,6 +731,7 @@ void PPU::LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uin
 		info.AbsoluteTileAddr = _console->GetMapper()->ToAbsoluteChrAddress(tileAddr);
 		info.OffsetY = lineOffset;
 		info.SpriteX = spriteX;
+		info.OAMIndex = oamID;		
 
 		if(_scanline >= 0) {
 			//Sprites read on prerender scanline are not shown on scanline 0
@@ -788,7 +790,7 @@ void PPU::LoadExtraSprites()
 			for(uint32_t i = (_lastVisibleSpriteAddr + 4) & 0xFF; i != _firstVisibleSpriteAddr; i = (i + 4) & 0xFF) {
 				uint8_t spriteY = _spriteRAM[i];
 				if(_scanline >= spriteY && _scanline < spriteY + (_flags.LargeSprites ? 16 : 8)) {
-					LoadSprite(spriteY, _spriteRAM[i + 1], _spriteRAM[i + 2], _spriteRAM[i + 3], true);
+					LoadSprite(spriteY, _spriteRAM[i + 1], _spriteRAM[i + 2], _spriteRAM[i + 3], true, i >> 2);
 					_spriteCount++;
 				}
 			}
@@ -799,7 +801,7 @@ void PPU::LoadExtraSprites()
 void PPU::LoadSpriteTileInfo()
 {
 	uint8_t *spriteAddr = _secondarySpriteRAM + _spriteIndex * 4;
-	LoadSprite(*spriteAddr, *(spriteAddr+1), *(spriteAddr+2), *(spriteAddr+3), false);
+	LoadSprite(*spriteAddr, *(spriteAddr+1), *(spriteAddr+2), *(spriteAddr+3), false, _secondarySpriteRAMLink[_spriteIndex]);
 }
 
 void PPU::ShiftTileRegisters()
@@ -1036,12 +1038,14 @@ void PPU::ProcessSpriteEvaluation()
 			if(_cycle & 0x01) {
 				//Read a byte from the primary OAM on odd cycles
 				_oamCopybuffer = ReadSpriteRam(_state.SpriteRamAddr);
+				_oamID = _state.SpriteRamAddr >> 2;
 			} else {
 				if(_oamCopyDone) {
 					_spriteAddrH = (_spriteAddrH + 1) & 0x3F;
 					if(_secondaryOAMAddr >= 0x20) {
 						//"As seen above, a side effect of the OAM write disable signal is to turn writes to the secondary OAM into reads from it."
 						_oamCopybuffer = _secondarySpriteRAM[_secondaryOAMAddr & 0x1F];
+						_oamID = _secondarySpriteRAMLink[(_secondaryOAMAddr >> 2) & 0x08];
 					}
 				} else {
 					if(!_spriteInRange && _scanline >= _oamCopybuffer && _scanline < _oamCopybuffer + (_flags.LargeSprites ? 16 : 8)) {
@@ -1051,7 +1055,7 @@ void PPU::ProcessSpriteEvaluation()
 					if(_secondaryOAMAddr < 0x20) {
 						//Copy 1 byte to secondary OAM
 						_secondarySpriteRAM[_secondaryOAMAddr] = _oamCopybuffer;
-
+						_secondarySpriteRAMLink[_secondaryOAMAddr >> 2] =_oamID;
 						if(_spriteInRange) {
 							_spriteAddrL++;
 							_secondaryOAMAddr++;
@@ -1083,6 +1087,7 @@ void PPU::ProcessSpriteEvaluation()
 					} else {
 						//"As seen above, a side effect of the OAM write disable signal is to turn writes to the secondary OAM into reads from it."
 						_oamCopybuffer = _secondarySpriteRAM[_secondaryOAMAddr & 0x1F];
+						_oamID = _secondarySpriteRAMLink[(_secondaryOAMAddr >> 2) & 0x08];
 
 						//8 sprites have been found, check next sprite for overflow + emulate PPU bug
 						if(_spriteInRange) {

@@ -30,6 +30,7 @@ enum class IRQSource
 	FrameCounter = 2,
 	DMC = 4,
 	FdsDisk = 8,
+	EPSM = 16,
 };
 
 enum class MemoryOperation
@@ -185,6 +186,7 @@ struct SpriteInfo : TileInfo
 	uint8_t SpriteX;
 
 	bool VerticalMirror; //used by HD ppu
+	uint8_t OAMIndex; //used by HD ppu
 };
 
 struct ApuLengthCounterState

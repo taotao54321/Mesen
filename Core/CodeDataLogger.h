@@ -81,6 +81,7 @@ public:
 
 	CdlRatios GetRatios();
 
+	bool IsNone(uint32_t absoluteAddr);
 	bool IsCode(uint32_t absoluteAddr);
 	bool IsJumpTarget(uint32_t absoluteAddr);
 	bool IsSubEntryPoint(uint32_t absoluteAddr);
